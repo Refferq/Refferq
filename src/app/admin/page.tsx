@@ -2269,7 +2269,7 @@ function ProgramSettingsPage() {
         name: newGroup.name,
         commissionRate: newGroup.commissionRate,
         description: newGroup.description,
-        signupUrl: `https://bsbot.tolt.io?group=${newGroup.name.toLowerCase()}`,
+        signupUrl: `https://refferq.vercel.app?group=${newGroup.name.toLowerCase()}`,
         memberCount: 0,
         createdAt: new Date().toISOString()
       };
