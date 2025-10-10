@@ -1,7 +1,7 @@
 # Refferq - Open Source Affiliate Management Platform
 
 <p align="center">
-  <img src="./public/images/logo/refferq-logo.svg" alt="Refferq Logo" width="200"/>
+  <img src="./public/images/github-banner.svg" alt="Refferq Logo" width="200"/>
 </p>
 
 <p align="center">
