@@ -1,0 +1,904 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+
+interface AffiliateStats {
+  totalEarnings: number;
+  totalClicks: number;
+  totalLeads: number;
+  totalReferredCustomers: number;
+  referralLink: string;
+  referralCode: string;
+}
+
+interface Referral {
+  id: string;
+  leadName: string;
+  leadEmail: string;
+  company?: string;
+  estimatedValue: number;
+  status: string;
+  createdAt: string;
+  amountPaid?: number;
+  commission?: number;
+}
+
+interface Payout {
+  id: string;
+  amount: number;
+  status: string;
+  method: string;
+  createdAt: string;
+  paidAt?: string;
+}
+
+export default function AffiliateDashboard() {
+  const { user, loading: authLoading, logout } = useAuth();
+  const [activePage, setActivePage] = useState('dashboard');
+  const [stats, setStats] = useState<AffiliateStats | null>(null);
+  const [referrals, setReferrals] = useState<Referral[]>([]);
+  const [payouts, setPayouts] = useState<Payout[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Referral form state
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [submitForm, setSubmitForm] = useState({
+    leadName: '',
+    leadEmail: '',
+    estimatedValue: '0',
+  });
+
+  // Settings form state
+  const [settingsForm, setSettingsForm] = useState({
+    name: '',
+    company: '',
+    email: '',
+    country: '',
+    paymentMethod: 'PayPal',
+    paymentEmail: '',
+  });
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      loadDashboardData();
+    }
+  }, [authLoading, user]);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/affiliate/profile');
+      const data = await response.json();
+      
+      if (data.success) {
+        setStats({
+          totalEarnings: data.affiliate?.balanceCents || 0,
+          totalClicks: 0,
+          totalLeads: data.referrals?.length || 0,
+          totalReferredCustomers: data.referrals?.filter((r: any) => r.status === 'APPROVED').length || 0,
+          referralLink: `${window.location.origin}/r/${data.affiliate?.referralCode}`,
+          referralCode: data.affiliate?.referralCode || '',
+        });
+        setReferrals(data.referrals || []);
+        
+        // Load user settings
+        setSettingsForm({
+          name: user?.name || '',
+          company: '',
+          email: user?.email || '',
+          country: 'India',
+          paymentMethod: 'PayPal',
+          paymentEmail: user?.email || '',
+        });
+      }
+      
+      // Load payouts
+      const payoutsRes = await fetch('/api/affiliate/payouts');
+      if (payoutsRes.ok) {
+        const payoutsData = await payoutsRes.json();
+        setPayouts(payoutsData.payouts || []);
+      }
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitLead = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const response = await fetch('/api/affiliate/referrals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lead_name: submitForm.leadName,
+          lead_email: submitForm.leadEmail,
+          estimated_value: submitForm.estimatedValue,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setNotification({ type: 'success', message: 'Lead submitted successfully! Waiting for admin approval.' });
+        setShowSubmitModal(false);
+        setSubmitForm({ leadName: '', leadEmail: '', estimatedValue: '0' });
+        loadDashboardData();
+      } else {
+        setNotification({ type: 'error', message: data.error || 'Failed to submit lead' });
+      }
+    } catch (error) {
+      setNotification({ type: 'error', message: 'An error occurred while submitting lead' });
+    }
+
+    setTimeout(() => setNotification(null), 5000);
+  };
+
+  const handleUpdateSettings = async (field: string) => {
+    try {
+      const response = await fetch('/api/affiliate/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settingsForm),
+      });
+
+      if (response.ok) {
+        setNotification({ type: 'success', message: `${field} updated successfully!` });
+      } else {
+        setNotification({ type: 'error', message: `Failed to update ${field}` });
+      }
+    } catch (error) {
+      setNotification({ type: 'error', message: 'An error occurred' });
+    }
+
+    setTimeout(() => setNotification(null), 5000);
+  };
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !user.hasAffiliate) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Access Denied</h1>
+          <p className="text-gray-600">Affiliate account required</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Notification */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+          notification.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'
+        }`}>
+          <div className="flex items-center gap-2">
+            <span>{notification.type === 'success' ? '✓' : '⚠'}</span>
+            <span className="text-sm font-medium">{notification.message}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Sidebar */}
+      <div className="fixed left-0 top-0 h-full w-60 bg-white border-r border-gray-200 flex flex-col">
+        <div className="p-6 border-b border-gray-200">
+          <h1 className="text-xl font-bold text-gray-900">Affiliate Portal</h1>
+          <p className="text-sm text-gray-500 mt-1">Welcome, {user.name}</p>
+        </div>
+
+        <nav className="flex-1 p-4">
+          <button
+            onClick={() => setActivePage('dashboard')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-1 text-left ${
+              activePage === 'dashboard' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <span>🏠</span>
+            <span>Dashboard</span>
+          </button>
+          
+          <button
+            onClick={() => setActivePage('referrals')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-1 text-left ${
+              activePage === 'referrals' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <span>👥</span>
+            <span>Referrals</span>
+          </button>
+          
+          <button
+            onClick={() => setActivePage('resources')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-1 text-left ${
+              activePage === 'resources' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <span>📚</span>
+            <span>Resources</span>
+          </button>
+          
+          <button
+            onClick={() => setActivePage('payouts')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-1 text-left ${
+              activePage === 'payouts' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <span>💳</span>
+            <span>Payouts</span>
+          </button>
+          
+          <button
+            onClick={() => setActivePage('reports')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-1 text-left ${
+              activePage === 'reports' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              📊
+              <span>Reports</span>
+              <span className="ml-auto px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">Beta</span>
+            </span>
+          </button>
+        </nav>
+
+        <div className="p-4 border-t border-gray-200">
+          <button
+            onClick={() => setActivePage('settings')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 text-left ${
+              activePage === 'settings' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <span>⚙️</span>
+            <span>Settings</span>
+          </button>
+          
+          <button
+            onClick={logout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-red-600 hover:bg-red-50"
+          >
+            <span>🚪</span>
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="ml-60 p-8">
+        {/* Top Banner */}
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-2 text-green-800">
+            <span>✓</span>
+            <span className="text-sm font-medium">Earn 20% on all paid customers.</span>
+          </div>
+        </div>
+
+        {/* Dashboard Page */}
+        {activePage === 'dashboard' && (
+          <DashboardPage stats={stats} referrals={referrals} />
+        )}
+
+        {/* Referrals Page */}
+        {activePage === 'referrals' && (
+          <ReferralsPage 
+            referrals={referrals} 
+            onSubmitLead={() => setShowSubmitModal(true)} 
+          />
+        )}
+
+        {/* Payouts Page */}
+        {activePage === 'payouts' && (
+          <PayoutsPage stats={stats} payouts={payouts} />
+        )}
+
+        {/* Settings Page */}
+        {activePage === 'settings' && (
+          <SettingsPage 
+            settingsForm={settingsForm} 
+            setSettingsForm={setSettingsForm}
+            onUpdate={handleUpdateSettings}
+          />
+        )}
+
+        {/* Other Pages */}
+        {(activePage === 'resources' || activePage === 'reports') && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              {activePage.charAt(0).toUpperCase() + activePage.slice(1)}
+            </h2>
+            <p className="text-gray-600">This section is under development.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Submit Lead Modal */}
+      {showSubmitModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-900">Submit lead</h3>
+              <button
+                onClick={() => setShowSubmitModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <span className="text-2xl">&times;</span>
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 mb-6">
+              Enter the details below to submit a lead. Ensure all information is accurate for proper tracking and follow-up.
+            </p>
+
+            <form onSubmit={handleSubmitLead} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  What's the lead's name?*
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={submitForm.leadName}
+                  onChange={(e) => setSubmitForm({ ...submitForm, leadName: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Full name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  What is the main contact's email address?*
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={submitForm.leadEmail}
+                  onChange={(e) => setSubmitForm({ ...submitForm, leadEmail: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="email@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  What is the estimated deal size for this lead? (Type 0 if unsure)*
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-gray-500">₹</span>
+                  <input
+                    type="number"
+                    required
+                    value={submitForm.estimatedValue}
+                    onChange={(e) => setSubmitForm({ ...submitForm, estimatedValue: e.target.value })}
+                    className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-medium"
+              >
+                Submit lead
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          lead_name: referralForm.lead_name,
+          lead_email: referralForm.lead_email,
+          company: referralForm.company,
+          notes: referralForm.notes,
+          estimated_value: parseInt(referralForm.estimated_value) || 0,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit referral');
+      }
+
+      showNotification('success', 'Referral submitted successfully!');
+      setShowReferralForm(false);
+      setReferralForm({
+        lead_name: '',
+        lead_email: '',
+        company: '',
+        notes: '',
+        estimated_value: '',
+      });
+      
+      await loadAffiliateData();
+    } catch (error) {
+      console.error('Error submitting referral:', error);
+      showNotification('error', 'Failed to submit referral');
+    }
+  };
+
+  const copyReferralLink = () => {
+    if (!affiliateData) return;
+    
+    const referralLink = `${window.location.origin}/r/${affiliateData.affiliate.referralCode}`;
+    navigator.clipboard.writeText(referralLink);
+    showNotification('success', 'Referral link copied to clipboard!');
+  };
+
+  const showNotification = (type: NotificationProps['type'], message: string) => {
+    setNotification({ type, message });
+  };
+
+  const closeNotification = () => {
+    setNotification(null);
+  };
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect handled by useAuth hook, this is just a fallback
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading affiliate data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-red-600">{error}</p>
+          <button 
+            onClick={loadAffiliateData}
+            className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!affiliateData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600">No affiliate data available</p>
+          <button 
+            onClick={loadAffiliateData}
+            className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            Load Data
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      {/* Notification */}
+      {notification && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          onClose={closeNotification}
+        />
+      )}
+
+      {/* Enhanced Header */}
+      <div className="bg-white shadow-lg border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">A</span>
+              </div>
+              <h1 className="text-xl font-bold text-gray-900">Affiliate Dashboard</h1>
+            </div>
+            <div className="flex items-center space-x-6">
+              <div className="hidden md:flex items-center space-x-4">
+                <span className="text-sm text-gray-600">Total Earnings</span>
+                <span className="text-lg font-bold text-green-600">
+                  ${(affiliateData.stats.totalEarnings / 100).toFixed(2)}
+                </span>
+              </div>
+              <NotificationCenter />
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-medium text-gray-600">
+                    {user.name.split(' ').map((n: string) => n[0]).join('')}
+                  </span>
+                </div>
+                <span className="text-sm font-medium text-gray-700">{user.name}</span>
+                <button 
+                  onClick={logout}
+                  className="text-sm text-indigo-600 hover:text-indigo-500 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Enhanced Stats Cards */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="bg-gradient-to-br from-blue-400 to-blue-600 overflow-hidden shadow-xl rounded-2xl transform hover:scale-105 transition-all duration-300">
+            <div className="p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm font-medium">Total Commissions</p>
+                  <p className="text-3xl font-bold">${(affiliateData.stats.totalEarnings / 100).toFixed(2)}</p>
+                  <p className="text-blue-100 text-xs mt-1">{affiliateData.stats.totalCommissions} referrals</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">💰</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-green-400 to-emerald-600 overflow-hidden shadow-xl rounded-2xl transform hover:scale-105 transition-all duration-300">
+            <div className="p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-100 text-sm font-medium">Pending Earnings</p>
+                  <p className="text-3xl font-bold">${(affiliateData.stats.pendingEarnings / 100).toFixed(2)}</p>
+                  <p className="text-green-100 text-xs mt-1">{affiliateData.stats.pendingCommissions} pending</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">⏳</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-400 to-pink-500 overflow-hidden shadow-xl rounded-2xl transform hover:scale-105 transition-all duration-300">
+            <div className="p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm font-medium">Conversion Rate</p>
+                  <p className="text-3xl font-bold">{affiliateData.stats.conversionRate.toFixed(1)}%</p>
+                  <p className="text-purple-100 text-xs mt-1">{affiliateData.stats.totalClicks} total clicks</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">📊</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-orange-400 to-red-500 overflow-hidden shadow-xl rounded-2xl transform hover:scale-105 transition-all duration-300">
+            <div className="p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-orange-100 text-sm font-medium">This Month</p>
+                  <p className="text-3xl font-bold">{affiliateData.stats.totalConversions}</p>
+                  <p className="text-orange-100 text-xs mt-1">Conversions</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">🎯</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button
+              onClick={() => setShowReferralForm(true)}
+              className="flex flex-col items-center p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors group"
+            >
+              <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <span className="text-white text-xl">➕</span>
+              </div>
+              <span className="text-sm font-medium text-gray-700">Add Referral</span>
+            </button>
+
+            <button
+              onClick={copyReferralLink}
+              className="flex flex-col items-center p-4 rounded-xl bg-green-50 hover:bg-green-100 transition-colors group"
+            >
+              <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <span className="text-white text-xl">🔗</span>
+              </div>
+              <span className="text-sm font-medium text-gray-700">Copy Link</span>
+            </button>
+
+            <button className="flex flex-col items-center p-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors group">
+              <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <span className="text-white text-xl">📈</span>
+              </div>
+              <span className="text-sm font-medium text-gray-700">Analytics</span>
+            </button>
+
+            <button className="flex flex-col items-center p-4 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors group">
+              <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <span className="text-white text-xl">🛠️</span>
+              </div>
+              <span className="text-sm font-medium text-gray-700">Marketing Tools</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Recent Referrals */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+                <h3 className="text-lg font-bold text-white">Recent Referrals</h3>
+                <p className="text-blue-100 text-sm">{affiliateData.referrals.length} total referrals</p>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {affiliateData.referrals.slice(0, 5).map((referral: any) => (
+                    <div key={referral.id} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">{referral.leadName}</h4>
+                          <p className="text-sm text-gray-600">{referral.leadEmail}</p>
+                          {referral.metadata.company && (
+                            <p className="text-xs text-gray-500 mt-1">Company: {referral.metadata.company}</p>
+                          )}
+                          <p className="text-xs text-gray-500 mt-1">
+                            Submitted: {new Date(referral.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="ml-4">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            referral.status === 'approved' ? 'bg-green-100 text-green-800' :
+                            referral.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {referral.status}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {affiliateData.referrals.length === 0 && (
+                  <div className="text-center py-8">
+                    <div className="text-4xl mb-4">📝</div>
+                    <p className="text-gray-600">No referrals yet</p>
+                    <button
+                      onClick={() => setShowReferralForm(true)}
+                      className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      Submit Your First Referral
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Referral Tools */}
+          <div>
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 mb-6">
+              <div className="px-6 py-4 border-b border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900">Referral Link</h3>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Your Referral Code</label>
+                    <div className="flex">
+                      <input
+                        type="text"
+                        value={affiliateData.affiliate.referralCode}
+                        readOnly
+                        className="flex-1 px-3 py-2 border border-gray-200 rounded-l-lg bg-gray-50"
+                      />
+                      <button
+                        onClick={copyReferralLink}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 transition-colors"
+                      >
+                        Copy Link
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="border-t border-gray-200 pt-4">
+                    <h4 className="font-medium text-gray-900 mb-2">Share Options</h4>
+                    <div className="space-y-2">
+                      <button className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                        Share on LinkedIn
+                      </button>
+                      <button className="w-full py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors text-sm">
+                        Share on Twitter
+                      </button>
+                      <button className="w-full py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm">
+                        Email Template
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Commission Summary */}
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+              <div className="px-6 py-4 border-b border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900">Commission Summary</h3>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Earned</span>
+                    <span className="font-bold text-green-600">${(affiliateData.stats.totalEarnings / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Pending</span>
+                    <span className="font-bold text-yellow-600">${(affiliateData.stats.pendingEarnings / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Next Payout</span>
+                    <span className="font-bold text-gray-900">Jan 1st</span>
+                  </div>
+                  <div className="border-t border-gray-200 pt-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Available Balance</span>
+                      <span className="font-bold text-blue-600">${(affiliateData.affiliate.balanceCents / 100).toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Referral Form Modal */}
+      {showReferralForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Submit New Referral</h3>
+                <button
+                  onClick={() => setShowReferralForm(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <span className="text-2xl">&times;</span>
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmitReferral} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Lead Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={referralForm.lead_name}
+                    onChange={(e) => setReferralForm({ ...referralForm, lead_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter lead's full name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={referralForm.lead_email}
+                    onChange={(e) => setReferralForm({ ...referralForm, lead_email: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter lead's email"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Company
+                  </label>
+                  <input
+                    type="text"
+                    value={referralForm.company}
+                    onChange={(e) => setReferralForm({ ...referralForm, company: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Company name (optional)"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Estimated Value ($)
+                  </label>
+                  <input
+                    type="number"
+                    value={referralForm.estimated_value}
+                    onChange={(e) => setReferralForm({ ...referralForm, estimated_value: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Notes
+                  </label>
+                  <textarea
+                    value={referralForm.notes}
+                    onChange={(e) => setReferralForm({ ...referralForm, notes: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Additional information about this lead..."
+                  />
+                </div>
+
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowReferralForm(false)}
+                    className="flex-1 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    Submit Referral
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

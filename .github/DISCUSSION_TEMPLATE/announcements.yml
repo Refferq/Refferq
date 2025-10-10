@@ -1,0 +1,92 @@
+---
+title: "🎉 Refferq v1.0.0 Released - Open Source Affiliate Management Platform"
+labels: ["announcement", "release"]
+---
+
+# 🎉 Refferq v1.0.0 is Now Available!
+
+We're incredibly excited to announce the **first stable release** of Refferq - a comprehensive, open-source affiliate management platform!
+
+## 🚀 What's New in v1.0.0
+
+### Core Features
+- ✅ Complete affiliate management system
+- ✅ Admin dashboard with real-time analytics
+- ✅ Affiliate portal with earnings tracking
+- ✅ Referral submission and approval workflow
+- ✅ Flexible commission system
+- ✅ Payout processing (Bank CSV, Stripe Connect)
+- ✅ Email notifications with professional templates
+- ✅ JWT + OTP authentication
+
+### Technical Highlights
+- ✅ 31 REST API endpoints
+- ✅ 6 professional email templates
+- ✅ Full TypeScript implementation
+- ✅ PostgreSQL + Prisma ORM
+- ✅ Next.js 15 + React 19
+- ✅ Production-ready deployment
+
+### Documentation
+- ✅ Comprehensive README
+- ✅ 18,000+ word wiki
+- ✅ Complete API documentation
+- ✅ Deployment guides
+- ✅ Email setup guide
+- ✅ Contributing guidelines
+
+## 📖 Resources
+
+- **Quick Start:** [5-minute setup guide](https://github.com/refferq/refferq/wiki/Quick-Start-Guide)
+- **Documentation:** [Complete wiki](https://github.com/refferq/refferq/wiki)
+- **API Reference:** [API documentation](https://github.com/refferq/refferq/wiki/API-Overview)
+- **Roadmap:** [Future features](https://github.com/refferq/refferq/wiki/Roadmap)
+
+## 🎯 Quick Start
+
+```bash
+git clone https://github.com/refferq/refferq.git
+cd refferq
+npm install
+cp .env.example .env.local
+npm run db:generate && npm run db:push
+npm run dev
+```
+
+## 💬 We Want Your Feedback!
+
+This is our first release, and we'd love to hear from you:
+
+- What features would you like to see next?
+- How can we improve the documentation?
+- What integrations are most important to you?
+- Any bugs or issues you've encountered?
+
+**Please share your thoughts below!** 👇
+
+## 🤝 Get Involved
+
+- ⭐ Star the repository
+- 🐛 Report bugs via [Issues](https://github.com/refferq/refferq/issues)
+- 💻 Contribute code via [Pull Requests](https://github.com/refferq/refferq/pulls)
+- 💬 Join discussions and help others
+- 📝 Improve documentation
+
+## 🗺️ What's Next?
+
+Check our [Roadmap](https://github.com/refferq/refferq/wiki/Roadmap) for upcoming features:
+
+- **v1.1.0 (Q4 2025)** - Enhanced analytics & webhooks
+- **v1.2.0 (Q1 2026)** - White-label customization
+- **v1.3.0 (Q2 2026)** - Advanced commission system
+
+## 🙏 Thank You!
+
+To everyone who tested, provided feedback, and supported this project - **thank you!**
+
+Let's build something amazing together! 🚀
+
+---
+
+**Made with ❤️ by the Refferq Team**  
+**MIT Licensed • Open Source • Community Driven**

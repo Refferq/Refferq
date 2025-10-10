@@ -1,0 +1,116 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#34d399;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:0.1" />
+    </linearGradient>
+    
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1280" height="640" fill="url(#bgGradient)"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="100" cy="100" r="150" fill="url(#accentGradient)" opacity="0.3"/>
+  <circle cx="1180" cy="540" r="200" fill="url(#accentGradient)" opacity="0.3"/>
+  <circle cx="1100" cy="150" r="100" fill="#34d399" opacity="0.1"/>
+  <circle cx="200" cy="500" r="120" fill="#34d399" opacity="0.1"/>
+  
+  <!-- Grid pattern -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  </pattern>
+  <rect width="1280" height="640" fill="url(#grid)"/>
+  
+  <!-- Logo Icon (R in a circle) -->
+  <g transform="translate(320, 180)">
+    <circle cx="0" cy="0" r="60" fill="white" opacity="0.95" filter="url(#glow)"/>
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#10b981" text-anchor="middle" dominant-baseline="central">R</text>
+  </g>
+  
+  <!-- Main Title -->
+  <text x="420" y="220" font-family="Arial, sans-serif" font-size="96" font-weight="bold" fill="white" filter="url(#glow)">
+    Refferq
+  </text>
+  
+  <!-- Tagline -->
+  <text x="420" y="280" font-family="Arial, sans-serif" font-size="32" fill="rgba(255,255,255,0.95)">
+    Open Source Affiliate Management Platform
+  </text>
+  
+  <!-- Features -->
+  <g transform="translate(420, 340)">
+    <!-- Feature 1 -->
+    <g>
+      <circle cx="0" cy="0" r="8" fill="white"/>
+      <text x="20" y="0" font-family="Arial, sans-serif" font-size="24" fill="white" dominant-baseline="central">
+        Next.js 15 + TypeScript
+      </text>
+    </g>
+    
+    <!-- Feature 2 -->
+    <g transform="translate(0, 45)">
+      <circle cx="0" cy="0" r="8" fill="white"/>
+      <text x="20" y="0" font-family="Arial, sans-serif" font-size="24" fill="white" dominant-baseline="central">
+        PostgreSQL + Prisma ORM
+      </text>
+    </g>
+    
+    <!-- Feature 3 -->
+    <g transform="translate(0, 90)">
+      <circle cx="0" cy="0" r="8" fill="white"/>
+      <text x="20" y="0" font-family="Arial, sans-serif" font-size="24" fill="white" dominant-baseline="central">
+        Real-time Analytics + Automated Payouts
+      </text>
+    </g>
+  </g>
+  
+  <!-- Bottom badges -->
+  <g transform="translate(100, 570)">
+    <!-- MIT License Badge -->
+    <rect x="0" y="0" width="140" height="40" rx="5" fill="rgba(255,255,255,0.2)"/>
+    <text x="70" y="25" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">
+      MIT License
+    </text>
+    
+    <!-- Next.js Badge -->
+    <rect x="160" y="0" width="120" height="40" rx="5" fill="rgba(255,255,255,0.2)"/>
+    <text x="220" y="25" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">
+      Next.js 15
+    </text>
+    
+    <!-- TypeScript Badge -->
+    <rect x="300" y="0" width="130" height="40" rx="5" fill="rgba(255,255,255,0.2)"/>
+    <text x="365" y="25" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">
+      TypeScript
+    </text>
+    
+    <!-- Production Ready Badge -->
+    <rect x="450" y="0" width="180" height="40" rx="5" fill="rgba(255,255,255,0.2)"/>
+    <text x="540" y="25" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">
+      Production Ready
+    </text>
+  </g>
+  
+  <!-- GitHub star icon -->
+  <g transform="translate(1100, 570)">
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" 
+          fill="white" opacity="0.9" transform="scale(1.5)"/>
+    <text x="45" y="25" font-family="Arial, sans-serif" font-size="18" fill="white">
+      Star on GitHub
+    </text>
+  </g>
+</svg>

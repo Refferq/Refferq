@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fallback styles if Tailwind doesn't load */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Home page button hover effects */
+a[href="/login"]:hover {
+  background-color: #4338ca !important;
+}
+
+a[href="/admin"]:hover,
+a[href="/affiliate"]:hover {
+  background-color: #f0f4ff !important;
+}
+
+/* Ensure basic styling works even without Tailwind */
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.bg-gray-50 {
+  background-color: #f9fafb;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+.font-extrabold {
+  font-weight: 800;
+}
+
+.text-gray-900 {
+  color: #111827;
+}
+
+.border {
+  border-width: 1px;
+}
+
+.border-gray-300 {
+  border-color: #d1d5db;
+}
+
+.rounded-md {
+  border-radius: 0.375rem;
+}
+
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.bg-indigo-600 {
+  background-color: #4f46e5;
+}
+
+.text-white {
+  color: #ffffff;
+}
+
+.hover\:bg-indigo-700:hover {
+  background-color: #4338ca;
+}
