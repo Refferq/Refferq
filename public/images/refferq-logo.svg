@@ -1,0 +1,35 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#gradient)" />
+  
+  <!-- Gradient Definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f0fdf4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Letter R with modern design -->
+  <g transform="translate(50, 50)">
+    <!-- Main R shape -->
+    <path d="M 15 10 L 50 10 C 65 10, 75 20, 75 35 C 75 45, 70 52, 60 55 L 80 90 L 60 90 L 42 57 L 35 57 L 35 90 L 15 90 Z M 35 25 L 35 42 L 50 42 C 55 42, 58 39, 58 33.5 C 58 28, 55 25, 50 25 Z" 
+          fill="url(#iconGradient)" 
+          stroke="white" 
+          stroke-width="2"/>
+    
+    <!-- Lightning bolt accent -->
+    <path d="M 85 20 L 75 40 L 82 40 L 72 65 L 88 42 L 82 42 Z" 
+          fill="#fbbf24" 
+          stroke="#f59e0b" 
+          stroke-width="1.5"
+          opacity="0.9"/>
+  </g>
+  
+  <!-- Outer ring -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="white" stroke-width="3" opacity="0.3"/>
+</svg>
