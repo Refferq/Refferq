@@ -2097,7 +2097,7 @@ function ProgramSettingsPage() {
     websiteUrl: 'https://kyns.com',
     currency: 'INR',
     blockedCountries: [] as string[],
-    portalSubdomain: 'bsbot.tolt.io',
+    portalSubdomain: 'refferq.vercel.app',
     termsOfService: '',
     minimumPayoutThreshold: 0,
     payoutTerm: 'NET-15',
