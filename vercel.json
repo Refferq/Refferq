@@ -1,33 +1,11 @@
 {
   "version": 2,
   "name": "refferq",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "JWT_SECRET": "@jwt_secret",
-    "EMAIL_HOST": "@email_host",
-    "EMAIL_PORT": "@email_port",
-    "EMAIL_USER": "@email_user",
-    "EMAIL_PASSWORD": "@email_password",
-    "EMAIL_FROM": "@email_from",
-    "NEXT_PUBLIC_APP_URL": "@app_url"
-  },
-  "build": {
-    "env": {
-      "DATABASE_URL": "@database_url",
-      "JWT_SECRET": "@jwt_secret"
-    }
-  },
-  "regions": ["iad1"],
   "framework": "nextjs",
-  "installCommand": "npm install",
   "buildCommand": "npx prisma generate && npm run build",
+  "installCommand": "npm install",
   "devCommand": "npm run dev",
+  "regions": ["iad1"],
   "headers": [
     {
       "source": "/(.*)",
