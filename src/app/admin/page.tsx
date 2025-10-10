@@ -2174,7 +2174,7 @@ function ProgramSettingsPage() {
           name: 'Default',
           commissionRate: 20,
           description: 'Earn 20% on all paid customers.',
-          signupUrl: 'https://bsbot.tolt.io',
+          signupUrl: 'https://refferq.vercel.app',
           memberCount: 0,
           createdAt: new Date().toISOString()
         }
