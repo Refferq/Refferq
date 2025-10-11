@@ -87,42 +87,72 @@ function DashboardPage({ stats, referrals }: { stats: AffiliateStats | null; ref
       {/* Links Section */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Referral Links</h3>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Referral Link</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                readOnly
-                value={stats?.referralLink || ''}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm"
-              />
-              <button
-                onClick={() => copyToClipboard(stats?.referralLink || '')}
-                className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 text-sm font-medium"
-              >
-                Copy
-              </button>
+        
+        {!stats?.referralCode ? (
+          <div className="text-center py-8">
+            <div className="text-4xl mb-4">🔗</div>
+            <p className="text-gray-600 mb-4">No referral code found</p>
+            <p className="text-sm text-gray-500 mb-4">
+              Generate your referral code to start earning commissions
+            </p>
+            <button
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/affiliate/generate-code', { method: 'POST' });
+                  const data = await response.json();
+                  if (data.success) {
+                    window.location.reload();
+                  } else {
+                    alert('Failed to generate code: ' + data.error);
+                  }
+                } catch (error) {
+                  console.error('Failed to generate code:', error);
+                  alert('Failed to generate code. Please try again.');
+                }
+              }}
+              className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium"
+            >
+              Generate Referral Code
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Referral Link</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={stats?.referralLink || ''}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm"
+                />
+                <button
+                  onClick={() => copyToClipboard(stats?.referralLink || '')}
+                  className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 text-sm font-medium"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Referral Code</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={stats?.referralCode || ''}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm"
+                />
+                <button
+                  onClick={() => copyToClipboard(stats?.referralCode || '')}
+                  className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 text-sm font-medium"
+                >
+                  Copy
+                </button>
+              </div>
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Referral Code</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                readOnly
-                value={stats?.referralCode || ''}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm"
-              />
-              <button
-                onClick={() => copyToClipboard(stats?.referralCode || '')}
-                className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 text-sm font-medium"
-              >
-                Copy
-              </button>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Recent Referrals */}
