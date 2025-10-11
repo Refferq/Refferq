@@ -27,11 +27,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user is active
+    // Check user status with specific messages
+    if (user.status === 'PENDING') {
+      return NextResponse.json(
+        { success: false, message: 'Your account is pending approval. Please wait for admin activation.' },
+        { status: 403 }
+      );
+    }
+
+    if (user.status === 'INACTIVE') {
+      return NextResponse.json(
+        { success: false, message: 'Your account has been deactivated. Please contact support.' },
+        { status: 403 }
+      );
+    }
+
+    if (user.status === 'SUSPENDED') {
+      return NextResponse.json(
+        { success: false, message: 'Your account has been suspended. Please contact support.' },
+        { status: 403 }
+      );
+    }
+
     if (user.status !== 'ACTIVE') {
       return NextResponse.json(
         { success: false, message: 'Account is not active' },
-        { status: 401 }
+        { status: 403 }
       );
     }
 

@@ -56,6 +56,12 @@ class AuthService {
       // Hash password
       const hashedPassword = await bcrypt.hash(data.password, 12);
 
+      // Determine initial status based on role
+      // Affiliates start as PENDING and need admin approval
+      // Admins start as ACTIVE (for initial setup)
+      const userRoleLower = data.role.toLowerCase();
+      const initialStatus = userRoleLower === 'admin' ? 'ACTIVE' : 'PENDING';
+
       // Create user
       const user = await prisma.user.create({
         data: {
@@ -63,12 +69,12 @@ class AuthService {
           name: data.name,
           password: hashedPassword,
           role: data.role.toUpperCase() as Role,
-          status: 'ACTIVE' as UserStatus
+          status: initialStatus as UserStatus
         }
       });
 
       // If affiliate, create affiliate record
-      if (data.role === 'affiliate') {
+      if (userRoleLower === 'affiliate') {
         const referralCode = this.generateReferralCode(data.name);
         
         await prisma.affiliate.create({

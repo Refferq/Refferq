@@ -95,6 +95,7 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json({
+      success: true,
       user: {
         id: user.id,
         name: user.name,
