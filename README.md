@@ -420,7 +420,7 @@ Built with ❤️ using:
 - [Recharts](https://recharts.org)
 
 ---
-
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I3I31MM8N2)
 <p align="center">
   Made with ❤️ by the <strong>Refferq Team</strong>
 </p>
