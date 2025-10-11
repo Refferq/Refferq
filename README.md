@@ -421,7 +421,9 @@ Built with ❤️ using:
 
 ---
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I3I31MM8N2)
-<a href="https://www.buymeacoffee.com/Refferq"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=Refferq&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
+
+<a href="https://www.buymeacoffee.com/Refferq"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=Refferq&button_colour=40DCA5&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" /></a>
+
 <p align="center">
   Made with ❤️ by the <strong>Refferq Team</strong>
 </p>
