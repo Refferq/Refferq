@@ -239,6 +239,9 @@ Refferq uses [Resend](https://resend.com) for sending transactional emails. Foll
 
 ```bash
 npm run dev
+```
+
+Open [https://app.refferq.com](https://app.refferq.com) or your configured domain in your browser.
 # or
 yarn dev
 # or

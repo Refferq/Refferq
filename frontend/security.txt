@@ -1,0 +1,12 @@
+Contact: mailto:security@refferq.com
+Contact: https://github.com/Refferq/Refferq/security/advisories/new
+Expires: 2026-10-12T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://refferq.com/.well-known/security.txt
+Policy: https://github.com/Refferq/Refferq/blob/main/SECURITY.md
+Acknowledgments: https://github.com/Refferq/Refferq/blob/main/SECURITY.md#hall-of-fame
+
+# Our security disclosure policy:
+# If you discover a security vulnerability in Refferq,
+# please report it responsibly through one of the contact methods above.
+# We take all security reports seriously and will respond promptly.

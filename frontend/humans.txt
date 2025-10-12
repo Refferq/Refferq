@@ -1,0 +1,28 @@
+/* TEAM */
+Project: Refferq
+Description: Open Source Affiliate Platform
+Site: https://refferq.com/
+Repository: https://github.com/Refferq/Refferq
+Email: hello@refferq.com
+
+/* THANKS */
+To all our contributors and the open source community!
+
+/* TECHNOLOGY */
+Framework: Next.js 15.2.3
+Language: TypeScript 5.8
+Frontend: React 19, Tailwind CSS
+Backend: Node.js, PostgreSQL
+ORM: Prisma 6.16.3
+Authentication: JWT (jose library)
+Email: Resend API
+Hosting: Vercel
+Analytics: Privacy-focused tracking
+
+/* SITE */
+Last update: 2025/10/12
+Standards: HTML5, CSS3, ES2023
+Components: Responsive Design, Progressive Enhancement
+Software: VS Code, Git, GitHub
+Fonts: System fonts for performance
+Icons: Custom SVG icons

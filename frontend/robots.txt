@@ -1,0 +1,38 @@
+# Refferq - Open Source Affiliate Platform
+# https://refferq.com/
+
+User-agent: *
+Allow: /
+Allow: /features.html
+Allow: /pricing.html
+Allow: /docs.html
+
+# Disallow admin and user areas
+Disallow: /admin/
+Disallow: /affiliate/
+Disallow: /api/
+
+# Disallow authentication pages from indexing
+Disallow: /login
+Disallow: /register
+Disallow: /verify-otp
+
+# Disallow private user data
+Disallow: /profile/
+Disallow: /settings/
+
+# Sitemap
+Sitemap: https://refferq.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 5
+
+# Allow specific bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /

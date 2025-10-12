@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Complete documentation for Refferq - Open source affiliate platform. Installation guide, API reference, and tutorials.">
+    <meta name="keywords" content="refferq documentation, affiliate platform docs, API reference, installation guide">
+    <title>Documentation - Refferq</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .docs-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 60px;
+            padding: 100px 0;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        .docs-sidebar {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+        .docs-nav {
+            list-style: none;
+            padding: 0;
+        }
+        .docs-nav-section {
+            margin-bottom: 32px;
+        }
+        .docs-nav-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-500);
+            margin-bottom: 12px;
+        }
+        .docs-nav-link {
+            display: block;
+            padding: 8px 12px;
+            color: var(--gray-600);
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .docs-nav-link:hover,
+        .docs-nav-link.active {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+        .docs-content {
+            max-width: 800px;
+        }
+        .docs-content h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+        .docs-content h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-top: 60px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--gray-200);
+        }
+        .docs-content h3 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 40px;
+            margin-bottom: 16px;
+        }
+        .docs-content p {
+            line-height: 1.8;
+            color: var(--gray-700);
+            margin-bottom: 20px;
+        }
+        .docs-content pre {
+            background: var(--gray-900);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .docs-content code {
+            background: var(--gray-100);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+        }
+        .docs-content pre code {
+            background: none;
+            padding: 0;
+            color: white;
+        }
+        .docs-content ul, .docs-content ol {
+            margin: 20px 0;
+            padding-left: 24px;
+            line-height: 1.8;
+        }
+        .docs-content li {
+            margin-bottom: 8px;
+            color: var(--gray-700);
+        }
+        .info-box {
+            background: #e0f2fe;
+            border-left: 4px solid #0284c7;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 24px 0;
+        }
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 24px 0;
+        }
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 24px 0;
+        }
+        @media (max-width: 968px) {
+            .docs-container {
+                grid-template-columns: 1fr;
+            }
+            .docs-sidebar {
+                position: relative;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="index.html" class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="#10b981"/>
+                        <path d="M8 12h16M8 16h16M8 20h10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span>Refferq</span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="features.html">Features</a></li>
+                    <li><a href="pricing.html">Pricing</a></li>
+                    <li><a href="docs.html">Docs</a></li>
+                    <li><a href="https://github.com/Refferq/Refferq" target="_blank">GitHub</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="Refferq" data-color="#40DCA5" data-emoji="☕"  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>
+                    <a href="https://app.refferq.com/login" class="btn-secondary">Sign in</a>
+                    <a href="https://app.refferq.com/register" class="btn-primary">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Documentation -->
+    <div class="docs-container">
+        <!-- Sidebar Navigation -->
+        <aside class="docs-sidebar">
+            <nav class="docs-nav">
+                <div class="docs-nav-section">
+                    <div class="docs-nav-title">Getting Started</div>
+                    <a href="#introduction" class="docs-nav-link active">Introduction</a>
+                    <a href="#quick-start" class="docs-nav-link">Quick Start</a>
+                    <a href="#installation" class="docs-nav-link">Installation</a>
+                    <a href="#configuration" class="docs-nav-link">Configuration</a>
+                </div>
+                <div class="docs-nav-section">
+                    <div class="docs-nav-title">Features</div>
+                    <a href="#affiliates" class="docs-nav-link">Affiliate Management</a>
+                    <a href="#tracking" class="docs-nav-link">Tracking Setup</a>
+                    <a href="#commissions" class="docs-nav-link">Commissions</a>
+                    <a href="#payouts" class="docs-nav-link">Payouts</a>
+                </div>
+                <div class="docs-nav-section">
+                    <div class="docs-nav-title">API Reference</div>
+                    <a href="#authentication" class="docs-nav-link">Authentication</a>
+                    <a href="#endpoints" class="docs-nav-link">API Endpoints</a>
+                    <a href="#webhooks" class="docs-nav-link">Webhooks</a>
+                </div>
+                <div class="docs-nav-section">
+                    <div class="docs-nav-title">Deployment</div>
+                    <a href="#vercel" class="docs-nav-link">Vercel</a>
+                    <a href="#docker" class="docs-nav-link">Docker</a>
+                    <a href="#vps" class="docs-nav-link">VPS/Cloud</a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="docs-content">
+            <h1 id="introduction">📚 Documentation</h1>
+            <p>Welcome to the Refferq documentation! This guide will help you get started with setting up and running your own affiliate platform.</p>
+
+            <div class="info-box">
+                <strong>💡 New to Refferq?</strong> Start with the <a href="#quick-start">Quick Start</a> guide to get up and running in minutes.
+            </div>
+
+            <h2 id="quick-start">🚀 Quick Start</h2>
+            <p>Get Refferq running locally in 5 minutes:</p>
+
+            <h3>1. Clone the Repository</h3>
+            <pre><code>git clone https://github.com/Refferq/Refferq.git
+cd Refferq</code></pre>
+
+            <h3>2. Install Dependencies</h3>
+            <pre><code>npm install
+# or
+yarn install
+# or
+pnpm install</code></pre>
+
+            <h3>3. Set Up Environment Variables</h3>
+            <p>Copy the example environment file and configure your settings:</p>
+            <pre><code>cp .env.example .env</code></pre>
+
+            <p>Update <code>.env</code> with your database and email credentials:</p>
+            <pre><code># Database
+DATABASE_URL="postgresql://user:password@localhost:5432/refferq"
+
+# JWT Secret
+JWT_SECRET="your-super-secret-jwt-key-change-this"
+
+# Email (Resend)
+RESEND_API_KEY="re_xxxxxxxxxxxxx"
+EMAIL_FROM="noreply@yourdomain.com"
+
+# App URL (Production)
+NEXT_PUBLIC_APP_URL="https://app.refferq.com"</code></pre>
+
+            <h3>4. Set Up Database</h3>
+            <pre><code>npx prisma generate
+npx prisma migrate dev
+npx prisma db seed</code></pre>
+
+            <h3>5. Run Development Server</h3>
+            <pre><code>npm run dev</code></pre>
+
+            <div class="success-box">
+                <strong>✅ Success!</strong> Open <a href="https://app.refferq.com">https://app.refferq.com</a> or your configured domain in your browser to see Refferq running.
+            </div>
+
+            <h2 id="installation">💾 Installation</h2>
+            
+            <h3>System Requirements</h3>
+            <ul>
+                <li>Node.js 18.x or higher</li>
+                <li>PostgreSQL 12.x or higher</li>
+                <li>npm, yarn, or pnpm</li>
+                <li>Git</li>
+            </ul>
+
+            <h3>Database Setup</h3>
+            <p>Refferq uses PostgreSQL. You can use:</p>
+            <ul>
+                <li><strong>Local PostgreSQL</strong> - Install PostgreSQL on your machine</li>
+                <li><strong>Docker</strong> - Run PostgreSQL in a container</li>
+                <li><strong>Cloud Database</strong> - Use Supabase, Railway, or Neon</li>
+            </ul>
+
+            <h4>Using Docker for PostgreSQL:</h4>
+            <pre><code>docker run --name refferq-db \
+  -e POSTGRES_PASSWORD=mysecretpassword \
+  -e POSTGRES_DB=refferq \
+  -p 5432:5432 \
+  -d postgres:15</code></pre>
+
+            <h2 id="configuration">⚙️ Configuration</h2>
+
+            <h3>Environment Variables</h3>
+            <p>All configuration is done through environment variables in the <code>.env</code> file:</p>
+
+            <h4>Required Variables:</h4>
+            <ul>
+                <li><code>DATABASE_URL</code> - PostgreSQL connection string</li>
+                <li><code>JWT_SECRET</code> - Secret key for JWT tokens (generate a random 32+ character string)</li>
+                <li><code>RESEND_API_KEY</code> - API key from Resend.com for sending emails</li>
+                <li><code>EMAIL_FROM</code> - Sender email address</li>
+                <li><code>NEXT_PUBLIC_APP_URL</code> - Your app's public URL</li>
+            </ul>
+
+            <h4>Optional Variables:</h4>
+            <ul>
+                <li><code>NODE_ENV</code> - Environment (development, production)</li>
+                <li><code>PORT</code> - Server port (default: 3000)</li>
+            </ul>
+
+            <h2 id="affiliates">👥 Affiliate Management</h2>
+            
+            <h3>User Registration Flow</h3>
+            <p>Refferq uses a passwordless OTP-based authentication system:</p>
+            <ol>
+                <li>User enters email and selects role (Admin or Affiliate)</li>
+                <li>OTP code is sent to their email</li>
+                <li>User enters OTP code to complete registration</li>
+                <li>New affiliates start with <code>PENDING</code> status</li>
+                <li>Admins must approve affiliates to change status to <code>ACTIVE</code></li>
+            </ol>
+
+            <h3>Affiliate Statuses</h3>
+            <ul>
+                <li><strong>PENDING</strong> - Newly registered, awaiting admin approval</li>
+                <li><strong>ACTIVE</strong> - Approved and can generate referrals</li>
+                <li><strong>INACTIVE</strong> - Temporarily disabled</li>
+                <li><strong>SUSPENDED</strong> - Blocked from the platform</li>
+            </ul>
+
+            <div class="warning-box">
+                <strong>⚠️ Note:</strong> Only ACTIVE affiliates can earn commissions. Make sure to approve new affiliates from the admin dashboard.
+            </div>
+
+            <h2 id="tracking">🎯 Tracking Setup</h2>
+
+            <h3>JavaScript Tracking Script</h3>
+            <p>Refferq includes a lightweight JavaScript tracking library (<code>refferq-tracker.js</code>) that you can add to any website.</p>
+
+            <h4>Step 1: Generate API Key</h4>
+            <p>In the admin dashboard, go to <strong>Settings → Integration</strong> and click "Generate API Key". You'll receive:</p>
+            <ul>
+                <li><strong>Public Key</strong> (pk_xxx) - Used in frontend tracking</li>
+                <li><strong>Private Key</strong> (sk_xxx) - Used for server-side API calls</li>
+            </ul>
+
+            <h4>Step 2: Add Tracking Script</h4>
+            <p>Add this script tag to your website, just before the closing <code>&lt;/body&gt;</code> tag:</p>
+            <pre><code>&lt;script 
+  src="https://app.refferq.com/scripts/refferq-tracker.js"
+  data-api-url="https://app.refferq.com/api"
+  data-api-key="pk_your_public_key_here"
+&gt;&lt;/script&gt;</code></pre>
+
+            <h4>Step 3: Track Conversions</h4>
+            <p>When a sale occurs, call the tracking function:</p>
+            <pre><code>// Track a conversion
+Refferq.trackConversion({
+  orderId: "order_123",
+  amount: 99.99,
+  currency: "USD",
+  email: "customer@example.com"
+});</code></pre>
+
+            <h3>Server-Side Tracking</h3>
+            <p>For more control, use the API directly:</p>
+            <pre><code>POST /api/track/conversion
+Content-Type: application/json
+X-API-Key: sk_your_private_key_here
+
+{
+  "referralCode": "JOHN123",
+  "orderId": "order_123",
+  "amount": 99.99,
+  "currency": "USD",
+  "customerEmail": "customer@example.com"
+}</code></pre>
+
+            <h2 id="commissions">💰 Commissions</h2>
+
+            <h3>Commission Types</h3>
+            <p>Refferq supports flexible commission structures:</p>
+
+            <h4>Percentage-Based</h4>
+            <pre><code>{
+  "type": "PERCENTAGE",
+  "rate": 20,  // 20% commission
+  "minPayout": 50.00
+}</code></pre>
+
+            <h4>Fixed Amount</h4>
+            <pre><code>{
+  "type": "FIXED",
+  "amount": 10.00,  // $10 per sale
+  "minPayout": 50.00
+}</code></pre>
+
+            <h4>Tiered Commissions</h4>
+            <pre><code>{
+  "type": "TIERED",
+  "tiers": [
+    { "upTo": 10, "rate": 15 },      // First 10 sales: 15%
+    { "upTo": 50, "rate": 20 },      // Next 40 sales: 20%
+    { "upTo": null, "rate": 25 }     // 50+ sales: 25%
+  ]
+}</code></pre>
+
+            <h2 id="payouts">💸 Payouts</h2>
+
+            <h3>Payout Management</h3>
+            <p>Track and manage affiliate payouts through the admin dashboard:</p>
+            <ol>
+                <li>View affiliate balances and pending payouts</li>
+                <li>Set minimum payout thresholds</li>
+                <li>Generate payout reports</li>
+                <li>Mark payouts as completed</li>
+                <li>Export payout history for accounting</li>
+            </ol>
+
+            <h3>Automated Payouts</h3>
+            <p>Integrate with payment providers (coming soon):</p>
+            <ul>
+                <li>PayPal Mass Pay</li>
+                <li>Stripe Connect</li>
+                <li>Wise (TransferWise)</li>
+                <li>Bank transfers via Plaid</li>
+            </ul>
+
+            <h2 id="authentication">🔐 Authentication</h2>
+
+            <h3>API Authentication</h3>
+            <p>Refferq uses JWT tokens for authentication. Include the token in your requests:</p>
+            <pre><code>Authorization: Bearer &lt;your-jwt-token&gt;</code></pre>
+
+            <h3>Getting a JWT Token</h3>
+            <pre><code>POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "otp": "123456"
+}</code></pre>
+
+            <p>Response:</p>
+            <pre><code>{
+  "success": true,
+  "message": "Login successful",
+  "user": {
+    "id": "user_id",
+    "email": "admin@example.com",
+    "role": "ADMIN"
+  }
+}</code></pre>
+
+            <h2 id="endpoints">📡 API Endpoints</h2>
+
+            <h3>Authentication Endpoints</h3>
+            <ul>
+                <li><code>POST /api/auth/register</code> - Register new user</li>
+                <li><code>POST /api/auth/verify-otp</code> - Verify OTP code</li>
+                <li><code>POST /api/auth/login</code> - Login user</li>
+                <li><code>POST /api/auth/logout</code> - Logout user</li>
+            </ul>
+
+            <h3>Admin Endpoints</h3>
+            <ul>
+                <li><code>GET /api/admin/affiliates</code> - List all affiliates</li>
+                <li><code>PATCH /api/admin/affiliates/:id/status</code> - Update affiliate status</li>
+                <li><code>GET /api/admin/dashboard</code> - Get dashboard statistics</li>
+                <li><code>GET /api/admin/referrals</code> - List all referrals</li>
+                <li><code>POST /api/admin/integration/generate-key</code> - Generate API keys</li>
+                <li><code>PUT /api/admin/profile</code> - Update admin profile</li>
+            </ul>
+
+            <h3>Affiliate Endpoints</h3>
+            <ul>
+                <li><code>GET /api/affiliate/profile</code> - Get affiliate profile and stats</li>
+                <li><code>POST /api/affiliate/generate-code</code> - Generate referral code</li>
+                <li><code>GET /api/affiliate/referrals</code> - Get affiliate's referrals</li>
+                <li><code>GET /api/affiliate/earnings</code> - Get earnings data</li>
+            </ul>
+
+            <h3>Tracking Endpoints</h3>
+            <ul>
+                <li><code>POST /api/track/referral</code> - Track referral click</li>
+                <li><code>POST /api/track/conversion</code> - Track conversion/sale</li>
+            </ul>
+
+            <h2 id="webhooks">🔔 Webhooks</h2>
+
+            <p>Configure webhooks to receive real-time notifications:</p>
+
+            <h3>Webhook Events</h3>
+            <ul>
+                <li><code>affiliate.created</code> - New affiliate registered</li>
+                <li><code>affiliate.approved</code> - Affiliate status changed to ACTIVE</li>
+                <li><code>referral.created</code> - New referral tracked</li>
+                <li><code>conversion.created</code> - New conversion recorded</li>
+                <li><code>payout.completed</code> - Payout marked as completed</li>
+            </ul>
+
+            <h3>Webhook Payload Example</h3>
+            <pre><code>{
+  "event": "conversion.created",
+  "timestamp": "2025-10-12T10:30:00Z",
+  "data": {
+    "conversionId": "conv_123",
+    "affiliateId": "aff_456",
+    "amount": 99.99,
+    "commission": 19.99,
+    "orderId": "order_789"
+  }
+}</code></pre>
+
+            <h2 id="vercel">☁️ Deploy to Vercel</h2>
+
+            <h3>One-Click Deploy</h3>
+            <p>Deploy Refferq to Vercel in seconds:</p>
+            <ol>
+                <li>Fork the Refferq repository on GitHub</li>
+                <li>Connect your Vercel account to GitHub</li>
+                <li>Click "New Project" and select the forked repository</li>
+                <li>Add your environment variables</li>
+                <li>Click "Deploy"</li>
+            </ol>
+
+            <div class="info-box">
+                <strong>💡 Tip:</strong> Use Vercel's built-in PostgreSQL database or connect to an external provider like Supabase.
+            </div>
+
+            <h2 id="docker">🐳 Docker Deployment</h2>
+
+            <h3>Using Docker Compose</h3>
+            <p>Create a <code>docker-compose.yml</code> file:</p>
+            <pre><code>version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: refferq
+      POSTGRES_PASSWORD: yourpassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://postgres:yourpassword@db:5432/refferq
+      JWT_SECRET: your-jwt-secret
+      RESEND_API_KEY: re_xxxxx
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:</code></pre>
+
+            <p>Run with:</p>
+            <pre><code>docker-compose up -d</code></pre>
+
+            <h2 id="vps">🖥️ VPS/Cloud Deployment</h2>
+
+            <h3>Deploy to Any VPS</h3>
+            <p>Deploy Refferq to Digital Ocean, Linode, AWS, or any VPS:</p>
+
+            <ol>
+                <li><strong>Set up server</strong> - Ubuntu 22.04 recommended</li>
+                <li><strong>Install Node.js</strong> - Use nvm or apt</li>
+                <li><strong>Install PostgreSQL</strong></li>
+                <li><strong>Clone repository</strong></li>
+                <li><strong>Configure environment</strong></li>
+                <li><strong>Build application</strong> - <code>npm run build</code></li>
+                <li><strong>Set up PM2</strong> - Process manager</li>
+                <li><strong>Configure Nginx</strong> - Reverse proxy</li>
+                <li><strong>Set up SSL</strong> - Use Let's Encrypt</li>
+            </ol>
+
+            <h3>Using PM2</h3>
+            <pre><code># Install PM2
+npm install -g pm2
+
+# Start application
+pm2 start npm --name "refferq" -- start
+
+# Save PM2 config
+pm2 save
+pm2 startup</code></pre>
+
+            <div class="success-box">
+                <strong>🎉 Congratulations!</strong> You now have a fully functioning affiliate platform. Check out our <a href="https://github.com/Refferq/Refferq/wiki">GitHub Wiki</a> for more advanced topics.
+            </div>
+
+            <hr style="margin: 60px 0; border: none; border-top: 2px solid var(--gray-200);">
+
+            <h2>📞 Need Help?</h2>
+            <p>Join our community and get support:</p>
+            <ul>
+                <li><a href="https://github.com/Refferq/Refferq/discussions">GitHub Discussions</a></li>
+                <li><a href="https://github.com/Refferq/Refferq/issues">Report Issues</a></li>
+                <li><a href="https://discord.gg/refferq">Discord Community</a></li>
+                <li><a href="mailto:support@refferq.com">Email Support</a></li>
+            </ul>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <div class="footer-logo">
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <rect width="32" height="32" rx="8" fill="#10b981"/>
+                            <path d="M8 12h16M8 16h16M8 20h10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span>Refferq</span>
+                    </div>
+                    <p class="footer-description">
+                        Open source affiliate platform built with Next.js and PostgreSQL.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="footer-title">Product</h4>
+                    <ul class="footer-links">
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="docs.html">Documentation</a></li>
+                        <li><a href="#">Changelog</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-title">Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://github.com/Refferq/Refferq">GitHub</a></li>
+                        <li><a href="#">Wiki</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Community</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-title">Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">License</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2025 Refferq. Open source under MIT License.</p>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="Refferq" data-color="#40DCA5" data-emoji="☕"  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>
+                    <div class="footer-social">
+                        <a href="https://github.com/Refferq/Refferq" aria-label="GitHub">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                            </svg>
+                        </a>
+                        <a href="#" aria-label="Twitter">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
