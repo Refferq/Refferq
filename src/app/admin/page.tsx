@@ -629,7 +629,7 @@ function PartnersPage() {
           name: aff.user.name,
           email: aff.user.email,
           referralCode: aff.referralCode,
-          status: aff.user.status || 'ACTIVE',
+          status: aff.user.status, // Removed fallback - use actual status from database
           createdAt: aff.createdAt,
           clicks: 0, // Will be populated with click tracking
           leads: aff._count?.referrals || 0,

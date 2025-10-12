@@ -1,3 +1,7 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://opensource.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20me%20a%20coffee-ffdd00?style=flat&logo=buy-me-a-coffee)](https://buymeacoffee.com/refferq)
 # Refferq - Open Source Affiliate Management Platform
 
 <p align="center">
@@ -425,7 +429,6 @@ Built with ❤️ using:
 ---
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I3I31MM8N2)
 
-<a href="https://www.buymeacoffee.com/Refferq"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=Refferq&button_colour=40DCA5&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" /></a>
 
 <p align="center">
   Made with ❤️ by the <strong>Refferq Team</strong>
@@ -434,3 +437,8 @@ Built with ❤️ using:
 <p align="center">
   <sub>© 2025 Refferq. All rights reserved.</sub>
 </p>
+<p align="center">
+ **⭐ Found this useful? Give us a star to support the project!**
+
+  [![Buy Me A Coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&slug=daniavila&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff)](https://buymeacoffee.com/refferq)
+ 
