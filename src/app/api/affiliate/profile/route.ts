@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
       const metadata = ref.metadata as any;
       return {
         ...ref,
-        estimatedValue: metadata?.estimated_value || 0,
+        estimatedValue: Number(metadata?.estimated_value) || 0,
         company: metadata?.company || '',
       };
     });

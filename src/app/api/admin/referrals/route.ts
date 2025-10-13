@@ -57,21 +57,26 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      referrals: referrals.map(referral => ({
-        id: referral.id,
-        leadEmail: referral.leadEmail,
-        leadName: referral.leadName,
-        leadPhone: referral.leadPhone,
-        status: referral.status,
-        notes: referral.notes,
-        createdAt: referral.createdAt,
-        affiliate: {
-          id: referral.affiliate.id,
-          name: referral.affiliate.user.name,
-          email: referral.affiliate.user.email,
-          referralCode: referral.affiliate.referralCode
-        }
-      }))
+      referrals: referrals.map(referral => {
+        const metadata = referral.metadata as any;
+        return {
+          id: referral.id,
+          leadEmail: referral.leadEmail,
+          leadName: referral.leadName,
+          leadPhone: referral.leadPhone,
+          status: referral.status,
+          notes: referral.notes,
+          createdAt: referral.createdAt,
+          estimatedValue: Number(metadata?.estimated_value) || 0,
+          company: metadata?.company || '',
+          affiliate: {
+            id: referral.affiliate.id,
+            name: referral.affiliate.user.name,
+            email: referral.affiliate.user.email,
+            referralCode: referral.affiliate.referralCode
+          }
+        };
+      })
     });
 
   } catch (error) {

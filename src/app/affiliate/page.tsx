@@ -192,7 +192,7 @@ function DashboardPage({ stats, referrals }: { stats: AffiliateStats | null; ref
                       {new Date(ref.createdAt).toLocaleDateString()}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-900 text-right">
-                      ₹{(ref.estimatedValue || 0).toFixed(2)}
+                      ₹{(Number(ref.estimatedValue) || 0).toFixed(2)}
                     </td>
                   </tr>
                 ))}
@@ -297,7 +297,7 @@ function ReferralsPage({ referrals, onSubmitLead }: { referrals: Referral[]; onS
                       {new Date(ref.createdAt).toLocaleDateString()}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-900 text-right">
-                      ₹{(ref.estimatedValue || 0).toFixed(2)}
+                      ₹{(Number(ref.estimatedValue) || 0).toFixed(2)}
                     </td>
                   </tr>
                 ))}

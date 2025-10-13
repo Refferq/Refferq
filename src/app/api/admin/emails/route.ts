@@ -109,16 +109,35 @@ export async function POST(request: Request) {
     let template;
 
     if (id) {
-      // Update existing template
-      template = await prisma.emailTemplate.update({
+      // Check if template exists
+      const existingTemplate = await prisma.emailTemplate.findUnique({
         where: { id },
-        data: {
-          subject,
-          body: emailBody,
-          variables: variables || [],
-          updatedAt: new Date(),
-        },
       });
+
+      if (existingTemplate) {
+        // Update existing template
+        template = await prisma.emailTemplate.update({
+          where: { id },
+          data: {
+            subject,
+            body: emailBody,
+            variables: variables || [],
+            updatedAt: new Date(),
+          },
+        });
+      } else {
+        // Template not found, create new one instead
+        template = await prisma.emailTemplate.create({
+          data: {
+            type,
+            name,
+            subject,
+            body: emailBody,
+            variables: variables || [],
+            isActive: true,
+          },
+        });
+      }
     } else {
       // Create new template
       template = await prisma.emailTemplate.create({
