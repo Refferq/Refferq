@@ -55,8 +55,42 @@ export async function GET(request: NextRequest) {
       where: { status: 'APPROVED' }
     });
     
+    // Calculate ACTUAL transaction revenue from conversions
     const totalRevenue = await prisma.conversion.aggregate({
       _sum: { amountCents: true }
+    });
+    
+    // Calculate ESTIMATED revenue from referrals (leads)
+    const referrals = await prisma.referral.findMany({
+      include: {
+        affiliate: true
+      }
+    });
+    
+    // Get all partner groups for commission rate lookup
+    const partnerGroups = await prisma.partnerGroup.findMany();
+    const partnerGroupMap = new Map(
+      partnerGroups.map(pg => [pg.id, pg.commissionRate])
+    );
+    
+    let totalEstimatedRevenue = 0;
+    let totalEstimatedCommission = 0;
+    
+    referrals.forEach((ref) => {
+      const metadata = ref.metadata as any;
+      const estimatedValue = Number(metadata?.estimated_value) || 0;
+      const valueInCents = estimatedValue * 100;
+      
+      // Get commission rate from partner group or default to 20%
+      const affiliate = ref.affiliate as any;
+      const partnerGroupId = affiliate.partnerGroupId;
+      const commissionRate = partnerGroupId 
+        ? (partnerGroupMap.get(partnerGroupId) || 0.20)
+        : 0.20;
+      const commissionInCents = Math.floor(valueInCents * commissionRate);
+      
+      totalEstimatedRevenue += valueInCents;
+      totalEstimatedCommission += commissionInCents;
     });
 
     const stats = {
@@ -66,7 +100,9 @@ export async function GET(request: NextRequest) {
       totalConversions,
       pendingReferrals,
       approvedReferrals,
-      totalRevenue: totalRevenue._sum?.amountCents || 0,
+      totalRevenue: totalRevenue._sum?.amountCents || 0, // Actual transaction revenue
+      totalEstimatedRevenue, // Estimated revenue from all leads
+      totalEstimatedCommission, // Total commission to be paid
     };
 
     return NextResponse.json({ success: true, stats });

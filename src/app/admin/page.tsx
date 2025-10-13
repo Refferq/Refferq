@@ -5,6 +5,8 @@ import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardStats {
   totalRevenue: number;
+  totalEstimatedRevenue: number;
+  totalEstimatedCommission: number;
   totalClicks: number;
   totalLeads: number;
   totalReferredCustomers: number;
@@ -5522,6 +5524,8 @@ export default function AdminDashboard() {
       if (statsData.success) {
         setStats({
           totalRevenue: statsData.stats.totalRevenue || 0,
+          totalEstimatedRevenue: statsData.stats.totalEstimatedRevenue || 0,
+          totalEstimatedCommission: statsData.stats.totalEstimatedCommission || 0,
           totalClicks: 0,
           totalLeads: statsData.stats.totalReferrals || 0,
           totalReferredCustomers: statsData.stats.approvedReferrals || 0,
@@ -5735,10 +5739,11 @@ export default function AdminDashboard() {
 
               <div className="grid grid-cols-4 gap-6 mb-6">
                 <div>
-                  <div className="text-sm text-gray-600 mb-2">Total revenue generated</div>
+                  <div className="text-sm text-gray-600 mb-2">Total estimated revenue</div>
                   <div className="text-3xl font-bold text-gray-900">
-                    ₹{stats ? (stats.totalRevenue / 100).toFixed(2) : '0.00'}
+                    ₹{stats ? (stats.totalEstimatedRevenue / 100).toFixed(2) : '0.00'}
                   </div>
+                  <div className="text-xs text-gray-500 mt-1">From all affiliate leads</div>
                   <div className="flex gap-2 mt-4">
                     <button onClick={() => setActivePage('partners')} className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
                       View partners
@@ -5748,16 +5753,55 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                 </div>
-
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-6">
+                
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6">
                   <div className="flex items-start justify-between mb-4">
-                    <div className="text-sm text-gray-600">Total clicks</div>
+                    <div className="text-sm text-gray-600">Actual revenue (transactions)</div>
                     <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-                      <span>🔗</span>
+                      <span>💰</span>
                     </div>
                   </div>
-                  <div className="text-3xl font-bold text-gray-900">{stats?.totalClicks || 0}</div>
-                  <div className="text-xs text-gray-500 mt-2">All clicks from partner links</div>
+                  <div className="text-3xl font-bold text-green-900">
+                    ₹{stats ? (stats.totalRevenue / 100).toFixed(2) : '0.00'}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">Confirmed customer payments</div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="text-sm text-gray-600">Total commission owed</div>
+                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
+                      <span>�</span>
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold text-blue-900">
+                    ₹{stats ? (stats.totalEstimatedCommission / 100).toFixed(2) : '0.00'}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">To be paid to affiliates</div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="text-sm text-gray-600">Total affiliates</div>
+                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
+                      <span>👥</span>
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold text-purple-900">{stats?.totalAffiliates || 0}</div>
+                  <div className="text-xs text-gray-500 mt-2">Active partners in program</div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-6 mb-6">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="text-sm text-gray-600">Pending leads</div>
+                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
+                      <span>⏳</span>
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold text-yellow-600">{stats?.pendingReferrals || 0}</div>
+                  <div className="text-xs text-gray-500 mt-2">Awaiting approval</div>
                 </div>
 
                 <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-6">

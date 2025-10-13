@@ -12,12 +12,12 @@ model User {
   email          String       @unique
   name           String
   password       String
-  profilePicture String?      @map("profile_picture")
   role           Role         @default(AFFILIATE)
   status         UserStatus   @default(PENDING)
   lastLogin      DateTime?    @map("last_login")
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
+  profilePicture String?      @map("profile_picture")
   affiliate      Affiliate?
   auditLogs      AuditLog[]
   commissions    Commission[]
@@ -27,17 +27,19 @@ model User {
 }
 
 model Affiliate {
-  id            String       @id @default(cuid())
-  userId        String       @unique @map("user_id")
-  referralCode  String       @unique @map("referral_code")
-  payoutDetails Json         @default("{}") @map("payout_details")
-  balanceCents  Int          @default(0) @map("balance_cents")
-  createdAt     DateTime     @default(now()) @map("created_at")
-  updatedAt     DateTime     @updatedAt @map("updated_at")
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  commissions   Commission[]
-  conversions   Conversion[]
-  referrals     Referral[]
+  id             String        @id @default(cuid())
+  userId         String        @unique @map("user_id")
+  referralCode   String        @unique @map("referral_code")
+  payoutDetails  Json          @default("{}") @map("payout_details")
+  balanceCents   Int           @default(0) @map("balance_cents")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  partnerGroupId String?       @map("partner_group_id")
+  partnerGroup   PartnerGroup? @relation(fields: [partnerGroupId], references: [id])
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commissions    Commission[]
+  conversions    Conversion[]
+  referrals      Referral[]
 
   @@map("affiliates")
 }
@@ -48,7 +50,6 @@ model Referral {
   leadName       String          @map("lead_name")
   leadEmail      String          @map("lead_email")
   leadPhone      String?         @map("lead_phone")
-  subscriptionId String?         @map("subscription_id")
   status         ReferralStatus  @default(PENDING)
   notes          String?
   metadata       Json            @default("{}")
@@ -57,6 +58,7 @@ model Referral {
   reviewNotes    String?         @map("review_notes")
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
+  subscriptionId String?         @map("subscription_id")
   conversions    Conversion[]
   clicks         ReferralClick[]
   affiliate      Affiliate       @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
@@ -124,11 +126,11 @@ model Payout {
   method                PayoutMethod
   status                PayoutStatus @default(PENDING)
   details               Json         @default("{}")
-  commissionPeriodStart DateTime?    @map("commission_period_start")
-  commissionPeriodEnd   DateTime?    @map("commission_period_end")
   processedAt           DateTime?    @map("processed_at")
   createdAt             DateTime     @default(now()) @map("created_at")
   updatedAt             DateTime     @updatedAt @map("updated_at")
+  commissionPeriodEnd   DateTime?    @map("commission_period_end")
+  commissionPeriodStart DateTime?    @map("commission_period_start")
   commission            Commission   @relation(fields: [commissionId], references: [id], onDelete: Cascade)
   user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -212,16 +214,67 @@ model ProgramSettings {
 }
 
 model PartnerGroup {
-  id             String   @id @default(cuid())
+  id             String      @id @default(cuid())
   name           String
   description    String?
-  commissionRate Float    @map("commission_rate")
-  signupUrl      String?  @map("signup_url")
-  isDefault      Boolean  @default(false) @map("is_default")
+  commissionRate Float       @map("commission_rate")
+  signupUrl      String?     @map("signup_url")
+  isDefault      Boolean     @default(false) @map("is_default")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+  affiliates     Affiliate[]
+
+  @@map("partner_groups")
+}
+
+model EmailTemplate {
+  id        String            @id @default(cuid())
+  type      EmailTemplateType
+  name      String
+  subject   String
+  body      String
+  variables Json              @default("[]")
+  isActive  Boolean           @default(true) @map("is_active")
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+  emailLogs EmailLog[]
+
+  @@map("email_templates")
+}
+
+model EmailLog {
+  id             String        @id @default(cuid())
+  templateId     String        @map("template_id")
+  recipientId    String        @map("recipient_id")
+  recipientEmail String        @map("recipient_email")
+  subject        String
+  body           String
+  status         EmailStatus   @default(PENDING)
+  sentAt         DateTime?     @map("sent_at")
+  error          String?
+  metadata       Json          @default("{}")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  template       EmailTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId])
+  @@index([templateId])
+  @@map("email_logs")
+}
+
+model IntegrationSettings {
+  id             String   @id @default(cuid())
+  userId         String   @unique @map("user_id")
+  provider       String
+  apiKey         String?  @map("api_key")
+  publicKey      String?  @map("public_key")
+  webhookUrl     String?  @map("webhook_url")
+  trackingScript String?  @map("tracking_script")
+  isActive       Boolean  @default(true) @map("is_active")
+  config         Json     @default("{}")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
-  @@map("partner_groups")
+  @@map("integration_settings")
 }
 
 enum Role {
@@ -230,10 +283,10 @@ enum Role {
 }
 
 enum UserStatus {
-  PENDING
   ACTIVE
   INACTIVE
   SUSPENDED
+  PENDING
 }
 
 enum ReferralStatus {
@@ -281,56 +334,6 @@ enum PayoutStatus {
 enum CommissionRuleType {
   PERCENTAGE
   FIXED
-}
-
-model EmailTemplate {
-  id          String              @id @default(cuid())
-  type        EmailTemplateType
-  name        String
-  subject     String
-  body        String              @db.Text
-  variables   Json                @default("[]")
-  isActive    Boolean             @default(true) @map("is_active")
-  createdAt   DateTime            @default(now()) @map("created_at")
-  updatedAt   DateTime            @updatedAt @map("updated_at")
-  emailLogs   EmailLog[]
-
-  @@map("email_templates")
-}
-
-model EmailLog {
-  id            String        @id @default(cuid())
-  templateId    String        @map("template_id")
-  recipientId   String        @map("recipient_id")
-  recipientEmail String       @map("recipient_email")
-  subject       String
-  body          String        @db.Text
-  status        EmailStatus   @default(PENDING)
-  sentAt        DateTime?     @map("sent_at")
-  error         String?
-  metadata      Json          @default("{}")
-  createdAt     DateTime      @default(now()) @map("created_at")
-  template      EmailTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-
-  @@index([recipientId])
-  @@index([templateId])
-  @@map("email_logs")
-}
-
-model IntegrationSettings {
-  id            String   @id @default(cuid())
-  userId        String   @unique @map("user_id")
-  provider      String   // 'tolt', 'rewardful', 'custom', etc.
-  apiKey        String?  @map("api_key")
-  publicKey     String?  @map("public_key")
-  webhookUrl    String?  @map("webhook_url")
-  trackingScript String? @map("tracking_script") @db.Text
-  isActive      Boolean  @default(true) @map("is_active")
-  config        Json     @default("{}")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-
-  @@map("integration_settings")
 }
 
 enum EmailTemplateType {
