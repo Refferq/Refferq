@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
       success: true,
       referrals: referrals.map(referral => {
         const metadata = referral.metadata as any;
+        const payoutDetails = referral.affiliate.payoutDetails as any;
         return {
           id: referral.id,
           leadEmail: referral.leadEmail,
@@ -73,7 +74,8 @@ export async function GET(request: NextRequest) {
             id: referral.affiliate.id,
             name: referral.affiliate.user.name,
             email: referral.affiliate.user.email,
-            referralCode: referral.affiliate.referralCode
+            referralCode: referral.affiliate.referralCode,
+            partnerGroup: payoutDetails?.partnerGroup || 'Default'
           }
         };
       })

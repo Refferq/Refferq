@@ -3775,6 +3775,7 @@ function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [partners, setPartners] = useState<any[]>([]);
+  const [partnerGroups, setPartnerGroups] = useState<PartnerGroup[]>([]);
   const [activeTab, setActiveTab] = useState<'customers' | 'commissions' | 'transactions'>('customers');
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -3799,13 +3800,39 @@ function CustomersPage() {
   });
 
   useEffect(() => {
-    fetchCustomers();
-    fetchPartners();
+    fetchPartnerGroups();
   }, []);
+
+  useEffect(() => {
+    if (partnerGroups.length > 0) {
+      fetchCustomers();
+      fetchPartners();
+    }
+  }, [partnerGroups]);
 
   useEffect(() => {
     filterCustomers();
   }, [customers, searchQuery, sortField, sortDirection]);
+
+  const fetchPartnerGroups = async () => {
+    try {
+      // Fetch partner groups - for now using mock data
+      // TODO: Replace with actual API call when partner groups API is ready
+      setPartnerGroups([
+        {
+          id: '1',
+          name: 'Default',
+          commissionRate: 20,
+          description: 'Earn 20% on all paid customers.',
+          signupUrl: 'https://refferq.vercel.app',
+          memberCount: 0,
+          createdAt: new Date().toISOString()
+        }
+      ]);
+    } catch (error) {
+      console.error('Failed to fetch partner groups:', error);
+    }
+  };
 
   const fetchPartners = async () => {
     try {
@@ -3826,18 +3853,36 @@ function CustomersPage() {
       const data = await response.json();
       
       if (data.success) {
-        const formattedCustomers: Customer[] = data.referrals.map((ref: any) => ({
-          id: ref.id,
-          name: ref.leadName,
-          email: ref.leadEmail,
-          partnerId: ref.affiliateId,
-          partnerName: ref.affiliate.name,
-          status: ref.status === 'APPROVED' ? 'Active' : ref.status === 'PENDING' ? 'Lead' : 'Canceled',
-          subscriptionId: ref.subscriptionId || '',
-          totalPaid: 0,
-          totalCommission: 0,
-          createdAt: ref.createdAt
-        }));
+        const formattedCustomers: Customer[] = data.referrals.map((ref: any) => {
+          // Get estimated value (convert to number if string, already in smallest unit)
+          const estimatedValue = Number(ref.estimatedValue) || 0;
+          // If estimatedValue is in whole currency (not cents), convert to cents
+          // Assuming values are in whole currency (e.g., 5000 rupees, not 500000 paise)
+          const valueInCents = estimatedValue * 100;
+          
+          // Get the affiliate's partner group
+          const affiliatePartnerGroup = ref.affiliate?.partnerGroup || 'Default';
+          
+          // Find the commission rate for this partner group
+          const partnerGroup = partnerGroups.find(pg => pg.name === affiliatePartnerGroup);
+          const commissionRate = partnerGroup?.commissionRate || 20; // Default to 20% if not found
+          
+          // Calculate commission based on partner group's commission rate
+          const commissionInCents = Math.floor(valueInCents * (commissionRate / 100));
+          
+          return {
+            id: ref.id,
+            name: ref.leadName,
+            email: ref.leadEmail,
+            partnerId: ref.affiliateId,
+            partnerName: ref.affiliate.name,
+            status: ref.status === 'APPROVED' ? 'Active' : ref.status === 'PENDING' ? 'Lead' : 'Canceled',
+            subscriptionId: ref.subscriptionId || '',
+            totalPaid: valueInCents, // Store in cents for consistency
+            totalCommission: commissionInCents, // Store in cents for consistency
+            createdAt: ref.createdAt
+          };
+        });
         setCustomers(formattedCustomers);
       }
     } catch (error) {
