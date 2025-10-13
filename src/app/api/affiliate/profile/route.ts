@@ -94,6 +94,16 @@ export async function GET(request: NextRequest) {
       conversionRate
     };
 
+    // Map referrals to include estimatedValue from metadata
+    const mappedReferrals = referrals.map(ref => {
+      const metadata = ref.metadata as any;
+      return {
+        ...ref,
+        estimatedValue: metadata?.estimated_value || 0,
+        company: metadata?.company || '',
+      };
+    });
+
     return NextResponse.json({
       success: true,
       user: {
@@ -104,7 +114,7 @@ export async function GET(request: NextRequest) {
       },
       affiliate: user.affiliate,
       stats,
-      referrals,
+      referrals: mappedReferrals,
       conversions,
       commissions,
     });

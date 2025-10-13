@@ -148,9 +148,19 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' }
     });
 
+    // Map referrals to include estimatedValue from metadata
+    const mappedReferrals = referrals.map(ref => {
+      const metadata = ref.metadata as any;
+      return {
+        ...ref,
+        estimatedValue: metadata?.estimated_value || 0,
+        company: metadata?.company || '',
+      };
+    });
+
     return NextResponse.json({
       success: true,
-      referrals,
+      referrals: mappedReferrals,
     });
   } catch (error) {
     console.error('Get referrals API error:', error);
