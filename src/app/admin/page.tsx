@@ -3856,21 +3856,16 @@ function CustomersPage() {
       
       if (data.success) {
         const formattedCustomers: Customer[] = data.referrals.map((ref: any) => {
-          // Get estimated value (convert to number if string, already in smallest unit)
+          // Get estimated value (convert to number if string)
           const estimatedValue = Number(ref.estimatedValue) || 0;
-          // If estimatedValue is in whole currency (not cents), convert to cents
-          // Assuming values are in whole currency (e.g., 5000 rupees, not 500000 paise)
+          // Convert to cents (assuming values are in whole currency like 5000 rupees)
           const valueInCents = estimatedValue * 100;
           
-          // Get the affiliate's partner group
-          const affiliatePartnerGroup = ref.affiliate?.partnerGroup || 'Default';
-          
-          // Find the commission rate for this partner group
-          const partnerGroup = partnerGroups.find(pg => pg.name === affiliatePartnerGroup);
-          const commissionRate = partnerGroup?.commissionRate || 20; // Default to 20% if not found
+          // Get commission rate from API (already calculated based on partner group)
+          const commissionRate = ref.affiliate?.commissionRate || 0.20;
           
           // Calculate commission based on partner group's commission rate
-          const commissionInCents = Math.floor(valueInCents * (commissionRate / 100));
+          const commissionInCents = Math.floor(valueInCents * commissionRate);
           
           return {
             id: ref.id,

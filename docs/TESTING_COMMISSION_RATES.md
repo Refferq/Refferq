@@ -1,4 +1,4 @@
-# Testing Commission Rates by Partner Group
+# 
 
 ## 🎯 Quick Test Guide
 

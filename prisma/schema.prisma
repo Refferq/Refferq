@@ -40,6 +40,7 @@ model Affiliate {
   commissions    Commission[]
   conversions    Conversion[]
   referrals      Referral[]
+  transactions   Transaction[]
 
   @@map("affiliates")
 }
@@ -50,6 +51,7 @@ model Referral {
   leadName       String          @map("lead_name")
   leadEmail      String          @map("lead_email")
   leadPhone      String?         @map("lead_phone")
+  subscriptionId String?         @map("subscription_id")
   status         ReferralStatus  @default(PENDING)
   notes          String?
   metadata       Json            @default("{}")
@@ -58,9 +60,9 @@ model Referral {
   reviewNotes    String?         @map("review_notes")
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
-  subscriptionId String?         @map("subscription_id")
   conversions    Conversion[]
   clicks         ReferralClick[]
+  transactions   Transaction[]
   affiliate      Affiliate       @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
 
   @@map("referrals")
@@ -227,6 +229,30 @@ model PartnerGroup {
   @@map("partner_groups")
 }
 
+model Transaction {
+  id               String            @id @default(cuid())
+  referralId       String            @map("referral_id")
+  affiliateId      String            @map("affiliate_id")
+  customerId       String?           @map("customer_id")
+  customerName     String            @map("customer_name")
+  customerEmail    String            @map("customer_email")
+  amountCents      Int               @map("amount_cents")
+  commissionCents  Int               @map("commission_cents")
+  commissionRate   Float             @map("commission_rate")
+  status           TransactionStatus @default(PENDING)
+  description      String?
+  invoiceId        String?           @map("invoice_id")
+  paymentMethod    String?           @map("payment_method")
+  paidAt           DateTime?         @map("paid_at")
+  createdBy        String            @map("created_by")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+  referral         Referral          @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  affiliate        Affiliate         @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
 model EmailTemplate {
   id        String            @id @default(cuid())
   type      EmailTemplateType
@@ -334,6 +360,13 @@ enum PayoutStatus {
 enum CommissionRuleType {
   PERCENTAGE
   FIXED
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+  FAILED
 }
 
 enum EmailTemplateType {

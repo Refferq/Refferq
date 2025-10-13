@@ -54,12 +54,21 @@ export async function GET(request: NextRequest) {
         createdAt: 'desc'
       }
     });
+    
+    // Get all partner groups for commission rate lookup
+    const partnerGroups = await prisma.partnerGroup.findMany();
+    const partnerGroupMap = new Map(
+      partnerGroups.map(pg => [pg.id, { name: pg.name, rate: pg.commissionRate }])
+    );
 
     return NextResponse.json({
       success: true,
       referrals: referrals.map(referral => {
         const metadata = referral.metadata as any;
-        const payoutDetails = referral.affiliate.payoutDetails as any;
+        const affiliate = referral.affiliate as any;
+        const pgId = affiliate.partnerGroupId;
+        const pgData = pgId ? partnerGroupMap.get(pgId) : null;
+        
         return {
           id: referral.id,
           leadEmail: referral.leadEmail,
@@ -71,11 +80,13 @@ export async function GET(request: NextRequest) {
           estimatedValue: Number(metadata?.estimated_value) || 0,
           company: metadata?.company || '',
           affiliate: {
-            id: referral.affiliate.id,
-            name: referral.affiliate.user.name,
-            email: referral.affiliate.user.email,
-            referralCode: referral.affiliate.referralCode,
-            partnerGroup: payoutDetails?.partnerGroup || 'Default'
+            id: affiliate.id,
+            name: affiliate.user.name,
+            email: affiliate.user.email,
+            referralCode: affiliate.referralCode,
+            partnerGroup: pgData?.name || 'Default',
+            partnerGroupId: pgId,
+            commissionRate: pgData?.rate || 0.20
           }
         };
       })

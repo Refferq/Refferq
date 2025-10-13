@@ -43,7 +43,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!user.affiliate) {
+    const affiliate = user.affiliate as any;
+    if (!affiliate) {
       return NextResponse.json(
         { error: 'Affiliate profile not found' },
         { status: 404 }
@@ -52,17 +53,17 @@ export async function GET(request: NextRequest) {
 
     // Get affiliate statistics
     const referrals = await prisma.referral.findMany({
-      where: { affiliateId: user.affiliate.id },
+      where: { affiliateId: affiliate.id },
       orderBy: { createdAt: 'desc' }
     });
 
     const conversions = await prisma.conversion.findMany({
-      where: { affiliateId: user.affiliate.id },
+      where: { affiliateId: affiliate.id },
       orderBy: { createdAt: 'desc' }
     });
 
     const commissions = await prisma.commission.findMany({
-      where: { affiliateId: user.affiliate.id },
+      where: { affiliateId: affiliate.id },
       orderBy: { createdAt: 'desc' }
     });
 
@@ -112,7 +113,7 @@ export async function GET(request: NextRequest) {
         email: user.email,
         role: user.role
       },
-      affiliate: user.affiliate,
+      affiliate: affiliate,
       stats,
       referrals: mappedReferrals,
       conversions,
