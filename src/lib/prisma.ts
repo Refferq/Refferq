@@ -281,19 +281,23 @@ export class DatabaseService {
   // Payout operations
   async createPayout(payoutData: {
     userId: string;
-    commissionId: string;
+    affiliateId: string;
     amountCents: number;
-    method: 'BANK_CSV' | 'STRIPE_CONNECT';
-    details?: any;
+    commissionCount: number;
+    method?: string;
+    notes?: string;
+    createdBy: string;
   }) {
     return await prisma.payout.create({
       data: {
         userId: payoutData.userId,
-        commissionId: payoutData.commissionId,
+        affiliateId: payoutData.affiliateId,
         amountCents: payoutData.amountCents,
-        method: payoutData.method,
-        details: payoutData.details || {},
+        commissionCount: payoutData.commissionCount,
+        method: payoutData.method || 'Bank Transfer',
+        notes: payoutData.notes,
         status: 'PENDING',
+        createdBy: payoutData.createdBy,
       },
     });
   }
