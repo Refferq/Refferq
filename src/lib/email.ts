@@ -459,6 +459,294 @@ class EmailService {
       return { success: false, message: 'Failed to send verification email' };
     }
   }
+
+  async sendTransactionCreatedEmail(
+    affiliateEmail: string,
+    data: {
+      affiliateName: string;
+      customerName: string;
+      amountCents: number;
+      commissionCents: number;
+      commissionRate: number;
+      transactionId: string;
+    }
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const amount = (data.amountCents / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const commission = (data.commissionCents / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const rate = (data.commissionRate * 100).toFixed(0);
+      
+      const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>New Commission Earned!</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+          .amount-box { background: white; border: 2px solid #10b981; border-radius: 10px; padding: 20px; text-align: center; margin: 20px 0; }
+          .commission { font-size: 36px; font-weight: bold; color: #10b981; }
+          .button { display: inline-block; background: #10b981; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .details { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+          .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>💰 New Commission Earned!</h1>
+        </div>
+        <div class="content">
+          <h2>Great news, ${data.affiliateName}!</h2>
+          <p>A customer you referred has made a payment, and you've earned a commission!</p>
+          
+          <div class="amount-box">
+            <div style="font-size: 14px; color: #666; margin-bottom: 10px;">You earned</div>
+            <div class="commission">₹${commission}</div>
+            <div style="font-size: 14px; color: #666; margin-top: 10px;">${rate}% commission</div>
+          </div>
+          
+          <div class="details">
+            <h3 style="margin-top: 0;">Transaction Details</h3>
+            <div class="detail-row">
+              <span>Customer:</span>
+              <strong>${data.customerName}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Transaction Amount:</span>
+              <strong>₹${amount}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Your Commission:</span>
+              <strong style="color: #10b981;">₹${commission}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Commission Rate:</span>
+              <strong>${rate}%</strong>
+            </div>
+            <div class="detail-row" style="border-bottom: none;">
+              <span>Transaction ID:</span>
+              <strong style="font-size: 12px;">${data.transactionId}</strong>
+            </div>
+          </div>
+          
+          <p>This commission is currently <strong>pending</strong> and will be included in your next payout.</p>
+          
+          <div style="text-align: center;">
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">View Your Dashboard</a>
+          </div>
+          
+          <p style="margin-top: 30px; color: #666; font-size: 14px;">
+            Keep up the great work! Continue referring customers to earn more commissions.
+          </p>
+          
+          <p>Best regards,<br>The Refferq Team</p>
+        </div>
+      </body>
+      </html>
+      `;
+
+      const result = await resend.emails.send({
+        from: this.defaultFrom,
+        to: affiliateEmail,
+        subject: `💰 New Commission: ₹${commission} Earned!`,
+        html,
+      });
+
+      console.log('Transaction notification sent:', result);
+      return { success: true, message: 'Transaction notification sent successfully' };
+    } catch (error) {
+      console.error('Failed to send transaction notification:', error);
+      return { success: false, message: 'Failed to send transaction notification' };
+    }
+  }
+
+  async sendPayoutCreatedEmail(
+    affiliateEmail: string,
+    data: {
+      affiliateName: string;
+      amountCents: number;
+      commissionCount: number;
+      payoutId: string;
+      method?: string;
+    }
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const amount = (data.amountCents / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      
+      const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Payout Initiated</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+          .amount-box { background: white; border: 2px solid #3b82f6; border-radius: 10px; padding: 20px; text-align: center; margin: 20px 0; }
+          .amount { font-size: 36px; font-weight: bold; color: #3b82f6; }
+          .button { display: inline-block; background: #3b82f6; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .details { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+          .status-badge { display: inline-block; background: #fef3c7; color: #92400e; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>🎉 Payout Initiated!</h1>
+        </div>
+        <div class="content">
+          <h2>Hello ${data.affiliateName}!</h2>
+          <p>Good news! A payout has been initiated for your earned commissions.</p>
+          
+          <div class="amount-box">
+            <div style="font-size: 14px; color: #666; margin-bottom: 10px;">Payout Amount</div>
+            <div class="amount">₹${amount}</div>
+            <div style="margin-top: 15px;">
+              <span class="status-badge">PENDING</span>
+            </div>
+          </div>
+          
+          <div class="details">
+            <h3 style="margin-top: 0;">Payout Details</h3>
+            <p><strong>Commissions Included:</strong> ${data.commissionCount} commission${data.commissionCount > 1 ? 's' : ''}</p>
+            ${data.method ? `<p><strong>Payment Method:</strong> ${data.method}</p>` : ''}
+            <p><strong>Payout ID:</strong> <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${data.payoutId}</code></p>
+          </div>
+          
+          <p>Your payout is currently being processed. You'll receive another email once the payment has been completed.</p>
+          
+          <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <strong>⏱️ Processing Time:</strong><br>
+            Payouts typically take 3-5 business days to process, depending on the payment method.
+          </div>
+          
+          <div style="text-align: center;">
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">View Payout Status</a>
+          </div>
+          
+          <p style="margin-top: 30px; color: #666; font-size: 14px;">
+            Thank you for being a valued partner! Continue referring customers to earn more.
+          </p>
+          
+          <p>Best regards,<br>The Refferq Team</p>
+        </div>
+      </body>
+      </html>
+      `;
+
+      const result = await resend.emails.send({
+        from: this.defaultFrom,
+        to: affiliateEmail,
+        subject: `🎉 Payout Initiated: ₹${amount}`,
+        html,
+      });
+
+      console.log('Payout created notification sent:', result);
+      return { success: true, message: 'Payout created notification sent successfully' };
+    } catch (error) {
+      console.error('Failed to send payout created notification:', error);
+      return { success: false, message: 'Failed to send payout created notification' };
+    }
+  }
+
+  async sendPayoutCompletedEmail(
+    affiliateEmail: string,
+    data: {
+      affiliateName: string;
+      amountCents: number;
+      commissionCount: number;
+      payoutId: string;
+      method?: string;
+      processedAt: string;
+    }
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const amount = (data.amountCents / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const date = new Date(data.processedAt).toLocaleDateString('en-IN', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      
+      const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Payment Completed!</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+          .amount-box { background: white; border: 2px solid #10b981; border-radius: 10px; padding: 20px; text-align: center; margin: 20px 0; }
+          .amount { font-size: 36px; font-weight: bold; color: #10b981; }
+          .button { display: inline-block; background: #10b981; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .details { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+          .status-badge { display: inline-block; background: #d1fae5; color: #065f46; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+          .celebration { font-size: 48px; text-align: center; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>✅ Payment Completed!</h1>
+        </div>
+        <div class="content">
+          <div class="celebration">🎊 🎉 🥳</div>
+          
+          <h2>Congratulations, ${data.affiliateName}!</h2>
+          <p>Your payout has been successfully processed and the funds have been transferred.</p>
+          
+          <div class="amount-box">
+            <div style="font-size: 14px; color: #666; margin-bottom: 10px;">Amount Paid</div>
+            <div class="amount">₹${amount}</div>
+            <div style="margin-top: 15px;">
+              <span class="status-badge">✓ COMPLETED</span>
+            </div>
+          </div>
+          
+          <div class="details">
+            <h3 style="margin-top: 0;">Payment Details</h3>
+            <p><strong>Commissions Paid:</strong> ${data.commissionCount} commission${data.commissionCount > 1 ? 's' : ''}</p>
+            ${data.method ? `<p><strong>Payment Method:</strong> ${data.method}</p>` : ''}
+            <p><strong>Payment Date:</strong> ${date}</p>
+            <p><strong>Payout ID:</strong> <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${data.payoutId}</code></p>
+          </div>
+          
+          <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <strong>✓ Payment Confirmed</strong><br>
+            The funds should appear in your account within 1-2 business days, depending on your bank or payment provider.
+          </div>
+          
+          <div style="text-align: center;">
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">View Dashboard</a>
+          </div>
+          
+          <p style="margin-top: 30px; text-align: center; color: #666; font-size: 14px;">
+            Keep up the excellent work! Continue referring customers to earn more commissions.
+          </p>
+          
+          <p>Best regards,<br>The Refferq Team</p>
+        </div>
+      </body>
+      </html>
+      `;
+
+      const result = await resend.emails.send({
+        from: this.defaultFrom,
+        to: affiliateEmail,
+        subject: `✅ Payment Completed: ₹${amount} Paid!`,
+        html,
+      });
+
+      console.log('Payout completed notification sent:', result);
+      return { success: true, message: 'Payout completed notification sent successfully' };
+    } catch (error) {
+      console.error('Failed to send payout completed notification:', error);
+      return { success: false, message: 'Failed to send payout completed notification' };
+    }
+  }
 }
 
 export const emailService = new EmailService();

@@ -231,6 +231,28 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // Send email notification to affiliate
+    try {
+      const affiliateUser = await prisma.user.findUnique({
+        where: { id: affiliate.userId }
+      });
+
+      if (affiliateUser?.email) {
+        const { emailService } = await import('@/lib/email');
+        await emailService.sendTransactionCreatedEmail(affiliateUser.email, {
+          affiliateName: affiliate.name || affiliateUser.name || 'Partner',
+          customerName: referral.leadName,
+          amountCents,
+          commissionCents,
+          commissionRate,
+          transactionId: transaction.id
+        });
+      }
+    } catch (emailError) {
+      console.error('Failed to send transaction email:', emailError);
+      // Don't fail the transaction if email fails
+    }
+
     return NextResponse.json({
       success: true,
       transaction,

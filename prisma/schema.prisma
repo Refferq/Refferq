@@ -41,6 +41,7 @@ model Affiliate {
   conversions    Conversion[]
   referrals      Referral[]
   transactions   Transaction[]
+  payouts        Payout[]
 
   @@map("affiliates")
 }
@@ -115,26 +116,28 @@ model Commission {
   affiliate    Affiliate        @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
   conversion   Conversion       @relation(fields: [conversionId], references: [id], onDelete: Cascade)
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  payout       Payout?
+  payout       Payout?          @relation("PayoutCommissions", fields: [payoutId], references: [id])
+  payoutId     String?          @map("payout_id")
 
   @@map("commissions")
 }
 
 model Payout {
-  id                    String       @id @default(cuid())
-  userId                String       @map("user_id")
-  commissionId          String       @unique @map("commission_id")
-  amountCents           Int          @map("amount_cents")
-  method                PayoutMethod
-  status                PayoutStatus @default(PENDING)
-  details               Json         @default("{}")
-  processedAt           DateTime?    @map("processed_at")
-  createdAt             DateTime     @default(now()) @map("created_at")
-  updatedAt             DateTime     @updatedAt @map("updated_at")
-  commissionPeriodEnd   DateTime?    @map("commission_period_end")
-  commissionPeriodStart DateTime?    @map("commission_period_start")
-  commission            Commission   @relation(fields: [commissionId], references: [id], onDelete: Cascade)
-  user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String       @id @default(cuid())
+  affiliateId     String       @map("affiliate_id")
+  userId          String       @map("user_id")
+  amountCents     Int          @map("amount_cents")
+  commissionCount Int          @default(0) @map("commission_count")
+  method          String?
+  status          PayoutStatus @default(PENDING)
+  notes           String?
+  processedAt     DateTime?    @map("processed_at")
+  createdBy       String       @map("created_by")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  affiliate       Affiliate    @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commissions     Commission[] @relation("PayoutCommissions")
 
   @@map("payouts")
 }
@@ -230,25 +233,25 @@ model PartnerGroup {
 }
 
 model Transaction {
-  id               String            @id @default(cuid())
-  referralId       String            @map("referral_id")
-  affiliateId      String            @map("affiliate_id")
-  customerId       String?           @map("customer_id")
-  customerName     String            @map("customer_name")
-  customerEmail    String            @map("customer_email")
-  amountCents      Int               @map("amount_cents")
-  commissionCents  Int               @map("commission_cents")
-  commissionRate   Float             @map("commission_rate")
-  status           TransactionStatus @default(PENDING)
-  description      String?
-  invoiceId        String?           @map("invoice_id")
-  paymentMethod    String?           @map("payment_method")
-  paidAt           DateTime?         @map("paid_at")
-  createdBy        String            @map("created_by")
-  createdAt        DateTime          @default(now()) @map("created_at")
-  updatedAt        DateTime          @updatedAt @map("updated_at")
-  referral         Referral          @relation(fields: [referralId], references: [id], onDelete: Cascade)
-  affiliate        Affiliate         @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  id              String            @id @default(cuid())
+  referralId      String            @map("referral_id")
+  affiliateId     String            @map("affiliate_id")
+  customerId      String?           @map("customer_id")
+  customerName    String            @map("customer_name")
+  customerEmail   String            @map("customer_email")
+  amountCents     Int               @map("amount_cents")
+  commissionCents Int               @map("commission_cents")
+  commissionRate  Float             @map("commission_rate")
+  status          TransactionStatus @default(PENDING)
+  description     String?
+  invoiceId       String?           @map("invoice_id")
+  paymentMethod   String?           @map("payment_method")
+  paidAt          DateTime?         @map("paid_at")
+  createdBy       String            @map("created_by")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  referral        Referral          @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  affiliate       Affiliate         @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
 
   @@map("transactions")
 }
