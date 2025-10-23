@@ -152,7 +152,7 @@ export async function GET(request: NextRequest) {
         where: dateFilter,
         include: {
           user: true,
-          commission: {
+          commissions: {
             include: {
               affiliate: {
                 include: {
@@ -172,8 +172,8 @@ export async function GET(request: NextRequest) {
         generatedAt: new Date().toISOString(),
         data: payouts.map(payout => ({
           payoutId: payout.id,
-          affiliateName: payout.commission.affiliate.user.name,
-          affiliateEmail: payout.commission.affiliate.user.email,
+          affiliateName: payout.user.name,
+          affiliateEmail: payout.user.email,
           amount: payout.amountCents,
           method: payout.method,
           status: payout.status,
