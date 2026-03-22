@@ -17,6 +17,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      mail:
+        condition: service_healthy
     networks:
       - refferq-network
 
@@ -37,6 +39,14 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - refferq-network
+
+  mail:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
     networks:
       - refferq-network
 
