@@ -1,7 +1,16 @@
 import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
+
+// Types for email providers
+type EmailProvider = 'resend' | 'smtp';
 
 // Initialize Resend with API key only when needed (server-side)
 let resendInstance: Resend | null = null;
+let smtpTransporter: nodemailer.Transporter | null = null;
+
+function getEmailProvider(): EmailProvider {
+  return (process.env.EMAIL_PROVIDER as EmailProvider) || 'resend';
+}
 
 function getResendClient(): Resend {
   if (!resendInstance) {
@@ -12,6 +21,31 @@ function getResendClient(): Resend {
     resendInstance = new Resend(apiKey);
   }
   return resendInstance;
+}
+
+function getSmtpTransporter(): nodemailer.Transporter {
+  if (!smtpTransporter) {
+    const host = process.env.SMTP_HOST;
+    const port = parseInt(process.env.SMTP_PORT || '587');
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASSWORD;
+    const secure = process.env.SMTP_SECURE === 'true';
+
+    if (!host || !user || !pass) {
+      throw new Error('SMTP configuration (HOST, USER, PASSWORD) is incomplete');
+    }
+
+    smtpTransporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: {
+        user,
+        pass,
+      },
+    });
+  }
+  return smtpTransporter;
 }
 
 export const resend = {
@@ -26,8 +60,6 @@ export interface EmailTemplate {
   html: string;
   from?: string;
 }
-
-// Move private helper out of class if needed, or keep it. I'll keep it.
 
 export interface WelcomeEmailData {
   name: string;
@@ -83,7 +115,13 @@ export interface CommissionNotificationData {
 }
 
 class EmailService {
-  private defaultFrom = process.env.RESEND_FROM_EMAIL || 'Refferq <noreply@refferq.com>';
+  private get defaultFrom() {
+    const provider = getEmailProvider();
+    if (provider === 'smtp') {
+      return process.env.SMTP_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'Refferq <noreply@refferq.com>';
+    }
+    return process.env.RESEND_FROM_EMAIL || 'Refferq <noreply@refferq.com>';
+  }
 
   /** Escape HTML special characters to prevent XSS in email templates */
   private escapeHtml(str: string): string {
@@ -101,7 +139,7 @@ class EmailService {
   }
 
   private formatAmount(cents: number, symbol: string): string {
-    const { formatCurrency } = require('./currency'); // Use require if import is problematic in this context, or just import at top if possible
+    const { formatCurrency } = require('./currency'); 
     return formatCurrency(cents, symbol);
   }
 
@@ -123,26 +161,42 @@ class EmailService {
     });
   }
 
-  private async sendEmail(params: {
+  public async sendEmail(params: {
     to: string;
     subject: string;
     html: string;
+    from?: string;
   }): Promise<{ success: boolean; message: string }> {
-    try {
-      const { Resend } = await import('resend');
-      const resend = new Resend(process.env.RESEND_API_KEY);
+    const provider = getEmailProvider();
+    const from = params.from || this.defaultFrom;
 
-      const result = await resend.emails.send({
-        from: this.defaultFrom,
-        to: params.to,
-        subject: params.subject,
-        html: params.html,
-      });
+    try {
+      if (provider === 'smtp') {
+        const transporter = getSmtpTransporter();
+        await transporter.sendMail({
+          from,
+          to: params.to,
+          subject: params.subject,
+          html: params.html,
+        });
+      } else {
+        const resend = getResendClient();
+        const { error } = await resend.emails.send({
+          from,
+          to: params.to,
+          subject: params.subject,
+          html: params.html,
+        });
+
+        if (error) {
+          throw error;
+        }
+      }
 
       return { success: true, message: 'Email sent successfully' };
     } catch (error) {
-      console.error('Email sending error:', error);
-      return { success: false, message: 'Failed to send email' };
+      console.error(`Email sending error (${provider}):`, error);
+      return { success: false, message: `Failed to send email via ${provider}` };
     }
   }
 
@@ -881,22 +935,11 @@ class EmailService {
   }
 
   async sendCustomEmail(to: string, subject: string, html: string): Promise<{ success: boolean; message: string }> {
-    try {
-      const { Resend } = await import('resend');
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      const result = await resend.emails.send({
-        from: this.defaultFrom,
-        to,
-        subject,
-        html,
-      });
-
-      console.log('Custom email sent:', result);
-      return { success: true, message: 'Email sent successfully' };
-    } catch (error) {
-      console.error('Failed to send custom email:', error);
-      return { success: false, message: 'Failed to send email' };
-    }
+    return this.sendEmail({
+      to,
+      subject,
+      html,
+    });
   }
 
   // ─── Generic Email (for system notifications) ────────────────
