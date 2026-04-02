@@ -66,6 +66,10 @@ export async function POST(req: NextRequest) {
     const url = readOptionalString(body, 'url');
     const metadata = toObject(body.metadata ?? body.event_metadata);
     const metadataJson = metadata as unknown as Prisma.InputJsonObject;
+    const settings = await prisma.programSettings.findFirst({
+      select: { currency: true },
+    });
+    const defaultCurrency = settings?.currency || 'RUB';
 
     const amountRaw =
       typeof body.amount === 'number'
@@ -234,7 +238,7 @@ export async function POST(req: NextRequest) {
         referralId: referral?.id || null,
         eventType: 'PURCHASE',
         amountCents,
-        currency: currency || 'USD',
+        currency: currency || defaultCurrency,
         status: 'PENDING',
         eventMetadata: {
           eventId: eventContract.eventId,

@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
         commissionRate: commissionRate || 20,
         commissionType: commissionType || 'PERCENTAGE',
         cookieDuration: cookieDuration || 30,
-        currency: currency || 'INR',
+        currency: currency || 'RUB',
         autoApprove: autoApprove || false,
         minPayoutCents: minPayoutCents || 100000,
         payoutFrequency: payoutFrequency || 'MONTHLY',

@@ -45,7 +45,7 @@ interface Program {
 
 const emptyForm = {
   name: '', slug: '', description: '', commissionRate: '20', commissionType: 'PERCENTAGE',
-  cookieDuration: '30', currency: 'INR', autoApprove: false, minPayoutCents: '100000',
+  cookieDuration: '30', currency: 'RUB', autoApprove: false, minPayoutCents: '100000',
   payoutFrequency: 'MONTHLY', termsUrl: '', logoUrl: '', brandColor: '#6366f1',
 };
 
@@ -154,9 +154,9 @@ export default function ProgramsPage() {
     } catch (error) { console.error('Failed to delete program:', error); }
   };
 
-  const formatCurrency = (cents: number, currency: string = 'INR') => {
-    const symbol = currency === 'INR' ? '\u20B9' : currency === 'USD' ? '$' : currency === 'EUR' ? '\u20AC' : currency;
-    return `${symbol}${(cents / 100).toLocaleString('en-IN', { minimumFractionDigits: 0 })}`;
+  const formatCurrency = (cents: number, currency: string = 'RUB') => {
+    const symbol = currency === 'RUB' ? '\u20BD' : currency === 'INR' ? '\u20B9' : currency === 'USD' ? '$' : currency === 'EUR' ? '\u20AC' : currency;
+    return `${symbol}${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0 })}`;
   };
 
   const stats = {
@@ -350,6 +350,7 @@ export default function ProgramsPage() {
                 <Select value={form.currency} onValueChange={v => setForm({...form, currency: v})}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="RUB">RUB (\u20BD)</SelectItem>
                     <SelectItem value="INR">INR (\u20B9)</SelectItem>
                     <SelectItem value="USD">USD ($)</SelectItem>
                     <SelectItem value="EUR">EUR (\u20AC)</SelectItem>

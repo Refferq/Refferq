@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
           productName: 'BsBot',
           programName: "BsBot's Affiliate Program",
           websiteUrl: 'https://kyns.com',
-          currency: 'INR',
+          currency: 'RUB',
           portalSubdomain: 'bsbot.tolt.io',
           minimumPayoutThreshold: 0,
           payoutTerm: 'NET-15',
@@ -99,7 +99,7 @@ export async function PUT(request: NextRequest) {
           productName: 'BsBot',
           programName: "BsBot's Affiliate Program",
           websiteUrl: 'https://kyns.com',
-          currency: 'INR',
+          currency: 'RUB',
           portalSubdomain: 'bsbot.tolt.io'
         }
       });

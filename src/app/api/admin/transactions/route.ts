@@ -143,6 +143,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    const settings = await prisma.programSettings.findFirst({
+      select: { currency: true },
+    });
+
     await prisma.conversion.create({
       data: {
         affiliateId: referral.affiliateId,
@@ -150,7 +154,7 @@ export async function POST(request: NextRequest) {
         eventType: 'PURCHASE',
         amountCents,
         status: 'APPROVED',
-        currency: 'INR',
+        currency: settings?.currency || 'RUB',
         eventMetadata: {
           transactionId: transaction.id,
           commissionCents,

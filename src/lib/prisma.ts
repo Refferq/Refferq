@@ -194,7 +194,7 @@ export class DatabaseService {
         referralId: conversionData.referralId,
         eventType: conversionData.eventType,
         amountCents: conversionData.amountCents,
-        currency: conversionData.currency || 'USD',
+        currency: conversionData.currency || 'RUB',
         eventMetadata: conversionData.eventMetadata || {},
         status: 'PENDING',
       },

@@ -91,7 +91,10 @@ export async function POST(request: NextRequest) {
 
     const body = toObject(JSON.parse(rawBody));
     const eventType = readOptionalString(body, 'event_type', 'eventType');
-    const currency = readOptionalString(body, 'currency') || 'USD';
+    const currencySettings = await prisma.programSettings.findFirst({
+      select: { currency: true },
+    });
+    const currency = readOptionalString(body, 'currency') || currencySettings?.currency || 'RUB';
     const customerEmail = readOptionalString(body, 'customer_email', 'customerEmail');
     const attributionKey = readOptionalString(body, 'attribution_key', 'attributionKey');
     const referralCode = readOptionalString(body, 'referral_code', 'referralCode');

@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         description: description || null,
         discountType: discountType || 'PERCENTAGE',
         discountValue,
-        currency: currency || 'INR',
+        currency: currency || 'RUB',
         maxUses: maxUses || null,
         affiliateId: affiliateId || null,
         startsAt: startsAt ? new Date(startsAt) : null,

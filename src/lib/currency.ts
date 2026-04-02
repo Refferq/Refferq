@@ -4,6 +4,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
     'USD': '$',
     'EUR': '€',
     'INR': '₹',
+    'RUB': '₽',
     'GBP': '£',
     'BGN': 'лв.',
     'CAD': 'CA$',
