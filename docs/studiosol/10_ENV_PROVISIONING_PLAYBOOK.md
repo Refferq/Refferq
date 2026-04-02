@@ -52,6 +52,18 @@ npm run launch:env:strict
 npm run launch:check
 ```
 
+2a. One-shot gate (после заполнения staging vars):
+
+```bash
+STAGING_BASE_URL="https://<staging-domain>" \
+STAGING_TRACKING_API_KEY="<tracking-key>" \
+STAGING_REFERRAL_CODE="<affiliate-referral-code>" \
+STAGING_ADMIN_USER_ID="<admin-user-id>" \
+STAGING_ADMIN_EMAIL="<admin-email>" \
+STAGING_ADMIN_PASSWORD="<admin-password>" \
+npm run launch:gate
+```
+
 3. Staging E2E smoke:
 
 ```bash

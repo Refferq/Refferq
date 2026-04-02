@@ -38,6 +38,7 @@
     "launch:env:strict": "tsx scripts/validate-env.ts --strict",
     "launch:secrets": "tsx scripts/generate-launch-secrets.ts",
     "launch:check": "npm run check && npm run audit:prod && npm run launch:env:strict",
+    "launch:gate": "bash scripts/launch-gate.sh",
     "staging:dry-run": "tsx scripts/staging-dry-run.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",

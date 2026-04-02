@@ -50,6 +50,18 @@ STAGING_ADMIN_PASSWORD="<admin-password>" \
 npm run staging:dry-run
 ```
 
+7. (Опционально) one-shot проверка одним запуском:
+
+```bash
+STAGING_BASE_URL="https://<staging-domain>" \
+STAGING_TRACKING_API_KEY="<tracking-key>" \
+STAGING_REFERRAL_CODE="<affiliate-referral-code>" \
+STAGING_ADMIN_USER_ID="<admin-user-id>" \
+STAGING_ADMIN_EMAIL="<admin-email>" \
+STAGING_ADMIN_PASSWORD="<admin-password>" \
+npm run launch:gate
+```
+
 ## 2. Production Rollout
 
 1. Перенести проверенные значения в production secret manager.
