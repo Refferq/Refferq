@@ -102,7 +102,7 @@ export async function POST(request: Request) {
         metadata: {
           isTest: true,
           sentBy: user.id,
-        } as any,
+        },
       },
     });
 

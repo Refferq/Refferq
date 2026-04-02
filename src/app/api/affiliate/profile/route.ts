@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { asJsonObject, asNumber, asString } from '@/lib/json-utils';
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,7 +29,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const affiliate = user.affiliate as any;
+    const affiliate = user.affiliate;
     if (!affiliate) {
       return NextResponse.json(
         { error: 'Affiliate profile not found' },
@@ -64,15 +66,19 @@ export async function GET(request: NextRequest) {
     const pendingCommissionsCount = pendingCommissionsList.length;
     const totalConversions = conversions.length;
     const totalClicks = referrals.reduce((sum, r) => {
-      const metadata = r.metadata as any;
-      return sum + (metadata?.clicks || 0);
+      const metadata = asJsonObject(r.metadata);
+      return sum + asNumber(metadata.clicks, 0);
     }, 0);
     const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
 
     // Next maturation date for pending commissions
     const nextMaturesAt = pendingCommissionsList
-      .filter(c => (c as any).maturesAt)
-      .sort((a, b) => ((a as any).maturesAt.getTime() - (b as any).maturesAt.getTime()))[0]?.maturesAt || null;
+      .filter((commission) => commission.maturesAt !== null)
+      .sort((a, b) => {
+        const aTime = a.maturesAt?.getTime() ?? Number.MAX_SAFE_INTEGER;
+        const bTime = b.maturesAt?.getTime() ?? Number.MAX_SAFE_INTEGER;
+        return aTime - bTime;
+      })[0]?.maturesAt || null;
 
     const stats = {
       totalEarnings: availableEarnings,
@@ -88,11 +94,11 @@ export async function GET(request: NextRequest) {
 
     // Map referrals to include estimatedValue from metadata
     const mappedReferrals = referrals.map(ref => {
-      const metadata = ref.metadata as any;
+      const metadata = asJsonObject(ref.metadata);
       return {
         ...ref,
-        estimatedValue: Number(metadata?.estimated_value) || 0,
-        company: metadata?.company || '',
+        estimatedValue: asNumber(metadata.estimated_value, 0),
+        company: asString(metadata.company, ''),
       };
     });
 
@@ -154,7 +160,7 @@ export async function PUT(request: NextRequest) {
     const { name, company, email, country, paymentMethod, paymentEmail } = body;
 
     // Update user name and email if provided
-    const userUpdateData: any = {};
+    const userUpdateData: Prisma.UserUpdateInput = {};
     if (name && name.trim()) {
       userUpdateData.name = name.trim();
     }
@@ -181,17 +187,18 @@ export async function PUT(request: NextRequest) {
 
     // Update affiliate payout details if provided
     if (user.affiliate) {
-      const payoutDetails: any = {};
+      const existingPayoutDetails = asJsonObject(user.affiliate.payoutDetails);
+      const payoutDetailsUpdate: Record<string, unknown> = { ...existingPayoutDetails };
 
-      if (company) payoutDetails.company = company.trim();
-      if (country) payoutDetails.country = country;
-      if (paymentMethod) payoutDetails.paymentMethod = paymentMethod;
-      if (paymentEmail) payoutDetails.paymentEmail = paymentEmail.trim();
+      if (company) payoutDetailsUpdate.company = company.trim();
+      if (country) payoutDetailsUpdate.country = country;
+      if (paymentMethod) payoutDetailsUpdate.paymentMethod = paymentMethod;
+      if (paymentEmail) payoutDetailsUpdate.paymentEmail = paymentEmail.trim();
 
       await prisma.affiliate.update({
         where: { id: user.affiliate.id },
         data: {
-          payoutDetails: payoutDetails
+          payoutDetails: payoutDetailsUpdate as Prisma.InputJsonObject
         }
       });
     }

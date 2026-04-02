@@ -1,6 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, prisma } from '@/lib/prisma';
 import crypto from 'crypto';
+import {
+  resolveConversionEventContract,
+  resolveWebhookConversionExternalIds,
+} from '@/lib/conversion-idempotency';
+import { logSystemAuditAction } from '@/lib/audit';
+
+function toObject(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {};
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function readOptionalString(
+  source: Record<string, unknown>,
+  ...keys: string[]
+): string | null {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value !== 'string') {
+      continue;
+    }
+
+    const trimmed = value.trim();
+    if (trimmed.length > 0) {
+      return trimmed;
+    }
+  }
+
+  return null;
+}
 
 // ─── Webhook Signature Verification ────────────────────────────
 function verifyWebhookSignature(payload: string, signature: string | null, secret: string): boolean {
@@ -14,9 +46,9 @@ function verifyWebhookSignature(payload: string, signature: string | null, secre
   }
 }
 
-async function verifyApiKey(request: NextRequest): Promise<boolean> {
+async function verifyApiKey(request: NextRequest): Promise<{ valid: boolean; userId: string | null }> {
   const apiKey = request.headers.get('x-api-key');
-  if (!apiKey) return false;
+  if (!apiKey) return { valid: false, userId: null };
 
   // Hash the incoming key and look up by keyHash for secure comparison
   const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex');
@@ -24,7 +56,7 @@ async function verifyApiKey(request: NextRequest): Promise<boolean> {
     where: { keyHash, isActive: true }
   }).catch(() => null);
 
-  return !!key;
+  return { valid: !!key, userId: key?.userId || null };
 }
 
 export async function POST(request: NextRequest) {
@@ -35,11 +67,14 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('x-webhook-signature') || request.headers.get('x-refferq-signature');
 
     let authenticated = false;
+    let authActorUserId: string | null = null;
 
     // Method 1: API key authentication
     const apiKey = request.headers.get('x-api-key');
     if (apiKey) {
-      authenticated = await verifyApiKey(request);
+      const apiAuth = await verifyApiKey(request);
+      authenticated = apiAuth.valid;
+      authActorUserId = apiAuth.userId;
     }
 
     // Method 2: Webhook signature verification
@@ -54,50 +89,180 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = JSON.parse(rawBody);
-    const {
-      event_type,
-      amount_cents,
-      currency = 'USD',
-      customer_email,
-      attribution_key,
-      referral_code,
-      event_metadata = {},
-    } = body;
+    const body = toObject(JSON.parse(rawBody));
+    const eventType = readOptionalString(body, 'event_type', 'eventType');
+    const currency = readOptionalString(body, 'currency') || 'USD';
+    const customerEmail = readOptionalString(body, 'customer_email', 'customerEmail');
+    const attributionKey = readOptionalString(body, 'attribution_key', 'attributionKey');
+    const referralCode = readOptionalString(body, 'referral_code', 'referralCode');
+    const eventMetadata = toObject(body.event_metadata ?? body.eventMetadata);
+    const amountCents =
+      typeof body.amount_cents === 'number'
+        ? Math.round(body.amount_cents)
+        : typeof body.amountCents === 'number'
+          ? Math.round(body.amountCents)
+          : 0;
+    const eventContract = resolveConversionEventContract({
+      eventId: body.event_id ?? body.eventId,
+      orderId: body.order_id ?? body.orderId,
+      occurredAt: body.occurred_at ?? body.occurredAt,
+      timestamp: body.timestamp,
+      eventMetadata,
+    });
 
     // Validate required fields
-    if (!event_type || !customer_email) {
+    if (!eventType || !customerEmail) {
       return NextResponse.json(
         { success: false, message: 'Event type and customer email are required' },
         { status: 400 }
       );
     }
 
+    const normalizedEventType = String(eventType).toUpperCase();
+    const allowedEventTypes = new Set(['SIGNUP', 'PURCHASE', 'TRIAL', 'LEAD']);
+    if (!allowedEventTypes.has(normalizedEventType)) {
+      await logSystemAuditAction({
+        preferredActorId: authActorUserId,
+        action: 'conversion_rejected',
+        objectType: 'conversion_event',
+        objectId: eventContract.eventId || eventContract.orderId || `rejected_${Date.now()}`,
+        payload: {
+          reason: 'invalid_event_type',
+          eventType: normalizedEventType,
+          customerEmail,
+          occurredAt: eventContract.occurredAt,
+        },
+      });
+
+      return NextResponse.json(
+        { success: false, message: `Invalid event type: ${eventType}` },
+        { status: 400 }
+      );
+    }
+
+    // Idempotency guard: do not process the same external event/order twice
+    const { externalEventId, externalOrderId } = resolveWebhookConversionExternalIds({
+      eventId: eventContract.eventId,
+      orderId: eventContract.orderId,
+      eventMetadata,
+    });
+    if (externalEventId || externalOrderId) {
+      const duplicate = await prisma.conversion.findFirst({
+        where: {
+          OR: [
+            ...(externalEventId ? [{
+              eventMetadata: {
+                path: ['externalEventId'],
+                equals: String(externalEventId),
+              },
+            }, {
+              eventMetadata: {
+                path: ['event_id'],
+                equals: String(externalEventId),
+              },
+            }] : []),
+            ...(externalOrderId ? [{
+              eventMetadata: {
+                path: ['orderId'],
+                equals: String(externalOrderId),
+              },
+            }, {
+              eventMetadata: {
+                path: ['order_id'],
+                equals: String(externalOrderId),
+              },
+            }] : []),
+          ],
+        },
+        include: {
+          commissions: true,
+          affiliate: {
+            select: { userId: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      if (duplicate) {
+        await logSystemAuditAction({
+          preferredActorId: authActorUserId || duplicate.affiliate.userId,
+          action: 'conversion_duplicate',
+          objectType: 'conversion_event',
+          objectId: externalEventId || externalOrderId || duplicate.id,
+          payload: {
+            source: 'webhook_conversion',
+            externalEventId,
+            externalOrderId,
+            occurredAt: eventContract.occurredAt,
+          },
+        });
+
+        return NextResponse.json({
+          success: true,
+          message: 'Duplicate conversion event ignored',
+          duplicate: true,
+          conversion: duplicate,
+          commission: duplicate.commissions[0] || null,
+        });
+      }
+    }
+
     let affiliate = null;
     let attributionMethod = 'none';
 
     // Try to find affiliate through attribution key first
-    if (attribution_key) {
-      // In a real implementation, this would be stored in Redis
-      // For this simulation, we'll comment out the problematic call
-      // const recentClicks = await db.getClicksByReferralId('some-referral-id');
-      // For demo purposes, we'll use referral_code method
-      attributionMethod = 'attribution_key';
+    if (attributionKey) {
+      const click = await prisma.referralClick.findFirst({
+        where: {
+          metadata: {
+            path: ['attribution_key'],
+            equals: String(attributionKey),
+          },
+        },
+        include: {
+          referral: {
+            include: {
+              affiliate: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      if (click?.referral?.affiliate) {
+        affiliate = click.referral.affiliate;
+        attributionMethod = 'attribution_key';
+      }
     }
 
     // Fallback to referral code
-    if (!affiliate && referral_code) {
-      affiliate = await db.getAffiliateByReferralCode(referral_code);
+    if (!affiliate && referralCode) {
+      affiliate = await db.getAffiliateByReferralCode(referralCode);
       attributionMethod = 'referral_code';
     }
 
     // If no affiliate found, log the conversion but don't create commission
     if (!affiliate) {
       console.log('Conversion received but no affiliate attribution found:', {
-        event_type,
-        customer_email,
-        attribution_key,
-        referral_code,
+        eventType,
+        customerEmail,
+        attributionKey,
+        referralCode,
+      });
+
+      await logSystemAuditAction({
+        preferredActorId: authActorUserId,
+        action: 'conversion_unattributed',
+        objectType: 'conversion_event',
+        objectId: externalEventId || externalOrderId || `unattributed_${Date.now()}`,
+        payload: {
+          source: 'webhook_conversion',
+          eventType: normalizedEventType,
+          customerEmail,
+          attributionKey,
+          referralCode,
+          occurredAt: eventContract.occurredAt,
+        },
       });
 
       return NextResponse.json({
@@ -110,35 +275,45 @@ export async function POST(request: NextRequest) {
     // Create conversion record
     const conversion = await db.createConversion({
       affiliateId: affiliate.id,
-      eventType: event_type,
-      amountCents: amount_cents || 0,
+      eventType: normalizedEventType as 'SIGNUP' | 'PURCHASE' | 'TRIAL' | 'LEAD',
+      amountCents,
       currency,
       eventMetadata: {
-        ...event_metadata,
-        customerEmail: customer_email,
+        ...eventMetadata,
+        event_id: externalEventId || null,
+        order_id: externalOrderId || null,
+        occurred_at: eventContract.occurredAt,
+        eventId: externalEventId || null,
+        orderId: externalOrderId || null,
+        occurredAt: eventContract.occurredAt,
+        customerEmail,
+        externalEventId: externalEventId || null,
+        externalOrderId: externalOrderId || null,
         attributionMethod,
-        attributionKey: attribution_key,
-        referralCode: referral_code,
+        attributionKey,
+        referralCode,
       },
     });
 
     // Calculate commission
     const commissionRules = await db.getCommissionRules();
-    let applicableRule = commissionRules.find((rule: any) => rule.isDefault);
+    const applicableRule = commissionRules.find((rule) => rule.isDefault);
 
     const commissionRate = applicableRule?.value || 15;
     let commissionAmount = 0;
 
-    if (applicableRule?.type === 'PERCENTAGE' && amount_cents) {
-      commissionAmount = Math.floor((amount_cents * commissionRate) / 100);
+    if (applicableRule?.type === 'PERCENTAGE' && amountCents > 0) {
+      commissionAmount = Math.floor((amountCents * commissionRate) / 100);
     } else if (applicableRule?.type === 'FIXED') {
       commissionAmount = commissionRate;
     }
 
     // ─── Commission Hold Period ─────────────────────────────────
     // Fetch hold days from ProgramSettings (default 30)
-    const settings = await prisma.programSettings.findFirst();
-    const holdDays = (settings as any)?.commissionHoldDays ?? 30;
+    const settings = await prisma.programSettings.findFirst({
+      select: { commissionHoldDays: true },
+    });
+    const holdDays = settings?.commissionHoldDays ?? 30;
     const maturesAt = new Date();
     maturesAt.setDate(maturesAt.getDate() + holdDays);
 
@@ -161,15 +336,34 @@ export async function POST(request: NextRequest) {
 
     // Log audit event
     await db.createAuditLog({
-      actorId: 'system',
+      actorId: authActorUserId || affiliate.userId,
       action: 'conversion_tracked',
       objectType: 'conversion',
       objectId: conversion.id,
       payload: {
-        event_type,
-        amount_cents,
+        event_type: normalizedEventType,
+        amount_cents: amountCents,
         commission_amount: commissionAmount,
         affiliate_id: affiliate.id,
+        attributionMethod,
+        authActorUserId,
+        event_id: externalEventId,
+        order_id: externalOrderId,
+        occurred_at: eventContract.occurredAt,
+      },
+    });
+
+    await logSystemAuditAction({
+      preferredActorId: authActorUserId || affiliate.userId,
+      action: 'conversion_attributed',
+      objectType: 'conversion',
+      objectId: conversion.id,
+      payload: {
+        source: 'webhook_conversion',
+        eventType: normalizedEventType,
+        eventId: externalEventId,
+        orderId: externalOrderId,
+        occurredAt: eventContract.occurredAt,
         attributionMethod,
       },
     });

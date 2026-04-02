@@ -3,7 +3,9 @@ const nextConfig = {
   // Output standalone build for Docker deployments
   output: 'standalone',
   // Enable Turbopack (default in Next.js 16)
-  turbopack: {},
+  turbopack: {
+    root: __dirname,
+  },
   // Keep webpack config for fallback compatibility
   webpack: (config) => {
     config.module.rules.push({

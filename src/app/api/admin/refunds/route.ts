@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-
 async function verifyAdmin(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id');
@@ -9,11 +8,11 @@ async function verifyAdmin(request: NextRequest) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.role !== 'ADMIN') return null;
     return user;
-  } catch (_e) { return null; }
+  } catch (_e) {
+    return null;
+  }
 }
 
-// POST - Process a refund for a transaction
-// Automatically reverses associated commissions
 export async function POST(request: NextRequest) {
   const admin = await verifyAdmin(request);
   if (!admin) {
@@ -22,13 +21,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const { transactionId, reason } = await request.json();
-
     if (!transactionId) {
       return NextResponse.json({ success: false, error: 'Transaction ID is required' }, { status: 400 });
     }
 
-    // Get transaction
-    const transaction = await (prisma as any).transaction.findUnique({
+    const transaction = await prisma.transaction.findUnique({
       where: { id: transactionId },
       include: { affiliate: true },
     });
@@ -36,17 +33,16 @@ export async function POST(request: NextRequest) {
     if (!transaction) {
       return NextResponse.json({ success: false, error: 'Transaction not found' }, { status: 404 });
     }
-
     if (transaction.status === 'REFUNDED') {
       return NextResponse.json({ success: false, error: 'Transaction already refunded' }, { status: 400 });
     }
 
-    // Find associated commissions for this affiliate that are pending/approved
     const commissions = await prisma.commission.findMany({
       where: {
         affiliateId: transaction.affiliateId,
         status: { in: ['PENDING', 'APPROVED'] },
       },
+      orderBy: { createdAt: 'desc' },
     });
 
     const results = {
@@ -58,20 +54,22 @@ export async function POST(request: NextRequest) {
       deductedAmountCents: 0,
     };
 
-    // 1. Mark transaction as REFUNDED
-    await (prisma as any).transaction.update({
-      where: { id: transactionId },
-      data: {
-        status: 'REFUNDED',
-        description: `${transaction.description || ''} [REFUNDED: ${reason || 'No reason provided'}]`.trim(),
-      },
-    });
-    results.transactionRefunded = true;
+    await prisma.$transaction(async (tx) => {
+      await tx.transaction.update({
+        where: { id: transactionId },
+        data: {
+          status: 'REFUNDED',
+          description: `${transaction.description || ''} [REFUNDED: ${reason || 'No reason provided'}]`.trim(),
+        },
+      });
+      results.transactionRefunded = true;
 
-    // 2. Reverse associated commission (mark as CANCELLED)
-    if (commissions.length > 0) {
-      const matchingCommission = commissions[0]; // Take most recent matching
-      await prisma.commission.update({
+      if (commissions.length === 0) {
+        return;
+      }
+
+      const matchingCommission = commissions[0];
+      await tx.commission.update({
         where: { id: matchingCommission.id },
         data: { status: 'CANCELLED' },
       });
@@ -79,13 +77,11 @@ export async function POST(request: NextRequest) {
       results.reversedCommissionId = matchingCommission.id;
       results.reversedAmountCents = matchingCommission.amountCents;
 
-      // 3. Deduct from affiliate balance if applicable
-      const affiliate = await prisma.affiliate.findUnique({
+      const affiliate = await tx.affiliate.findUnique({
         where: { id: transaction.affiliateId },
       });
-
       if (affiliate && affiliate.balanceCents >= matchingCommission.amountCents) {
-        await prisma.affiliate.update({
+        await tx.affiliate.update({
           where: { id: transaction.affiliateId },
           data: {
             balanceCents: { decrement: matchingCommission.amountCents },
@@ -94,23 +90,22 @@ export async function POST(request: NextRequest) {
         results.balanceDeducted = true;
         results.deductedAmountCents = matchingCommission.amountCents;
       }
-    }
 
-    // 4. Create audit log
-    await prisma.auditLog.create({
-      data: {
-        actorId: admin.id,
-        action: 'TRANSACTION_REFUNDED',
-        objectType: 'transaction',
-        objectId: transactionId,
-        payload: {
-          reason: reason || 'No reason provided',
-          transactionAmountCents: transaction.amountCents,
-          commissionReversed: results.commissionReversed,
-          reversedAmountCents: results.reversedAmountCents,
-          balanceDeducted: results.balanceDeducted,
+      await tx.auditLog.create({
+        data: {
+          actorId: admin.id,
+          action: 'TRANSACTION_REFUNDED',
+          objectType: 'transaction',
+          objectId: transactionId,
+          payload: {
+            reason: reason || 'No reason provided',
+            transactionAmountCents: transaction.amountCents,
+            commissionReversed: results.commissionReversed,
+            reversedAmountCents: results.reversedAmountCents,
+            balanceDeducted: results.balanceDeducted,
+          },
         },
-      },
+      });
     });
 
     return NextResponse.json({
@@ -124,7 +119,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET - List refunded transactions
 export async function GET(request: NextRequest) {
   const admin = await verifyAdmin(request);
   if (!admin) {
@@ -132,9 +126,20 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const transactions = await (prisma as any).transaction.findMany({
+    const transactions = await prisma.transaction.findMany({
       where: { status: 'REFUNDED' },
-      include: { affiliate: { include: { user: { select: { name: true, email: true } } } } },
+      include: {
+        affiliate: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
       orderBy: { updatedAt: 'desc' },
       take: 100,
     });

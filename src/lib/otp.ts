@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { Prisma } from '@prisma/client';
 import crypto from 'crypto';
 
 export class OTPService {
@@ -37,7 +38,7 @@ export class OTPService {
       }
 
       // Check for recent OTP attempts (rate limiting)
-      const recentOTP = await (prisma as any).OTP.findFirst({
+      const recentOTP = await prisma.oTP.findFirst({
         where: {
           email: email.toLowerCase(),
           createdAt: {
@@ -54,7 +55,7 @@ export class OTPService {
       }
 
       // Invalidate any existing unused OTPs for this email
-      await (prisma as any).OTP.updateMany({
+      await prisma.oTP.updateMany({
         where: {
           email: email.toLowerCase(),
           isUsed: false
@@ -69,7 +70,7 @@ export class OTPService {
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
       // Store OTP in database
-      await (prisma as any).OTP.create({
+      await prisma.oTP.create({
         data: {
           email: email.toLowerCase(),
           code,
@@ -112,12 +113,12 @@ export class OTPService {
   // Verify OTP and return user if valid
   async verifyOTP(email: string, code: string): Promise<{
     success: boolean;
-    user?: any;
+    user?: Prisma.UserGetPayload<{ include: { affiliate: true } }> | null;
     message: string;
   }> {
     try {
       // Find the OTP
-      const otp = await (prisma as any).OTP.findFirst({
+      const otp = await prisma.oTP.findFirst({
         where: {
           email: email.toLowerCase(),
           code,
@@ -130,7 +131,7 @@ export class OTPService {
 
       if (!otp) {
         // Increment attempts for any existing OTP
-        await (prisma as any).OTP.updateMany({
+        await prisma.oTP.updateMany({
           where: {
             email: email.toLowerCase(),
             code,
@@ -151,7 +152,7 @@ export class OTPService {
 
       // Check attempts limit
       if (otp.attempts >= 3) {
-        await (prisma as any).OTP.update({
+        await prisma.oTP.update({
           where: { id: otp.id },
           data: { isUsed: true }
         });
@@ -163,7 +164,7 @@ export class OTPService {
       }
 
       // Mark OTP as used
-      await (prisma as any).OTP.update({
+      await prisma.oTP.update({
         where: { id: otp.id },
         data: { isUsed: true }
       });
@@ -201,7 +202,7 @@ export class OTPService {
   // Clean up expired OTPs (should be run periodically)
   async cleanupExpiredOTPs(): Promise<void> {
     try {
-      await (prisma as any).OTP.deleteMany({
+      await prisma.oTP.deleteMany({
         where: {
           OR: [
             {

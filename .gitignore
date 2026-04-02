@@ -1,5 +1,6 @@
 # Dependencies
 node_modules
+.npm-cache/
 /.pnp
 .pnp.js
 
@@ -33,7 +34,7 @@ next-env.d.ts
 
 # Prisma
 /generated/prisma
-/prisma/migrations/*.sql
+/prisma/dev.db
 
 # IDE
 .vscode/settings.json
@@ -52,6 +53,3 @@ logs
 
 # Copilot
 .github/copilot-instructions.md
-
-# Scripts
-/scripts/

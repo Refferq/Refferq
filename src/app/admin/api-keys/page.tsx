@@ -123,7 +123,7 @@ export default function ApiKeysPage() {
       });
       const json = await res.json();
       if (json.success) {
-        setNewKeySecret(json.apiKey.fullKey);
+        setNewKeySecret(json.apiKey.key);
         await fetchKeys();
       }
     } catch (error) {

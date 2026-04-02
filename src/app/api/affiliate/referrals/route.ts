@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { asJsonObject, asNumber, asString } from '@/lib/json-utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -121,12 +122,12 @@ export async function GET(request: NextRequest) {
     });
 
     // Map referrals to include estimatedValue from metadata
-    const mappedReferrals = referrals.map((ref: any) => {
-      const metadata = ref.metadata as any;
+    const mappedReferrals = referrals.map((ref) => {
+      const metadata = asJsonObject(ref.metadata);
       return {
         ...ref,
-        estimatedValue: Number(metadata?.estimated_value) || 0,
-        company: metadata?.company || '',
+        estimatedValue: asNumber(metadata.estimated_value, 0),
+        company: asString(metadata.company, ''),
       };
     });
 

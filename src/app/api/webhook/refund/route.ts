@@ -1,7 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { logAuditAction } from '@/lib/audit';
+import { logSystemAuditAction } from '@/lib/audit';
 import crypto from 'crypto';
+
+function toObject(value: unknown): Record<string, unknown> {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        return {};
+    }
+
+    return value as Record<string, unknown>;
+}
+
+function readOptionalString(
+    source: Record<string, unknown>,
+    ...keys: string[]
+): string | null {
+    for (const key of keys) {
+        const value = source[key];
+        if (typeof value !== 'string') {
+            continue;
+        }
+
+        const trimmed = value.trim();
+        if (trimmed.length > 0) {
+            return trimmed;
+        }
+    }
+
+    return null;
+}
 
 // ─── Webhook Signature Verification ────────────────────────────
 function verifyWebhookSignature(payload: string, signature: string | null, secret: string): boolean {
@@ -39,13 +66,16 @@ export async function POST(request: NextRequest) {
         const apiKey = request.headers.get('x-api-key');
 
         let authenticated = false;
+        let authActorUserId: string | null = null;
 
         if (apiKey) {
             const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex');
             const key = await prisma.apiKey.findFirst({
                 where: { keyHash, isActive: true },
+                select: { userId: true },
             }).catch(() => null);
             authenticated = !!key;
+            authActorUserId = key?.userId || null;
         }
 
         if (!authenticated && webhookSecret && signature) {
@@ -60,20 +90,54 @@ export async function POST(request: NextRequest) {
         }
 
         // ─── Parse & Validate ──────────────────────────────────────
-        const body = JSON.parse(rawBody);
-        const {
-            customer_email,
-            referral_code,
-            amount_cents,
-            reason = 'Customer refund',
-            external_id,
-        } = body;
+        const body = toObject(JSON.parse(rawBody));
+        const customerEmail = readOptionalString(body, 'customer_email', 'customerEmail');
+        const referralCode = readOptionalString(body, 'referral_code', 'referralCode');
+        const amountCents =
+            typeof body.amount_cents === 'number'
+                ? Math.round(body.amount_cents)
+                : typeof body.amountCents === 'number'
+                    ? Math.round(body.amountCents)
+                    : null;
+        const reason = readOptionalString(body, 'reason') || 'Customer refund';
+        const externalId = readOptionalString(body, 'external_id', 'externalId');
 
-        if (!customer_email) {
+        if (!customerEmail) {
             return NextResponse.json(
                 { success: false, message: 'customer_email is required' },
                 { status: 400 }
             );
+        }
+
+        // Idempotency guard for external refund id
+        if (externalId) {
+            const alreadyProcessed = await prisma.auditLog.findFirst({
+                where: {
+                    action: 'REFUND_PROCESSED',
+                    objectType: 'REFUND',
+                    objectId: String(externalId),
+                },
+                select: { id: true },
+            });
+
+            if (alreadyProcessed) {
+                await logSystemAuditAction({
+                    preferredActorId: authActorUserId,
+                    action: 'refund_duplicate',
+                    objectType: 'REFUND',
+                    objectId: externalId,
+                    payload: {
+                        customer_email: customerEmail,
+                        reason,
+                    },
+                });
+
+                return NextResponse.json({
+                    success: true,
+                    message: 'Duplicate refund event ignored',
+                    duplicate: true,
+                });
+            }
         }
 
         // ─── Find Related Conversions ──────────────────────────────
@@ -82,7 +146,7 @@ export async function POST(request: NextRequest) {
             where: {
                 eventMetadata: {
                     path: ['customerEmail'],
-                    equals: customer_email,
+                    equals: customerEmail,
                 },
             },
             include: {
@@ -93,7 +157,20 @@ export async function POST(request: NextRequest) {
         });
 
         if (conversions.length === 0) {
-            console.log('Refund webhook: no conversions found for', customer_email);
+            console.log('Refund webhook: no conversions found for', customerEmail);
+            await logSystemAuditAction({
+                preferredActorId: authActorUserId,
+                action: 'refund_unmatched',
+                objectType: 'REFUND',
+                objectId: externalId || `refund-${Date.now()}`,
+                payload: {
+                    customer_email: customerEmail,
+                    referral_code: referralCode,
+                    amount_cents: amountCents,
+                    reason,
+                },
+            });
+
             return NextResponse.json({
                 success: true,
                 message: 'Refund logged (no matching conversion found)',
@@ -120,7 +197,7 @@ export async function POST(request: NextRequest) {
                         where: { id: commission.id },
                         data: {
                             status: 'CANCELLED',
-                            clawbackNote: `Refund: ${reason}. External ID: ${external_id || 'N/A'}`,
+                            clawbackNote: `Refund: ${reason}. External ID: ${externalId || 'N/A'}`,
                         },
                     });
 
@@ -132,7 +209,7 @@ export async function POST(request: NextRequest) {
                         where: { id: commission.id },
                         data: {
                             status: 'CANCELLED',
-                            clawbackNote: `Refund clawback: ${reason}. External ID: ${external_id || 'N/A'}`,
+                            clawbackNote: `Refund clawback: ${reason}. External ID: ${externalId || 'N/A'}`,
                         },
                     });
 
@@ -152,7 +229,7 @@ export async function POST(request: NextRequest) {
                         where: { id: commission.id },
                         data: {
                             status: 'CLAWBACK',
-                            clawbackNote: `Paid commission clawback: ${reason}. Will be deducted from next payout. External ID: ${external_id || 'N/A'}`,
+                            clawbackNote: `Paid commission clawback: ${reason}. Will be deducted from next payout. External ID: ${externalId || 'N/A'}`,
                         },
                     });
 
@@ -179,15 +256,15 @@ export async function POST(request: NextRequest) {
         }
 
         // ─── Audit Log ─────────────────────────────────────────────
-        await logAuditAction({
-            actorId: 'system-webhook',
+        await logSystemAuditAction({
+            preferredActorId: authActorUserId || conversions[0]?.affiliate.userId || null,
             action: 'REFUND_PROCESSED',
             objectType: 'REFUND',
-            objectId: external_id || `refund-${Date.now()}`,
+            objectId: externalId || `refund-${Date.now()}`,
             payload: {
-                customer_email,
-                referral_code,
-                amount_cents,
+                customer_email: customerEmail,
+                referral_code: referralCode,
+                amount_cents: amountCents,
                 reason,
                 reversedCount,
                 totalReversedCents,

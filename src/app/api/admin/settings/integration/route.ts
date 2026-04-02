@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import crypto from 'crypto';
 
 
 // Verify admin auth with DB check
@@ -54,6 +55,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { provider, apiKey, publicKey, webhookUrl, trackingScript, isActive, config } = body;
+    const hashedApiKey = apiKey ? crypto.createHash('sha256').update(String(apiKey)).digest('hex') : null;
 
     // Validate provider
     if (!provider) {
@@ -76,7 +78,7 @@ export async function POST(req: NextRequest) {
         where: { userId: user.id },
         data: {
           provider,
-          apiKey: apiKey || null,
+          apiKey: hashedApiKey,
           publicKey: publicKey || null,
           webhookUrl: webhookUrl || null,
           trackingScript: trackingScript || null,
@@ -91,7 +93,7 @@ export async function POST(req: NextRequest) {
         data: {
           userId: user.id,
           provider,
-          apiKey: apiKey || null,
+          apiKey: hashedApiKey,
           publicKey: publicKey || null,
           webhookUrl: webhookUrl || null,
           trackingScript: trackingScript || null,

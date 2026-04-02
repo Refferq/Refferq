@@ -81,6 +81,30 @@ interface Partner {
   groupName?: string;
 }
 
+interface AffiliateApiItem {
+  id: string;
+  userId: string;
+  referralCode: string;
+  createdAt: string;
+  balanceCents: number;
+  user: {
+    name: string;
+    email: string;
+    status: string;
+  };
+  _count?: {
+    referrals?: number;
+  };
+}
+
+function getSortableValue(partner: Partner, field: keyof Partner): string | number {
+  const value = partner[field];
+  if (typeof value === 'string' || typeof value === 'number') {
+    return value;
+  }
+  return '';
+}
+
 export default function PartnersPage() {
   const router = useRouter();
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -129,7 +153,7 @@ export default function PartnersPage() {
       const data = await response.json();
 
       if (data.success) {
-        const formattedPartners = data.affiliates.map((aff: any) => ({
+        const formattedPartners: Partner[] = (data.affiliates as AffiliateApiItem[]).map((aff) => ({
           id: aff.id,
           userId: aff.userId,
           name: aff.user.name,
@@ -177,8 +201,8 @@ export default function PartnersPage() {
     }
 
     filtered.sort((a: Partner, b: Partner) => {
-      const aValue = (a as any)[sortField];
-      const bValue = (b as any)[sortField];
+      const aValue = getSortableValue(a, sortField);
+      const bValue = getSortableValue(b, sortField);
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
       }

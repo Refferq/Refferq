@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     const affiliateCounts = await Promise.all(
       partnerGroups.map(async (pg) => {
         const count = await prisma.affiliate.count({
-          where: { partnerGroupId: pg.id } as any
+          where: { partnerGroupId: pg.id }
         });
         return { id: pg.id, count };
       })
@@ -269,7 +269,7 @@ export async function DELETE(request: NextRequest) {
     
     // Count affiliates in this group
     const memberCount = await prisma.affiliate.count({
-      where: { partnerGroupId: id } as any
+      where: { partnerGroupId: id }
     });
 
     if (memberCount > 0) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { asJsonObject } from '@/lib/json-utils';
 
 
 // Batch update affiliates
@@ -100,20 +101,20 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        // Update affiliate metadata with group
-        for (const affiliateId of affiliateIds) {
+        const affiliatesForGroupUpdate = await prisma.affiliate.findMany({
+          where: { id: { in: affiliateIds } },
+          select: { id: true, payoutDetails: true },
+        });
+
+        for (const affiliateRecord of affiliatesForGroupUpdate) {
           await prisma.affiliate.update({
-            where: { id: affiliateId },
+            where: { id: affiliateRecord.id },
             data: {
               payoutDetails: {
-                // Preserve existing data and add/update group
-                ...(await prisma.affiliate.findUnique({
-                  where: { id: affiliateId },
-                  select: { payoutDetails: true }
-                }).then(a => a?.payoutDetails as any) || {}),
-                group
-              }
-            }
+                ...asJsonObject(affiliateRecord.payoutDetails),
+                group,
+              },
+            },
           });
           updatedCount++;
         }

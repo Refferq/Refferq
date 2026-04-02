@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { EmailTemplateType } from '@prisma/client';
 
 // Initialize Resend with API key only when needed (server-side)
 let resendInstance: Resend | null = null;
@@ -105,11 +106,32 @@ class EmailService {
     return formatCurrency(cents, symbol);
   }
 
+  private mapTemplateType(type: string): EmailTemplateType | null {
+    const map: Record<string, EmailTemplateType> = {
+      WELCOME_EMAIL: 'WELCOME_EMAIL',
+      NEW_REFERRAL: 'NEW_REFERRAL',
+      PARTNER_APPROVAL: 'PARTNER_APPROVAL',
+      PARTNER_DECLINED: 'PARTNER_DECLINED',
+      PAYOUT_GENERATED: 'PAYOUT_GENERATED',
+      PARTNER_PAID: 'PARTNER_PAID',
+      REFERRAL_CONVERTED: 'REFERRAL_CONVERTED',
+      COMMISSION_EARNED: 'COMMISSION_APPROVED',
+      COMMISSION_APPROVED: 'COMMISSION_APPROVED',
+      FIRST_REFERRAL: 'FIRST_REFERRAL',
+      PARTNER_INVITATION: 'PARTNER_INVITATION',
+    };
+    return map[type] || null;
+  }
+
   private async getTemplateFromDb(type: string) {
     try {
+      const mappedType = this.mapTemplateType(type);
+      if (!mappedType) {
+        return null;
+      }
       const { prisma } = await import('./prisma');
       return await prisma.emailTemplate.findFirst({
-        where: { type: type as any, isActive: true }
+        where: { type: mappedType, isActive: true }
       });
     } catch (error) {
       console.error(`Failed to fetch email template ${type}:`, error);

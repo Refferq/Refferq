@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { buildAutoPayoutPlan } from '@/lib/payout-planning';
 
 
 async function verifyAdmin(request: NextRequest) {
@@ -26,39 +27,53 @@ export async function POST(request: NextRequest) {
     const settings = await prisma.programSettings.findFirst();
     const minPayoutCents = settings?.minPayoutCents || 100000; // Default ₹1000
 
-    // Find all affiliates with balance above minimum payout threshold
-    // Status check is on User model, not Affiliate
+    // Find active affiliates that have APPROVED commissions, then compute payout plan in code.
     const eligibleAffiliates = await prisma.affiliate.findMany({
       where: {
-        balanceCents: { gte: minPayoutCents },
         user: { status: 'ACTIVE' },
+        commissions: {
+          some: { status: 'APPROVED' },
+        },
       },
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, name: true, email: true, status: true } },
+        commissions: {
+          where: { status: 'APPROVED' },
+          select: { id: true, amountCents: true },
+        },
       },
     });
+    const payoutPlan = buildAutoPayoutPlan(eligibleAffiliates, minPayoutCents);
 
-    if (eligibleAffiliates.length === 0) {
+    if (payoutPlan.payable.length === 0) {
       return NextResponse.json({
         success: true,
         message: 'No affiliates eligible for auto-payout',
         processed: 0,
         totalAmountCents: 0,
+        skipped: payoutPlan.skipped,
       });
     }
 
     if (dryRun) {
+      const preview = payoutPlan.payable.map((entry) => {
+        return {
+          id: entry.affiliateId,
+          name: entry.name,
+          email: entry.email,
+          approvedCommissions: entry.commissionIds.length,
+          approvedAmountCents: entry.approvedAmountCents,
+          balanceCents: entry.balanceCents,
+        };
+      });
+
       return NextResponse.json({
         success: true,
         dryRun: true,
-        eligible: eligibleAffiliates.map(a => ({
-          id: a.id,
-          name: a.user.name,
-          email: a.user.email,
-          balanceCents: a.balanceCents,
-        })),
-        totalAffiliates: eligibleAffiliates.length,
-        totalAmountCents: eligibleAffiliates.reduce((s, a) => s + a.balanceCents, 0),
+        eligible: preview,
+        totalAffiliates: payoutPlan.payable.length,
+        totalAmountCents: payoutPlan.payable.reduce((sum, entry) => sum + entry.approvedAmountCents, 0),
+        skipped: payoutPlan.skipped,
       });
     }
 
@@ -74,48 +89,63 @@ export async function POST(request: NextRequest) {
     let totalProcessed = 0;
     let totalAmountCents = 0;
 
-    for (const affiliate of eligibleAffiliates) {
+    for (const planItem of payoutPlan.payable) {
       try {
-        const payoutAmountCents = affiliate.balanceCents;
+        const approvedCommissionIds = planItem.commissionIds;
+        const payoutAmountCents = planItem.approvedAmountCents;
 
-        // Create payout record
-        const payout = await prisma.payout.create({
-          data: {
-            affiliateId: affiliate.id,
-            userId: affiliate.user.id,
-            amountCents: payoutAmountCents,
-            status: 'PENDING',
-            method: 'AUTO',
-            notes: 'Auto-payout processed',
-            createdBy: admin.id,
-          },
-        });
-
-        // Reset affiliate balance
-        await prisma.affiliate.update({
-          where: { id: affiliate.id },
-          data: {
-            balanceCents: 0,
-          },
-        });
-
-        // Create audit log
-        await prisma.auditLog.create({
-          data: {
-            action: 'AUTO_PAYOUT_CREATED',
-            actorId: admin.id,
-            objectType: 'payout',
-            objectId: payout.id,
-            payload: {
-              affiliateId: affiliate.id,
+        const payout = await prisma.$transaction(async (tx) => {
+          const createdPayout = await tx.payout.create({
+            data: {
+              affiliateId: planItem.affiliateId,
+              userId: planItem.userId,
               amountCents: payoutAmountCents,
+              commissionCount: approvedCommissionIds.length,
+              status: 'PENDING',
+              method: 'BANK_TRANSFER',
+              notes: 'Auto-payout processed',
+              createdBy: admin.id,
             },
-          },
+          });
+
+          await tx.commission.updateMany({
+            where: { id: { in: approvedCommissionIds }, status: 'APPROVED' },
+            data: {
+              status: 'PAID',
+              payoutId: createdPayout.id,
+              paidAt: new Date(),
+            },
+          });
+
+          // Decrement by paid amount instead of blind reset.
+          await tx.affiliate.update({
+            where: { id: planItem.affiliateId },
+            data: {
+              balanceCents: { decrement: payoutAmountCents },
+            },
+          });
+
+          await tx.auditLog.create({
+            data: {
+              action: 'AUTO_PAYOUT_CREATED',
+              actorId: admin.id,
+              objectType: 'payout',
+              objectId: createdPayout.id,
+              payload: {
+                affiliateId: planItem.affiliateId,
+                balanceCentsBefore: planItem.balanceCents,
+                amountCents: payoutAmountCents,
+                commissionIds: approvedCommissionIds,
+              },
+            },
+          });
+
+          return createdPayout;
         });
 
         results.push({
-          affiliateId: affiliate.id,
-          name: affiliate.user.name,
+          affiliateId: planItem.affiliateId,
+          name: planItem.name,
           payoutId: payout.id,
           amountCents: payoutAmountCents,
           status: 'CREATED',
@@ -125,8 +155,8 @@ export async function POST(request: NextRequest) {
         totalAmountCents += payoutAmountCents;
       } catch (err) {
         results.push({
-          affiliateId: affiliate.id,
-          name: affiliate.user.name,
+          affiliateId: planItem.affiliateId,
+          name: planItem.name,
           status: 'FAILED',
           error: (err as Error).message,
         });
@@ -139,6 +169,7 @@ export async function POST(request: NextRequest) {
       processed: totalProcessed,
       totalAmountCents,
       results,
+      skipped: payoutPlan.skipped,
     });
   } catch (error) {
     console.error('Auto-payout error:', error);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { asJsonObject, asNumber } from '@/lib/json-utils';
 
 
 export async function GET(request: NextRequest) {
@@ -24,6 +25,14 @@ export async function GET(request: NextRequest) {
         { status: 403 }
       );
     }
+
+    const url = new URL(request.url);
+    const parsedDays = Number(url.searchParams.get('days') || '30');
+    const days = Number.isFinite(parsedDays)
+      ? Math.max(1, Math.min(365, Math.floor(parsedDays)))
+      : 30;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
 
     // Calculate platform stats
     const totalAffiliates = await prisma.affiliate.count();
@@ -61,13 +70,12 @@ export async function GET(request: NextRequest) {
     let totalEstimatedCommission = 0;
     
     referrals.forEach((ref) => {
-      const metadata = ref.metadata as any;
-      const estimatedValue = Number(metadata?.estimated_value) || 0;
+      const metadata = asJsonObject(ref.metadata);
+      const estimatedValue = asNumber(metadata.estimated_value, 0);
       const valueInCents = estimatedValue * 100;
       
       // Get commission rate from partner group or default to 20%
-      const affiliate = ref.affiliate as any;
-      const partnerGroupId = affiliate.partnerGroupId;
+      const partnerGroupId = ref.affiliate.partnerGroupId;
       const commissionRate = partnerGroupId 
         ? (partnerGroupMap.get(partnerGroupId) || 0.20)
         : 0.20;
@@ -76,6 +84,38 @@ export async function GET(request: NextRequest) {
       totalEstimatedRevenue += valueInCents;
       totalEstimatedCommission += commissionInCents;
     });
+
+    const [
+      duplicateEvents,
+      rejectedEvents,
+      unattributedEvents,
+      attributedEvents,
+    ] = await Promise.all([
+      prisma.auditLog.count({
+        where: {
+          action: 'conversion_duplicate',
+          createdAt: { gte: startDate },
+        },
+      }),
+      prisma.auditLog.count({
+        where: {
+          action: 'conversion_rejected',
+          createdAt: { gte: startDate },
+        },
+      }),
+      prisma.auditLog.count({
+        where: {
+          action: 'conversion_unattributed',
+          createdAt: { gte: startDate },
+        },
+      }),
+      prisma.auditLog.count({
+        where: {
+          action: 'conversion_attributed',
+          createdAt: { gte: startDate },
+        },
+      }),
+    ]);
 
     const stats = {
       totalAffiliates,
@@ -87,6 +127,13 @@ export async function GET(request: NextRequest) {
       totalRevenue: totalRevenue._sum?.amountCents || 0, // Actual transaction revenue
       totalEstimatedRevenue, // Estimated revenue from all leads
       totalEstimatedCommission, // Total commission to be paid
+      eventProcessing: {
+        windowDays: days,
+        duplicates: duplicateEvents,
+        rejected: rejectedEvents,
+        unattributed: unattributedEvents,
+        attributed: attributedEvents,
+      },
     };
 
     return NextResponse.json({ success: true, stats });

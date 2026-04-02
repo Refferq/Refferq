@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { asJsonObject, asNumber, asString } from '@/lib/json-utils';
 
 
 export async function GET(request: NextRequest) {
@@ -48,9 +49,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       referrals: referrals.map(referral => {
-        const metadata = referral.metadata as any;
-        const affiliate = referral.affiliate as any;
-        const pgId = affiliate.partnerGroupId;
+        const metadata = asJsonObject(referral.metadata);
+        const pgId = referral.affiliate.partnerGroupId;
         const pgData = pgId ? partnerGroupMap.get(pgId) : null;
         
         return {
@@ -61,13 +61,13 @@ export async function GET(request: NextRequest) {
           status: referral.status,
           notes: referral.notes,
           createdAt: referral.createdAt,
-          estimatedValue: Number(metadata?.estimated_value) || 0,
-          company: metadata?.company || '',
+          estimatedValue: asNumber(metadata.estimated_value, 0),
+          company: asString(metadata.company, ''),
           affiliate: {
-            id: affiliate.id,
-            name: affiliate.user.name,
-            email: affiliate.user.email,
-            referralCode: affiliate.referralCode,
+            id: referral.affiliate.id,
+            name: referral.affiliate.user.name,
+            email: referral.affiliate.user.email,
+            referralCode: referral.affiliate.referralCode,
             partnerGroup: pgData?.name || 'Default',
             partnerGroupId: pgId,
             commissionRate: pgData?.rate || 0.20

@@ -28,9 +28,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate secure API keys
+    // Generate legacy public key (for compatibility) + modern hashed tracking key.
     const publicKey = 'pk_' + crypto.randomBytes(32).toString('hex');
-    const apiKey = 'sk_' + crypto.randomBytes(32).toString('hex');
+    const rawTrackingKey = `rfq_${crypto.randomBytes(32).toString('hex')}`;
+    const keyHash = crypto.createHash('sha256').update(rawTrackingKey).digest('hex');
+    const prefix = rawTrackingKey.slice(0, 12);
+
+    await prisma.apiKey.create({
+      data: {
+        name: `Integration key (${new Date().toISOString().slice(0, 10)})`,
+        key: null,
+        keyHash,
+        prefix,
+        userId: user.id,
+        scopes: ['write'],
+        rateLimit: 300,
+      },
+    });
 
     // Check if integration settings exist
     const existing = await prisma.integrationSettings.findUnique({
@@ -45,7 +59,7 @@ export async function POST(request: NextRequest) {
         where: { userId: user.id },
         data: {
           publicKey,
-          apiKey,
+          apiKey: null,
           provider: 'refferq',
           isActive: true,
         }
@@ -56,7 +70,7 @@ export async function POST(request: NextRequest) {
         data: {
           userId: user.id,
           publicKey,
-          apiKey,
+          apiKey: null,
           provider: 'refferq',
           isActive: true,
           config: {},
@@ -69,8 +83,9 @@ export async function POST(request: NextRequest) {
       message: 'API keys generated successfully',
       keys: {
         publicKey: integration.publicKey,
-        apiKey: integration.apiKey,
+        apiKey: rawTrackingKey,
       },
+      note: 'Use apiKey (rfq_...) in x-api-key header. publicKey is legacy and will be removed.',
       integration,
     });
 

@@ -7,7 +7,7 @@ async function verifyAdmin(request: NextRequest) {
     const userId = request.headers.get('x-user-id');
     if (!userId) return null;
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user || user.role !== 'ADMIN') return null;
+    if (!user || user.role !== 'ADMIN' || user.status !== 'ACTIVE') return null;
     return user;
   } catch (_e) {
     return null;
