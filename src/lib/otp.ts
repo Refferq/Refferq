@@ -143,6 +143,47 @@ export class OTPService {
     message: string;
   }> {
     try {
+      const otpDevMode = process.env.OTP_DEV_MODE === '1' || process.env.OTP_DEV_MODE === 'true';
+
+      // Test-only bypass: when OTP_DEV_MODE is enabled, allow login with any
+      // 6-digit code for an active user to keep local QA flows unblocked.
+      if (otpDevMode && /^\d{6}$/.test(code)) {
+        const devUser = await prisma.user.findUnique({
+          where: { email: email.toLowerCase() },
+          include: { affiliate: true },
+        });
+
+        if (!devUser) {
+          return {
+            success: false,
+            message: 'User not found',
+          };
+        }
+
+        if (devUser.status === 'INACTIVE' || devUser.status === 'SUSPENDED' || devUser.status === 'PENDING') {
+          return {
+            success: false,
+            message: 'Your account is not active. Please contact support.',
+          };
+        }
+
+        await prisma.oTP.updateMany({
+          where: {
+            email: email.toLowerCase(),
+            isUsed: false,
+          },
+          data: {
+            isUsed: true,
+          },
+        });
+
+        return {
+          success: true,
+          user: devUser,
+          message: 'OTP verified successfully',
+        };
+      }
+
       // Find the OTP
       const otp = await prisma.oTP.findFirst({
         where: {
