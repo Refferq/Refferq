@@ -1,6 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+load_env_defaults() {
+  if [[ -f .env ]]; then
+    set -a
+    # shellcheck disable=SC1091
+    source .env
+    set +a
+  fi
+
+  if [[ -f .env.local ]]; then
+    set -a
+    # shellcheck disable=SC1091
+    source .env.local
+    set +a
+  fi
+}
+
+if [[ -z "${STAGING_BASE_URL:-}" || -z "${STAGING_TRACKING_API_KEY:-}" || -z "${STAGING_REFERRAL_CODE:-}" ]]; then
+  load_env_defaults
+fi
+
 echo "[launch-gate] Step 1/3: quality + security + env strict"
 npm run launch:check
 
