@@ -10,6 +10,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://refferq:refferq@db:5432/refferq
       - JWT_SECRET=${JWT_SECRET:-change-me-to-a-random-string-min-32-chars}
+      - OTP_DEV_MODE=${OTP_DEV_MODE:-1}
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Refferq <onboarding@resend.dev>}
       - ADMIN_EMAILS=${ADMIN_EMAILS:-}

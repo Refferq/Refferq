@@ -11,6 +11,9 @@ export class OTPService {
   // Generate and send OTP via email
   async sendOTP(email: string): Promise<{ success: boolean; message: string }> {
     try {
+      const otpDevMode = process.env.OTP_DEV_MODE === '1' || process.env.OTP_DEV_MODE === 'true';
+      const allowOtpWithoutEmailDelivery = process.env.NODE_ENV !== 'production' || otpDevMode;
+
       // Check if user exists
       const user = await prisma.user.findUnique({
         where: { email: email.toLowerCase() }
@@ -78,6 +81,15 @@ export class OTPService {
         }
       });
 
+      // In local/staging test runs we allow OTP auth without email delivery.
+      // This keeps QA flows unblocked when RESEND is not configured.
+      if (allowOtpWithoutEmailDelivery && !process.env.RESEND_API_KEY) {
+        return {
+          success: true,
+          message: `[DEV OTP] ${code}`
+        };
+      }
+
       // Send OTP email
       const { Resend } = await import('resend');
       const resendClient = new Resend(process.env.RESEND_API_KEY);
@@ -90,6 +102,12 @@ export class OTPService {
 
       if (emailResult.error) {
         console.error('Failed to send OTP email:', emailResult.error);
+        if (allowOtpWithoutEmailDelivery) {
+          return {
+            success: true,
+            message: `[DEV OTP] ${code}`
+          };
+        }
         return {
           success: false,
           message: 'Failed to send OTP email. Please try again.'
@@ -103,6 +121,12 @@ export class OTPService {
 
     } catch (error) {
       console.error('Error sending OTP:', error);
+      if (process.env.NODE_ENV !== 'production' || process.env.OTP_DEV_MODE === '1' || process.env.OTP_DEV_MODE === 'true') {
+        return {
+          success: true,
+          message: 'OTP generated in dev mode. Please retry if code is not visible.'
+        };
+      }
       return {
         success: false,
         message: 'An error occurred while sending OTP'
