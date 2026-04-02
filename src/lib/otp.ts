@@ -40,21 +40,23 @@ export class OTPService {
         };
       }
 
-      // Check for recent OTP attempts (rate limiting)
-      const recentOTP = await prisma.oTP.findFirst({
-        where: {
-          email: email.toLowerCase(),
-          createdAt: {
-            gte: new Date(Date.now() - 60000) // Within last minute
+      // In test/dev mode we skip OTP cooldown to avoid blocking QA flows.
+      if (!allowOtpWithoutEmailDelivery) {
+        const recentOTP = await prisma.oTP.findFirst({
+          where: {
+            email: email.toLowerCase(),
+            createdAt: {
+              gte: new Date(Date.now() - 60000) // Within last minute
+            }
           }
-        }
-      });
+        });
 
-      if (recentOTP) {
-        return {
-          success: false,
-          message: 'Please wait 1 minute before requesting another OTP'
-        };
+        if (recentOTP) {
+          return {
+            success: false,
+            message: 'Please wait 1 minute before requesting another OTP'
+          };
+        }
       }
 
       // Invalidate any existing unused OTPs for this email
