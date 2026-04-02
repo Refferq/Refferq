@@ -318,7 +318,7 @@ export default function ProgramSettingsPage() {
                 value={settings.currency}
                 onValueChange={(v) => setSettings({ ...settings, currency: v })}
               >
-                <SelectTrigger>
+                <SelectTrigger id="currency">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

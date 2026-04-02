@@ -346,9 +346,9 @@ export default function ProgramsPage() {
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="grid gap-2">
-                <Label>Currency</Label>
+                <Label htmlFor="currency">Currency</Label>
                 <Select value={form.currency} onValueChange={v => setForm({...form, currency: v})}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger id="currency"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="RUB">RUB (\u20BD)</SelectItem>
                     <SelectItem value="INR">INR (\u20B9)</SelectItem>
