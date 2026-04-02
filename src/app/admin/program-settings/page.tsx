@@ -313,7 +313,12 @@ export default function ProgramSettingsPage() {
           <Separator />
           <div className="grid gap-4 md:grid-cols-3">
             <div className="grid gap-2">
-              <Label htmlFor="currency">Currency</Label>
+              <label
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                htmlFor="currency"
+              >
+                Currency
+              </label>
               <Select
                 value={settings.currency}
                 onValueChange={(v) => setSettings({ ...settings, currency: v })}

@@ -346,7 +346,12 @@ export default function ProgramsPage() {
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="currency">Currency</Label>
+                <label
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  htmlFor="currency"
+                >
+                  Currency
+                </label>
                 <Select value={form.currency} onValueChange={v => setForm({...form, currency: v})}>
                   <SelectTrigger id="currency"><SelectValue /></SelectTrigger>
                   <SelectContent>
