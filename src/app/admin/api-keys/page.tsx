@@ -343,13 +343,13 @@ export default function ApiKeysPage() {
                       <TableCell className="text-right text-sm">{(key._count?.usageLogs || 0).toLocaleString()}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {key.lastUsedAt
-                          ? new Date(key.lastUsedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+                          ? new Date(key.lastUsedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
                           : 'Never'}
                       </TableCell>
                       <TableCell className="text-sm">
                         {key.expiresAt ? (
                           <span className={isExpired ? 'text-destructive' : 'text-muted-foreground'}>
-                            {isExpired ? 'Expired' : new Date(key.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            {isExpired ? 'Expired' : new Date(key.expiresAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
                           </span>
                         ) : (
                           <span className="text-muted-foreground">Never</span>

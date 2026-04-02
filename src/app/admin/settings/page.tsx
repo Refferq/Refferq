@@ -175,7 +175,7 @@ export default function SettingsPage() {
                 <div>
                   <p className="text-sm font-medium">Account Created</p>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(profile.createdAt).toLocaleDateString('en-IN', {
+                    {new Date(profile.createdAt).toLocaleDateString(undefined, {
                       day: 'numeric',
                       month: 'long',
                       year: 'numeric',

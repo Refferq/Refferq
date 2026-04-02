@@ -400,7 +400,7 @@ export default function CustomerDetailPage() {
                 <span className="text-sm text-muted-foreground">Estimated Value</span>
                 <span className="flex items-center gap-1 font-semibold">
                   <IndianRupee className="h-3.5 w-3.5" />
-                  {referral.estimatedValue.toLocaleString('en-IN')}
+                  {referral.estimatedValue.toLocaleString(undefined)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -412,7 +412,7 @@ export default function CustomerDetailPage() {
                 <span className="text-sm font-medium">Est. Commission</span>
                 <span className="flex items-center gap-1 text-lg font-bold text-primary">
                   <IndianRupee className="h-4 w-4" />
-                  {estimatedCommission.toLocaleString('en-IN')}
+                  {estimatedCommission.toLocaleString(undefined)}
                 </span>
               </div>
             </CardContent>
@@ -471,13 +471,13 @@ export default function CustomerDetailPage() {
                   <div>
                     <p className="text-sm font-medium">Lead Submitted</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(referral.createdAt).toLocaleDateString('en-IN', {
+                      {new Date(referral.createdAt).toLocaleDateString(undefined, {
                         day: 'numeric',
                         month: 'long',
                         year: 'numeric',
                       })}
                       {' at '}
-                      {new Date(referral.createdAt).toLocaleTimeString('en-IN', {
+                      {new Date(referral.createdAt).toLocaleTimeString(undefined, {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}

@@ -392,7 +392,7 @@ export default function ApiAnalyticsPage() {
                           <TableCell className="text-sm text-muted-foreground">{log.apiKey?.name || '—'}</TableCell>
                           <TableCell className="text-xs text-muted-foreground font-mono">{log.ipAddress || '—'}</TableCell>
                           <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                            {new Date(log.createdAt).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: 'numeric', month: 'short' })}
+                            {new Date(log.createdAt).toLocaleString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', day: 'numeric', month: 'short' })}
                           </TableCell>
                         </TableRow>
                       ))}

@@ -140,7 +140,7 @@ export default function AdminDashboardPage() {
   const statCards = [
     {
       title: 'Estimated Revenue',
-      value: `₹${stats ? (stats.totalEstimatedRevenue / 100).toFixed(2) : '0.00'}`,
+      value: `₽${stats ? (stats.totalEstimatedRevenue / 100).toFixed(2) : '0.00'}`,
       icon: IndianRupee,
       description: 'Total projected value',
       trend: '+12%',
@@ -150,7 +150,7 @@ export default function AdminDashboardPage() {
     },
     {
       title: 'Confirmed Revenue',
-      value: `₹${stats ? (stats.totalRevenue / 100).toFixed(2) : '0.00'}`,
+      value: `₽${stats ? (stats.totalRevenue / 100).toFixed(2) : '0.00'}`,
       icon: TrendingUp,
       description: 'Approved transactions',
       color: 'text-emerald-600',
@@ -158,7 +158,7 @@ export default function AdminDashboardPage() {
     },
     {
       title: 'Commission Owed',
-      value: `₹${stats ? (stats.totalEstimatedCommission / 100).toFixed(2) : '0.00'}`,
+      value: `₽${stats ? (stats.totalEstimatedCommission / 100).toFixed(2) : '0.00'}`,
       icon: Wallet,
       description: 'Pending payouts',
       color: 'text-amber-600',
@@ -376,7 +376,7 @@ export default function AdminDashboardPage() {
                         <p className="text-xs text-muted-foreground font-mono">{affiliate.referralCode}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-sm font-semibold">₹{(affiliate.totalRevenue / 100).toFixed(2)}</p>
+                        <p className="text-sm font-semibold">₽{(affiliate.totalRevenue / 100).toFixed(2)}</p>
                         <p className="text-[11px] text-muted-foreground">{affiliate.totalReferrals} referrals</p>
                       </div>
                     </div>

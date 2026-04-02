@@ -288,7 +288,7 @@ export default function CustomersPage() {
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm font-medium">
                         <IndianRupee className="h-3.5 w-3.5" />
-                        {referral.estimatedValue.toLocaleString('en-IN')}
+                        {referral.estimatedValue.toLocaleString(undefined)}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -297,7 +297,7 @@ export default function CustomersPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {new Date(referral.createdAt).toLocaleDateString('en-IN', {
+                      {new Date(referral.createdAt).toLocaleDateString(undefined, {
                         day: 'numeric',
                         month: 'short',
                         year: 'numeric',

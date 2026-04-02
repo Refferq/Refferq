@@ -66,11 +66,11 @@ export async function GET(request: NextRequest) {
         weekStart.setDate(weekStart.getDate() - weekStart.getDay());
         weekStart.setHours(0, 0, 0, 0);
         cohortKey = weekStart.toISOString().slice(0, 10);
-        cohortLabel = `Week of ${weekStart.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`;
+        cohortLabel = `Week of ${weekStart.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
         cohortStart = weekStart;
       } else {
         cohortKey = `${joinDate.getFullYear()}-${String(joinDate.getMonth() + 1).padStart(2, '0')}`;
-        cohortLabel = joinDate.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+        cohortLabel = joinDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
         cohortStart = new Date(joinDate.getFullYear(), joinDate.getMonth(), 1);
       }
 

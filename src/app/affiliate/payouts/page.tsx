@@ -46,7 +46,7 @@ export default function PayoutsPage() {
   const [payouts, setPayouts] = useState<Payout[]>([]);
   const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState(0);
-  const [currencySymbol, setCurrencySymbol] = useState('₹');
+  const [currencySymbol, setCurrencySymbol] = useState('₽');
 
   useEffect(() => {
     if (!authLoading && user) fetchPayouts();
@@ -64,7 +64,7 @@ export default function PayoutsPage() {
       if (payData.success) setPayouts(payData.payouts || []);
       if (profileData.success) {
         setBalance(profileData.affiliate?.balanceCents || 0);
-        setCurrencySymbol(profileData.currencySymbol || '₹');
+        setCurrencySymbol(profileData.currencySymbol || '₽');
       }
     } catch (error) {
       console.error('Failed to fetch payouts:', error);
@@ -74,7 +74,7 @@ export default function PayoutsPage() {
   };
 
   const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+    new Date(date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
   const formatCurrency = (cents: number) =>
     `${currencySymbol}${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
