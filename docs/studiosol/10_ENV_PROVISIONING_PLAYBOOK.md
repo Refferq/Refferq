@@ -15,6 +15,7 @@
 - `RESEND_FROM_EMAIL`
 - `TRACKING_ALLOWED_ORIGINS`
 - `WEBHOOK_SECRET`
+- `CRON_SECRET`
 
 Шаблон: [`.env.launch.example`](/Users/kmrkzn/Workspace/Projects/SS_AFFSPA/.env.launch.example)
 
@@ -28,6 +29,7 @@ npm run launch:secrets
 
 - `JWT_SECRET`
 - `WEBHOOK_SECRET`
+- `CRON_SECRET`
 
 ## 4. Порядок заполнения
 
@@ -35,8 +37,9 @@ npm run launch:secrets
 2. Заполнить `NEXT_PUBLIC_APP_URL` staging-доменом.
 3. Указать `RESEND_API_KEY` и `RESEND_FROM_EMAIL`.
 4. Указать `TRACKING_ALLOWED_ORIGINS` (comma-separated absolute origins).
-5. Добавить сгенерированные `JWT_SECRET` и `WEBHOOK_SECRET`.
-6. Повторить те же шаги для production.
+5. Добавить сгенерированные `JWT_SECRET`, `WEBHOOK_SECRET`, `CRON_SECRET`.
+6. Явно отключить dev OTP bypass: `OTP_DEV_MODE=0`.
+7. Повторить те же шаги для production.
 
 ## 5. Проверка
 
@@ -50,6 +53,18 @@ npm run launch:env:strict
 
 ```bash
 npm run launch:check
+```
+
+2a. Program policy gate:
+
+```bash
+npm run launch:policy:strict
+```
+
+2b. Если `ProgramSettings` отсутствуют (однократно):
+
+```bash
+npm run launch:policy:bootstrap
 ```
 
 2a. One-shot gate (после заполнения staging vars):
@@ -80,4 +95,5 @@ npm run staging:dry-run
 
 - `launch:env:strict` проходит без missing/placeholder/invalid.
 - `launch:check` проходит полностью.
+- `launch:policy:strict` проходит без policy errors.
 - `staging:dry-run` проходит полным сценарием (включая admin segment).

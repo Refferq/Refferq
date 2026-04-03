@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  hasConversionCorrelationIds,
   resolveConversionEventContract,
+  resolveConversionCorrelationIds,
   resolveTrackConversionIdempotency,
   resolveWebhookConversionExternalIds,
 } from '../src/lib/conversion-idempotency';
@@ -88,4 +90,38 @@ test('resolveWebhookConversionExternalIds: direct fields override metadata', () 
     externalEventId: 'evt_2',
     externalOrderId: 'ord_2',
   });
+});
+
+test('resolveConversionCorrelationIds: normalizes event/order/idempotency identifiers', () => {
+  const resolved = resolveConversionCorrelationIds({
+    eventId: ' evt_a ',
+    orderId: ' ord_a ',
+    idempotencyKey: ' idem_a ',
+  });
+
+  assert.deepEqual(resolved, {
+    eventId: 'evt_a',
+    orderId: 'ord_a',
+    idempotencyKey: 'idem_a',
+  });
+});
+
+test('hasConversionCorrelationIds: requires at least one identifier', () => {
+  assert.equal(hasConversionCorrelationIds({
+    eventId: '',
+    orderId: '   ',
+    idempotencyKey: null,
+  }), false);
+
+  assert.equal(hasConversionCorrelationIds({
+    eventId: 'evt_only',
+  }), true);
+
+  assert.equal(hasConversionCorrelationIds({
+    orderId: 'ord_only',
+  }), true);
+
+  assert.equal(hasConversionCorrelationIds({
+    idempotencyKey: 'idem_only',
+  }), true);
 });

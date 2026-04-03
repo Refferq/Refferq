@@ -11,6 +11,7 @@ const REQUIRED_VARS = [
   'RESEND_FROM_EMAIL',
   'TRACKING_ALLOWED_ORIGINS',
   'WEBHOOK_SECRET',
+  'CRON_SECRET',
 ] as const;
 
 const PLACEHOLDER_PATTERNS = [
@@ -20,6 +21,7 @@ const PLACEHOLDER_PATTERNS = [
   /^sk_test_\.\.\.$/i,
   /^pk_test_\.\.\.$/i,
   /^whsec_\.\.\.$/i,
+  /^<.*>$/,
 ];
 
 function parseDotEnvFile(filePath: string): Record<string, string> {
@@ -60,6 +62,11 @@ function hasEnoughJwtEntropy(jwtSecret: string): boolean {
   return jwtSecret.trim().length >= 32;
 }
 
+function isTruthy(value: string | undefined): boolean {
+  if (!value) return false;
+  return ['1', 'true', 'yes', 'on'].includes(value.trim().toLowerCase());
+}
+
 function main() {
   const mode: Mode = process.argv.includes('--strict') ? 'strict' : 'report';
   const cwd = process.cwd();
@@ -91,9 +98,28 @@ function main() {
     invalid.push('JWT_SECRET (must be >= 32 chars)');
   }
 
+  const webhookSecret = mergedEnv.WEBHOOK_SECRET;
+  if (webhookSecret && webhookSecret.trim().length < 32) {
+    invalid.push('WEBHOOK_SECRET (must be >= 32 chars)');
+  }
+
+  const cronSecret = mergedEnv.CRON_SECRET;
+  if (cronSecret && cronSecret.trim().length < 32) {
+    invalid.push('CRON_SECRET (must be >= 32 chars)');
+  }
+
   const appUrl = mergedEnv.NEXT_PUBLIC_APP_URL;
   if (appUrl && !/^https?:\/\//i.test(appUrl)) {
     invalid.push('NEXT_PUBLIC_APP_URL (must include http:// or https://)');
+  }
+
+  const resendFromEmail = mergedEnv.RESEND_FROM_EMAIL;
+  if (
+    resendFromEmail &&
+    !/^[^<>\s]+@[^<>\s]+\.[^<>\s]+$/.test(resendFromEmail) &&
+    !/^.+\s<[^<>\s]+@[^<>\s]+\.[^<>\s]+>$/.test(resendFromEmail)
+  ) {
+    invalid.push('RESEND_FROM_EMAIL (must be email or "Name <email>")');
   }
 
   const allowedOrigins = mergedEnv.TRACKING_ALLOWED_ORIGINS;
@@ -105,6 +131,10 @@ function main() {
     if (origins.length === 0 || origins.some((origin) => !/^https?:\/\//i.test(origin))) {
       invalid.push('TRACKING_ALLOWED_ORIGINS (comma-separated absolute origins)');
     }
+  }
+
+  if (mode === 'strict' && isTruthy(mergedEnv.OTP_DEV_MODE)) {
+    invalid.push('OTP_DEV_MODE (must be disabled for launch: expected 0/false/unset)');
   }
 
   console.log('Launch env validation');

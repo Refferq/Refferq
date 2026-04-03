@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { validateTrackingApiKey } from '@/lib/tracking-auth';
 import { buildTrackingCorsHeaders } from '@/lib/tracking-cors';
 import {
+  hasConversionCorrelationIds,
   resolveConversionEventContract,
   resolveTrackConversionIdempotency,
 } from '@/lib/conversion-idempotency';
@@ -172,11 +173,51 @@ export async function POST(req: NextRequest) {
       headerIdempotencyKey: req.headers.get('idempotency-key'),
     });
 
-    if (normalizedOrderId || requestIdempotencyKey) {
+    const hasCorrelationIds = hasConversionCorrelationIds({
+      eventId: eventContract.eventId,
+      orderId: normalizedOrderId,
+      idempotencyKey: requestIdempotencyKey,
+    });
+
+    if (!hasCorrelationIds) {
+      await logSystemAuditAction({
+        preferredActorId: keyValidation.userId,
+        action: 'conversion_rejected',
+        objectType: 'conversion_event',
+        objectId: `rejected_${Date.now()}`,
+        payload: {
+          source: 'track_conversion',
+          reason: 'missing_correlation_identifiers',
+          referralCode,
+          occurredAt: eventContract.occurredAt,
+        },
+      });
+
+      return withCors(NextResponse.json(
+        {
+          success: false,
+          error: 'At least one correlation identifier is required: event_id/eventId, order_id/orderId, or idempotency_key/idempotencyKey',
+        },
+        { status: 400 }
+      ));
+    }
+
+    if (eventContract.eventId || normalizedOrderId || requestIdempotencyKey) {
       const existingConversion = await prisma.conversion.findFirst({
         where: {
           affiliateId: affiliate.id,
           OR: [
+            ...(eventContract.eventId ? [{
+              eventMetadata: {
+                path: ['eventId'],
+                equals: eventContract.eventId,
+              },
+            }, {
+              eventMetadata: {
+                path: ['event_id'],
+                equals: eventContract.eventId,
+              },
+            }] : []),
             ...(normalizedOrderId ? [{
               eventMetadata: {
                 path: ['orderId'],
@@ -204,7 +245,7 @@ export async function POST(req: NextRequest) {
           preferredActorId: keyValidation.userId,
           action: 'conversion_duplicate',
           objectType: 'conversion_event',
-          objectId: normalizedOrderId || requestIdempotencyKey || existingConversion.id,
+          objectId: eventContract.eventId || normalizedOrderId || requestIdempotencyKey || existingConversion.id,
           payload: {
             source: 'track_conversion',
             referralCode,

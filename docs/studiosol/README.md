@@ -15,6 +15,11 @@
 9. `09_STAGING_DRY_RUN_PROTOCOL.md` — протокол staging dry run и автоматизированный сценарий.
 10. `10_ENV_PROVISIONING_PLAYBOOK.md` — playbook заполнения env/secrets и закрытия launch env-gate.
 11. `11_FINAL_LAUNCH_RUNBOOK.md` — финальный one-shot runbook для staging финализации и production rollout.
+12. `12_PR_DRAFT.md` — черновик PR для фиксации выполненных launch hardening изменений.
+13. `13_IMPLEMENTATION_PLAN_STUDIOSLOW_2026-04-03.md` — актуальный пофазный план реализации для `studioslow.ru` до go-live.
+14. `14_STUDIOSLOW_EVENT_CONTRACT.md` — финальный server-side контракт событий для интеграции StudioSlow -> Refferq.
+15. `15_READINESS_REPORT_2026-04-03.md` — свежий readiness-статус с закрытыми техническими gate и оставшимися внешними блокерами.
+16. `16_LAUNCH_EVIDENCE_PROTOCOL.md` — протокол генерации формального launch evidence отчёта.
 
 ## Как использовать
 

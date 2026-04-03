@@ -8,6 +8,7 @@
 - `npm run check` должен быть green.
 - `npm run audit:prod` должен быть без high/critical.
 - `npm run launch:env:strict` должен проходить без missing/placeholder env.
+- `npm run launch:policy:strict` должен проходить без policy errors.
 
 2. Данные и миграции
 - Проверить `DATABASE_URL` на target production.

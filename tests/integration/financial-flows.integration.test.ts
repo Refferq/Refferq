@@ -178,6 +178,208 @@ it(
 );
 
 it(
+  'integration: track conversion rejects payloads without correlation identifiers',
+  async () => {
+    const [{ prisma }, trackModule] = await Promise.all([
+      import('@/lib/prisma'),
+      import('@/app/api/track/conversion/route'),
+    ]);
+    const trackPost = trackModule.POST;
+
+    const suffix = `it_track_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+    const hashedTestPassword = await bcrypt.hash(
+      `integration-test-password-${suffix}`,
+      12
+    );
+    const adminEmail = `admin_${suffix}@example.com`;
+    const affiliateEmail = `affiliate_${suffix}@example.com`;
+    const referralCode = `REF${Math.floor(Math.random() * 1_000_000)}`;
+    const rawApiKey = `rfq_${suffix}_${crypto.randomBytes(8).toString('hex')}`;
+    const apiKeyHash = crypto.createHash('sha256').update(rawApiKey).digest('hex');
+
+    const adminUser = await prisma.user.create({
+      data: {
+        email: adminEmail,
+        name: 'Integration Admin',
+        password: hashedTestPassword,
+        role: 'ADMIN',
+        status: 'ACTIVE',
+      },
+    });
+
+    const affiliateUser = await prisma.user.create({
+      data: {
+        email: affiliateEmail,
+        name: 'Integration Affiliate',
+        password: hashedTestPassword,
+        role: 'AFFILIATE',
+        status: 'ACTIVE',
+      },
+    });
+
+    const affiliate = await prisma.affiliate.create({
+      data: {
+        userId: affiliateUser.id,
+        referralCode,
+        payoutDetails: {},
+      },
+    });
+
+    await prisma.apiKey.create({
+      data: {
+        name: `integration-track-key-${suffix}`,
+        keyHash: apiKeyHash,
+        prefix: rawApiKey.slice(0, 8),
+        userId: adminUser.id,
+        scopes: ['write'],
+        isActive: true,
+      },
+    });
+
+    try {
+      const request = new Request('http://localhost/api/track/conversion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': rawApiKey,
+          Origin: 'http://localhost:3000',
+        },
+        body: JSON.stringify({
+          referralCode,
+          customerEmail: `customer_${suffix}@example.com`,
+          amount: 2500,
+          currency: 'RUB',
+          // Intentionally omitting event/order/idempotency identifiers
+        }),
+      }) as NextRequest;
+
+      const response = await trackPost(request);
+      const json = await response.json();
+
+      assert.equal(response.status, 400);
+      assert.equal(json.success, false);
+      assert.match(String(json.error), /At least one correlation identifier is required/i);
+
+      const conversionCount = await prisma.conversion.count({
+        where: { affiliateId: affiliate.id },
+      });
+      assert.equal(conversionCount, 0);
+    } finally {
+      await prisma.auditLog.deleteMany({
+        where: { actorId: { in: [adminUser.id, affiliateUser.id] } },
+      });
+      await prisma.commission.deleteMany({ where: { affiliateId: affiliate.id } });
+      await prisma.conversion.deleteMany({ where: { affiliateId: affiliate.id } });
+      await prisma.apiKey.deleteMany({ where: { userId: adminUser.id } });
+      await prisma.referral.deleteMany({ where: { affiliateId: affiliate.id } });
+      await prisma.affiliate.deleteMany({ where: { id: affiliate.id } });
+      await prisma.user.deleteMany({ where: { id: { in: [adminUser.id, affiliateUser.id] } } });
+    }
+  }
+);
+
+it(
+  'integration: webhook conversion rejects payloads without event_id/order_id',
+  async () => {
+    const [{ prisma }, webhookModule] = await Promise.all([
+      import('@/lib/prisma'),
+      import('@/app/api/webhook/conversion/route'),
+    ]);
+    const webhookPost = webhookModule.POST;
+
+    const suffix = `it_webhook_contract_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+    const hashedTestPassword = await bcrypt.hash(
+      `integration-test-password-${suffix}`,
+      12
+    );
+    const adminEmail = `admin_${suffix}@example.com`;
+    const affiliateEmail = `affiliate_${suffix}@example.com`;
+    const referralCode = `REF${Math.floor(Math.random() * 1_000_000)}`;
+    const rawApiKey = `rfq_${suffix}_${crypto.randomBytes(8).toString('hex')}`;
+    const apiKeyHash = crypto.createHash('sha256').update(rawApiKey).digest('hex');
+
+    const adminUser = await prisma.user.create({
+      data: {
+        email: adminEmail,
+        name: 'Integration Admin',
+        password: hashedTestPassword,
+        role: 'ADMIN',
+        status: 'ACTIVE',
+      },
+    });
+
+    const affiliateUser = await prisma.user.create({
+      data: {
+        email: affiliateEmail,
+        name: 'Integration Affiliate',
+        password: hashedTestPassword,
+        role: 'AFFILIATE',
+        status: 'ACTIVE',
+      },
+    });
+
+    const affiliate = await prisma.affiliate.create({
+      data: {
+        userId: affiliateUser.id,
+        referralCode,
+        payoutDetails: {},
+      },
+    });
+
+    await prisma.apiKey.create({
+      data: {
+        name: `integration-webhook-key-${suffix}`,
+        keyHash: apiKeyHash,
+        prefix: rawApiKey.slice(0, 8),
+        userId: adminUser.id,
+        scopes: ['write'],
+        isActive: true,
+      },
+    });
+
+    try {
+      const request = new Request('http://localhost/api/webhook/conversion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': rawApiKey,
+        },
+        body: JSON.stringify({
+          event_type: 'PURCHASE',
+          customer_email: `customer_${suffix}@example.com`,
+          amount_cents: 50000,
+          currency: 'RUB',
+          referral_code: referralCode,
+          // Intentionally omitting event_id/order_id
+        }),
+      }) as NextRequest;
+
+      const response = await webhookPost(request);
+      const json = await response.json();
+
+      assert.equal(response.status, 400);
+      assert.equal(json.success, false);
+      assert.match(String(json.message), /At least one correlation identifier is required/i);
+
+      const conversionCount = await prisma.conversion.count({
+        where: { affiliateId: affiliate.id },
+      });
+      assert.equal(conversionCount, 0);
+    } finally {
+      await prisma.auditLog.deleteMany({
+        where: { actorId: { in: [adminUser.id, affiliateUser.id] } },
+      });
+      await prisma.commission.deleteMany({ where: { affiliateId: affiliate.id } });
+      await prisma.conversion.deleteMany({ where: { affiliateId: affiliate.id } });
+      await prisma.apiKey.deleteMany({ where: { userId: adminUser.id } });
+      await prisma.referral.deleteMany({ where: { affiliateId: affiliate.id } });
+      await prisma.affiliate.deleteMany({ where: { id: affiliate.id } });
+      await prisma.user.deleteMany({ where: { id: { in: [adminUser.id, affiliateUser.id] } } });
+    }
+  }
+);
+
+it(
   'integration: auto payout marks approved commissions as paid and decrements balance',
   async () => {
     const [{ prisma }, autoPayoutModule] = await Promise.all([

@@ -71,6 +71,7 @@ interface ProgramSettings {
   currency: string;
   portalSubdomain: string;
   minimumPayoutThreshold: number;
+  minPayoutCents: number;
   payoutTerm: string;
   commissionHoldDays: number;
   commissionRules: CommissionRule[];
@@ -122,7 +123,15 @@ export default function ProgramSettingsPage() {
       const res = await fetch('/api/admin/settings');
       const data = await res.json();
       if (data.success) {
-        setSettings(data.settings);
+        const raw = data.settings as Partial<ProgramSettings>;
+        const resolvedMinPayout = Number(
+          raw.minPayoutCents ?? raw.minimumPayoutThreshold ?? 100000
+        );
+        setSettings({
+          ...(data.settings as ProgramSettings),
+          minPayoutCents: Number.isFinite(resolvedMinPayout) ? resolvedMinPayout : 100000,
+          minimumPayoutThreshold: Number.isFinite(resolvedMinPayout) ? resolvedMinPayout : 100000,
+        });
       }
     } catch (error) {
       console.error('Failed to fetch settings:', error);
@@ -145,7 +154,8 @@ export default function ProgramSettingsPage() {
           websiteUrl: settings.websiteUrl,
           currency: settings.currency,
           portalSubdomain: settings.portalSubdomain,
-          minimumPayoutThreshold: settings.minimumPayoutThreshold,
+          minimumPayoutThreshold: settings.minPayoutCents,
+          minPayoutCents: settings.minPayoutCents,
           payoutTerm: settings.payoutTerm,
           commissionHoldDays: settings.commissionHoldDays,
         }),
@@ -336,13 +346,17 @@ export default function ProgramSettingsPage() {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="minimumPayoutThreshold">Min Payout Threshold (cents)</Label>
+              <Label htmlFor="minPayoutCents">Min Payout Threshold (cents)</Label>
               <Input
-                id="minimumPayoutThreshold"
+                id="minPayoutCents"
                 type="number"
-                value={settings.minimumPayoutThreshold}
+                value={settings.minPayoutCents}
                 onChange={(e) =>
-                  setSettings({ ...settings, minimumPayoutThreshold: parseInt(e.target.value) || 0 })
+                  setSettings({
+                    ...settings,
+                    minPayoutCents: parseInt(e.target.value) || 0,
+                    minimumPayoutThreshold: parseInt(e.target.value) || 0,
+                  })
                 }
               />
             </div>
@@ -432,7 +446,7 @@ export default function ProgramSettingsPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="PERCENTAGE">Percentage</SelectItem>
-                          <SelectItem value="FLAT">Flat Amount</SelectItem>
+                          <SelectItem value="FIXED">Flat Amount</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -446,7 +460,7 @@ export default function ProgramSettingsPage() {
                         )}
                         <Input
                           type="number"
-                          className={ruleForm.type === 'FLAT' ? 'pl-9' : ''}
+                          className={ruleForm.type === 'FIXED' ? 'pl-9' : ''}
                           value={ruleForm.value}
                           onChange={(e) => setRuleForm({ ...ruleForm, value: e.target.value })}
                           placeholder={ruleForm.type === 'PERCENTAGE' ? '10' : '500'}

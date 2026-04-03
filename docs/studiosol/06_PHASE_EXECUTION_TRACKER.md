@@ -1,6 +1,6 @@
 # StudioSol Referral — Phase Execution Tracker
 
-Дата обновления: **2 апреля 2026**
+Дата обновления: **3 апреля 2026**
 
 ## 1. Execution Rules
 
@@ -29,6 +29,27 @@
   - duplicate conversion idempotent ✅
   - admin auto payout step ✅ (через auto-login `STAGING_ADMIN_EMAIL/STAGING_ADMIN_PASSWORD`).
 - env/secrets provisioning playbook добавлен (`10_ENV_PROVISIONING_PLAYBOOK.md`).
+- добавлен финальный план реализации до go-live (`13_IMPLEMENTATION_PLAN_STUDIOSLOW_2026-04-03.md`).
+- зафиксирован интеграционный event contract StudioSlow -> Refferq (`14_STUDIOSLOW_EVENT_CONTRACT.md`).
+- усилен launch env-gate:
+  - `CRON_SECRET` обязателен;
+  - `OTP_DEV_MODE` запрещён в strict launch режиме;
+  - дополнительные проверки `WEBHOOK_SECRET/CRON_SECRET` и placeholder-значений.
+- усилен conversion contract на runtime:
+  - `/api/track/conversion` требует хотя бы один correlation id (`event_id|order_id|idempotency_key`);
+  - `/api/webhook/conversion` требует хотя бы один correlation id (`event_id|order_id`);
+  - duplicate check в tracking теперь учитывает `event_id` помимо `order_id/idempotency_key`.
+- добавлен автоматический контрактный smoke: `npm run staging:contract-smoke`.
+- исправлен `/api/admin/settings`:
+  - корректный маппинг полей `ProgramSettings` (вместо legacy-полей);
+  - валидация payload и нормализация `commission rule type` (`FLAT -> FIXED`);
+  - audit logging для update/delete commission rules.
+  - синхронизированы payout threshold поля (`minimumPayoutThreshold <-> minPayoutCents`) для согласованного поведения UI и auto-payout.
+- добавлены policy-gates:
+  - `launch:policy:report|strict`;
+  - `launch:policy:bootstrap` для создания baseline `ProgramSettings`;
+  - `launch:gate` теперь включает `launch:policy:strict`.
+  - `launch:gate` поддерживает опциональный `LAUNCH_INCLUDE_CONTRACT_SMOKE=1`.
 
 ### In Progress
 

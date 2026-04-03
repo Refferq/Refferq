@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db, prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 import {
+  hasConversionCorrelationIds,
   resolveConversionEventContract,
   resolveWebhookConversionExternalIds,
 } from '@/lib/conversion-idempotency';
@@ -149,6 +150,31 @@ export async function POST(request: NextRequest) {
       orderId: eventContract.orderId,
       eventMetadata,
     });
+
+    if (!hasConversionCorrelationIds({ eventId: externalEventId, orderId: externalOrderId })) {
+      await logSystemAuditAction({
+        preferredActorId: authActorUserId,
+        action: 'conversion_rejected',
+        objectType: 'conversion_event',
+        objectId: `rejected_${Date.now()}`,
+        payload: {
+          reason: 'missing_correlation_identifiers',
+          source: 'webhook_conversion',
+          eventType: normalizedEventType,
+          customerEmail,
+          occurredAt: eventContract.occurredAt,
+        },
+      });
+
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'At least one correlation identifier is required: event_id/eventId or order_id/orderId',
+        },
+        { status: 400 }
+      );
+    }
+
     if (externalEventId || externalOrderId) {
       const duplicate = await prisma.conversion.findFirst({
         where: {

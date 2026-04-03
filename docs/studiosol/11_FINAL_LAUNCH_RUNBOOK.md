@@ -25,6 +25,8 @@ npm run launch:secrets
 - `RESEND_FROM_EMAIL`
 - `TRACKING_ALLOWED_ORIGINS`
 - `WEBHOOK_SECRET`
+- `CRON_SECRET`
+- `OTP_DEV_MODE=0`
 
 4. Прогнать env-gate:
 
@@ -38,7 +40,19 @@ npm run launch:env:strict
 npm run launch:check
 ```
 
-6. Прогнать staging E2E smoke:
+6. Проверить policy gate (ProgramSettings):
+
+```bash
+npm run launch:policy:strict
+```
+
+Если `ProgramSettings record is missing`, сначала один раз:
+
+```bash
+npm run launch:policy:bootstrap
+```
+
+7. Прогнать staging E2E smoke:
 
 ```bash
 STAGING_BASE_URL="https://<staging-domain>" \
@@ -50,7 +64,7 @@ STAGING_ADMIN_PASSWORD="<admin-password>" \
 npm run staging:dry-run
 ```
 
-7. (Опционально) one-shot проверка одним запуском:
+8. (Опционально) one-shot проверка одним запуском:
 
 ```bash
 STAGING_BASE_URL="https://<staging-domain>" \
@@ -60,6 +74,18 @@ STAGING_ADMIN_USER_ID="<admin-user-id>" \
 STAGING_ADMIN_EMAIL="<admin-email>" \
 STAGING_ADMIN_PASSWORD="<admin-password>" \
 npm run launch:gate
+```
+
+8a. (Опционально, рекомендовано перед production) включить контрактный smoke:
+
+```bash
+LAUNCH_INCLUDE_CONTRACT_SMOKE=1 npm run launch:gate
+```
+
+9. Сгенерировать формальный evidence-отчёт для Go/No-Go:
+
+```bash
+npm run launch:evidence
 ```
 
 ## 2. Production Rollout
@@ -79,6 +105,7 @@ Go только если:
 
 - `launch:env:strict` ✅
 - `launch:check` ✅
+- `launch:policy:strict` ✅
 - `staging:dry-run` ✅
 - post-deploy smoke ✅
 

@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { logAuditAction } from '@/lib/audit';
+import {
+  normalizeCommissionRuleType,
+  normalizeProgramSettingsPatch,
+} from '@/lib/program-settings-validation';
 
 
 export async function GET(request: NextRequest) {
@@ -24,17 +28,21 @@ export async function GET(request: NextRequest) {
 
     // If no settings exist, create default settings
     if (!programSettings) {
+      const appUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
       programSettings = await prisma.programSettings.create({
         data: {
           programId: `prg_${Date.now()}`,
-          productName: 'BsBot',
-          programName: "BsBot's Affiliate Program",
-          websiteUrl: 'https://kyns.com',
+          productName: 'StudioSlow',
+          programName: "StudioSlow's Affiliate Program",
+          websiteUrl: appUrl,
           currency: 'RUB',
-          portalSubdomain: 'bsbot.tolt.io',
+          portalSubdomain: 'affiliate',
           minimumPayoutThreshold: 0,
-          payoutTerm: 'NET-15',
-          commissionHoldDays: 30
+          payoutTerm: 'NET-30',
+          commissionHoldDays: 30,
+          minPayoutCents: 100000,
+          payoutFrequency: 'MONTHLY',
+          autoApprovePayouts: false,
         }
       });
     }
@@ -88,35 +96,41 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
+    const { data: sanitizedData, errors } = normalizeProgramSettingsPatch(body);
+
+    if (errors.length > 0) {
+      return NextResponse.json(
+        { error: 'Invalid settings payload', details: errors },
+        { status: 400 }
+      );
+    }
 
     // Get existing settings or create new one
     let programSettings = await prisma.programSettings.findFirst();
 
     if (!programSettings) {
+      const appUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
       programSettings = await prisma.programSettings.create({
         data: {
           programId: `prg_${Date.now()}`,
-          productName: 'BsBot',
-          programName: "BsBot's Affiliate Program",
-          websiteUrl: 'https://kyns.com',
+          productName: 'StudioSlow',
+          programName: "StudioSlow's Affiliate Program",
+          websiteUrl: appUrl,
           currency: 'RUB',
-          portalSubdomain: 'bsbot.tolt.io'
+          portalSubdomain: 'affiliate',
+          payoutTerm: 'NET-30',
+          minPayoutCents: 100000,
+          payoutFrequency: 'MONTHLY',
+          autoApprovePayouts: false,
         }
       });
     }
 
-    // Update program settings — only allow specific fields (prevent mass assignment)
-    const allowedFields = [
-      'programName', 'productName', 'websiteUrl', 'currency', 'portalSubdomain',
-      'companyName', 'companyLogo', 'primaryColor', 'secondaryColor',
-      'cookieDuration', 'minimumPayout', 'payoutFrequency', 'autoApprove',
-      'commissionType', 'commissionValue', 'brandingEnabled', 'commissionHoldDays'
-    ];
-    const sanitizedData: Record<string, any> = {};
-    for (const key of allowedFields) {
-      if (key in body && body[key] !== undefined) {
-        sanitizedData[key] = body[key];
-      }
+    if (Object.keys(sanitizedData).length === 0) {
+      return NextResponse.json(
+        { error: 'No valid settings fields provided' },
+        { status: 400 }
+      );
     }
 
     const updatedSettings = await prisma.programSettings.update({
@@ -173,10 +187,19 @@ export async function POST(request: NextRequest) {
     if (action === 'create') {
       // Create new commission rule
       const { name, type, value, conditions, isDefault } = ruleData;
+      const normalizedType = normalizeCommissionRuleType(type);
 
-      if (!name || !type || value === undefined) {
+      if (!name || !normalizedType || value === undefined) {
         return NextResponse.json(
-          { error: 'Name, type, and value are required' },
+          { error: 'Name, valid type, and value are required' },
+          { status: 400 }
+        );
+      }
+
+      const numericValue = Number(value);
+      if (!Number.isFinite(numericValue) || numericValue < 0) {
+        return NextResponse.json(
+          { error: 'Value must be a non-negative number' },
           { status: 400 }
         );
       }
@@ -192,8 +215,8 @@ export async function POST(request: NextRequest) {
       const newRule = await prisma.commissionRule.create({
         data: {
           name,
-          type,
-          value,
+          type: normalizedType,
+          value: numericValue,
           conditions: conditions || {},
           isDefault: isDefault || false,
           isActive: true
@@ -230,8 +253,34 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      const normalizedUpdates: Record<string, unknown> = {};
+      if (updates.name !== undefined) normalizedUpdates.name = updates.name;
+      if (updates.value !== undefined) {
+        const numericValue = Number(updates.value);
+        if (!Number.isFinite(numericValue) || numericValue < 0) {
+          return NextResponse.json(
+            { error: 'Value must be a non-negative number' },
+            { status: 400 }
+          );
+        }
+        normalizedUpdates.value = numericValue;
+      }
+      if (updates.conditions !== undefined) normalizedUpdates.conditions = updates.conditions || {};
+      if (updates.isDefault !== undefined) normalizedUpdates.isDefault = Boolean(updates.isDefault);
+      if (updates.isActive !== undefined) normalizedUpdates.isActive = Boolean(updates.isActive);
+      if (updates.type !== undefined) {
+        const normalizedType = normalizeCommissionRuleType(updates.type);
+        if (!normalizedType) {
+          return NextResponse.json(
+            { error: 'Invalid commission rule type' },
+            { status: 400 }
+          );
+        }
+        normalizedUpdates.type = normalizedType;
+      }
+
       // If setting as default, unset other defaults
-      if (updates.isDefault) {
+      if (normalizedUpdates.isDefault) {
         await prisma.commissionRule.updateMany({
           where: {
             id: { not: id },
@@ -243,7 +292,15 @@ export async function POST(request: NextRequest) {
 
       const updatedRule = await prisma.commissionRule.update({
         where: { id },
-        data: updates
+        data: normalizedUpdates
+      });
+
+      await logAuditAction({
+        actorId: user.id,
+        action: 'UPDATE_COMMISSION_RULE',
+        objectType: 'COMMISSION_RULE',
+        objectId: updatedRule.id,
+        payload: normalizedUpdates
       });
 
       // Clear cache
@@ -269,6 +326,14 @@ export async function POST(request: NextRequest) {
 
       await prisma.commissionRule.delete({
         where: { id }
+      });
+
+      await logAuditAction({
+        actorId: user.id,
+        action: 'DELETE_COMMISSION_RULE',
+        objectType: 'COMMISSION_RULE',
+        objectId: id,
+        payload: {}
       });
 
       // Clear cache

@@ -127,3 +127,30 @@ export function resolveWebhookConversionExternalIds(
     externalOrderId: contract.orderId,
   };
 }
+
+export interface ConversionCorrelationIdsInput {
+  eventId?: unknown;
+  orderId?: unknown;
+  idempotencyKey?: unknown;
+}
+
+export interface ResolvedConversionCorrelationIds {
+  eventId: string | null;
+  orderId: string | null;
+  idempotencyKey: string | null;
+}
+
+export function resolveConversionCorrelationIds(
+  input: ConversionCorrelationIdsInput
+): ResolvedConversionCorrelationIds {
+  return {
+    eventId: normalizeOptionalString(input.eventId),
+    orderId: normalizeOptionalString(input.orderId),
+    idempotencyKey: normalizeOptionalString(input.idempotencyKey),
+  };
+}
+
+export function hasConversionCorrelationIds(input: ConversionCorrelationIdsInput): boolean {
+  const resolved = resolveConversionCorrelationIds(input);
+  return Boolean(resolved.eventId || resolved.orderId || resolved.idempotencyKey);
+}

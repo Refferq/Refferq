@@ -24,6 +24,9 @@ fi
 echo "[launch-gate] Step 1/3: quality + security + env strict"
 npm run launch:check
 
+echo "[launch-gate] Step 1.5/3: program policy strict check"
+npm run launch:policy:strict
+
 echo "[launch-gate] Step 2/3: staging dry-run env validation"
 : "${STAGING_BASE_URL:?STAGING_BASE_URL is required}"
 : "${STAGING_TRACKING_API_KEY:?STAGING_TRACKING_API_KEY is required}"
@@ -31,5 +34,10 @@ echo "[launch-gate] Step 2/3: staging dry-run env validation"
 
 echo "[launch-gate] Step 3/3: staging dry-run execution"
 npm run staging:dry-run
+
+if [[ "${LAUNCH_INCLUDE_CONTRACT_SMOKE:-0}" == "1" ]]; then
+  echo "[launch-gate] Step 3.5/3: staging contract smoke"
+  npm run staging:contract-smoke
+fi
 
 echo "[launch-gate] ✅ Launch gate passed"
