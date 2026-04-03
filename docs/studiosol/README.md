@@ -20,13 +20,18 @@
 14. `14_STUDIOSLOW_EVENT_CONTRACT.md` — финальный server-side контракт событий для интеграции StudioSlow -> Refferq.
 15. `15_READINESS_REPORT_2026-04-03.md` — свежий readiness-статус с закрытыми техническими gate и оставшимися внешними блокерами.
 16. `16_LAUNCH_EVIDENCE_PROTOCOL.md` — протокол генерации формального launch evidence отчёта.
+17. `17_BITRIX_SITE_INTEGRATION_TASK.md` — готовая постановка задачи для разработчика 1C-Битрикс (Управление сайтом) по интеграции с Refferq.
+18. `18_BUSINESS_OPERATING_MODEL.md` — бизнес-модель эксплуатации: роли, процессы, KPI, регламент.
+19. `19_FINAL_RELEASE_PACKAGING.md` — финальная упаковка релиза: артефакты, go-live/rollback, hypercare.
+20. `20_FINISH_LINE_RECOMMENDATIONS.md` — инженерные рекомендации на финише и backlog на следующий спринт.
 
 ## Как использовать
 
-1. Согласовать PRD и модель комиссий.
-2. Утвердить архитектурные решения (источник событий оплаты, холд-период, антифрод).
-3. Запустить Phase 0/1 из roadmap как MVP.
-4. По итогам MVP пересчитать KPI и перейти к Phase 2.
+1. Согласовать PRD, payout policy и definition валидной конверсии.
+2. Утвердить архитектурные решения (источник событий оплаты, hold period, anti-fraud).
+3. Передать `17_BITRIX_SITE_INTEGRATION_TASK.md` в работу Bitrix-команде.
+4. Выполнить prelaunch/go-live по `07_LAUNCH_CHECKLIST.md` и `11_FINAL_LAUNCH_RUNBOOK.md`.
+5. Зафиксировать evidence и readiness (`15` + `16`), затем перейти в hypercare режим.
 
 ## Ключевой вывод
 
