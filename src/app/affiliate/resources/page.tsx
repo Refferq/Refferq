@@ -57,6 +57,16 @@ const typeColors: Record<string, string> = {
   OTHER: 'bg-gray-100 text-gray-700',
 };
 
+const typeLabels: Record<string, string> = {
+  BANNER: 'Баннер',
+  LOGO: 'Логотип',
+  SOCIAL_POST: 'Пост для соцсетей',
+  EMAIL_TEMPLATE: 'Email-шаблон',
+  DOCUMENT: 'Документ',
+  VIDEO: 'Видео',
+  OTHER: 'Другое',
+};
+
 export default function ResourcesPage() {
   const { loading: authLoading } = useAuth();
   const [resources, setResources] = useState<Resource[]>([]);
@@ -126,9 +136,9 @@ export default function ResourcesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Resources</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Материалы</h1>
         <p className="text-muted-foreground">
-          Download marketing materials, banners, and promotional assets
+          Скачивайте маркетинговые материалы, баннеры и промо-ассеты
         </p>
       </div>
 
@@ -141,7 +151,7 @@ export default function ResourcesPage() {
             </div>
             <div>
               <p className="text-2xl font-bold">{resources.length}</p>
-              <p className="text-xs text-muted-foreground">Total Resources</p>
+              <p className="text-xs text-muted-foreground">Всего материалов</p>
             </div>
           </CardContent>
         </Card>
@@ -152,7 +162,7 @@ export default function ResourcesPage() {
             </div>
             <div>
               <p className="text-2xl font-bold">{resources.filter((r) => ['BANNER', 'LOGO', 'SOCIAL_POST'].includes(r.type)).length}</p>
-              <p className="text-xs text-muted-foreground">Visual Assets</p>
+              <p className="text-xs text-muted-foreground">Визуальные материалы</p>
             </div>
           </CardContent>
         </Card>
@@ -163,7 +173,7 @@ export default function ResourcesPage() {
             </div>
             <div>
               <p className="text-2xl font-bold">{resources.reduce((sum, r) => sum + r.downloads, 0)}</p>
-              <p className="text-xs text-muted-foreground">Total Downloads</p>
+              <p className="text-xs text-muted-foreground">Всего скачиваний</p>
             </div>
           </CardContent>
         </Card>
@@ -174,7 +184,7 @@ export default function ResourcesPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search resources..."
+            placeholder="Поиск материалов..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -188,7 +198,7 @@ export default function ResourcesPage() {
               size="sm"
               onClick={() => setCategoryFilter(cat)}
             >
-              {cat === 'ALL' ? 'All' : cat}
+              {cat === 'ALL' ? 'Все' : cat}
             </Button>
           ))}
         </div>
@@ -199,11 +209,11 @@ export default function ResourcesPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <FolderOpen className="h-12 w-12 text-muted-foreground/40 mb-3" />
-            <p className="font-medium">No resources found</p>
+            <p className="font-medium">Материалы не найдены</p>
             <p className="mt-1 text-sm text-muted-foreground">
               {resources.length === 0
-                ? 'Marketing resources will appear here once uploaded by the admin team'
-                : 'Try adjusting your search or filter'}
+                ? 'Материалы появятся здесь после загрузки администратором'
+                : 'Попробуйте изменить поиск или фильтр'}
             </p>
           </CardContent>
         </Card>
@@ -220,7 +230,7 @@ export default function ResourcesPage() {
                       <Icon className="h-5 w-5" />
                     </div>
                     <Badge variant="outline" className="text-xs">
-                      {resource.type.replace('_', ' ')}
+                      {typeLabels[resource.type] || resource.type.replace('_', ' ')}
                     </Badge>
                   </div>
                   <CardTitle className="text-base mt-3">{resource.title}</CardTitle>
@@ -235,7 +245,7 @@ export default function ResourcesPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">
-                      {resource.downloads} download{resource.downloads !== 1 ? 's' : ''}
+                      {resource.downloads} скачиваний
                     </span>
                     <div className="flex gap-1.5">
                       <Button
@@ -244,11 +254,11 @@ export default function ResourcesPage() {
                         onClick={() => window.open(resource.fileUrl, '_blank')}
                       >
                         <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                        Preview
+                        Просмотр
                       </Button>
                       <Button size="sm" onClick={() => handleDownload(resource)}>
                         <Download className="h-3.5 w-3.5 mr-1" />
-                        Download
+                        Скачать
                       </Button>
                     </div>
                   </div>

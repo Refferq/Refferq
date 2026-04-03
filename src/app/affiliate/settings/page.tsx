@@ -90,13 +90,13 @@ export default function SettingsPage() {
         body: JSON.stringify(settingsForm),
       });
       if (res.ok) {
-        showNotification('success', 'Settings updated successfully!');
+        showNotification('success', 'Настройки успешно обновлены!');
       } else {
         const data = await res.json();
-        showNotification('error', data.error || 'Failed to update settings');
+        showNotification('error', data.error || 'Не удалось обновить настройки');
       }
     } catch (_e) {
-      showNotification('error', 'An error occurred');
+      showNotification('error', 'Произошла ошибка');
     } finally {
       setSaving(false);
     }
@@ -107,13 +107,13 @@ export default function SettingsPage() {
       const res = await fetch('/api/affiliate/generate-code', { method: 'POST' });
       const data = await res.json();
       if (data.success) {
-        showNotification('success', 'Referral code generated!');
+        showNotification('success', 'Реферальный код сгенерирован!');
         loadProfile();
       } else {
-        showNotification('error', 'Failed to generate code: ' + data.error);
+        showNotification('error', 'Не удалось сгенерировать код: ' + data.error);
       }
     } catch (_e) {
-      showNotification('error', 'Failed to generate code');
+      showNotification('error', 'Не удалось сгенерировать код');
     }
   };
 
@@ -147,8 +147,8 @@ export default function SettingsPage() {
       )}
 
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">Manage your account and payment preferences</p>
+        <h1 className="text-2xl font-bold tracking-tight">Настройки</h1>
+        <p className="text-muted-foreground">Управление аккаунтом и параметрами выплат</p>
       </div>
 
       {/* Referral Code */}
@@ -156,9 +156,9 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Key className="h-4 w-4" />
-            Referral Code
+            Реферальный код
           </CardTitle>
-          <CardDescription>Your unique referral identifier</CardDescription>
+          <CardDescription>Ваш уникальный реферальный идентификатор</CardDescription>
         </CardHeader>
         <CardContent>
           {referralCode ? (
@@ -170,8 +170,8 @@ export default function SettingsPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">No referral code generated yet.</p>
-              <Button onClick={handleGenerateCode}>Generate Code</Button>
+              <p className="text-sm text-muted-foreground">Реферальный код ещё не сгенерирован.</p>
+              <Button onClick={handleGenerateCode}>Сгенерировать код</Button>
             </div>
           )}
         </CardContent>
@@ -182,35 +182,35 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <User className="h-4 w-4" />
-            Personal Details
+            Личные данные
           </CardTitle>
-          <CardDescription>Manage your account information</CardDescription>
+          <CardDescription>Управление информацией профиля</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5">
-                <User className="h-3.5 w-3.5" /> Full Name
+                <User className="h-3.5 w-3.5" /> Полное имя
               </Label>
               <Input
                 value={settingsForm.name}
                 onChange={(e) => setSettingsForm({ ...settingsForm, name: e.target.value })}
-                placeholder="John Doe"
+                placeholder="Иван Иванов"
               />
             </div>
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5">
-                <Building2 className="h-3.5 w-3.5" /> Company
+                <Building2 className="h-3.5 w-3.5" /> Компания
               </Label>
               <Input
                 value={settingsForm.company}
                 onChange={(e) => setSettingsForm({ ...settingsForm, company: e.target.value })}
-                placeholder="Company Name"
+                placeholder="Название компании"
               />
             </div>
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5" /> Email
+                <Mail className="h-3.5 w-3.5" /> Эл. почта
               </Label>
               <Input
                 type="email"
@@ -221,7 +221,7 @@ export default function SettingsPage() {
             </div>
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5">
-                <Globe className="h-3.5 w-3.5" /> Country
+                <Globe className="h-3.5 w-3.5" /> Страна
               </Label>
               <Select
                 value={settingsForm.country}
@@ -229,15 +229,15 @@ export default function SettingsPage() {
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="India">India</SelectItem>
-                  <SelectItem value="USA">United States</SelectItem>
-                  <SelectItem value="UK">United Kingdom</SelectItem>
-                  <SelectItem value="Canada">Canada</SelectItem>
-                  <SelectItem value="Australia">Australia</SelectItem>
-                  <SelectItem value="Germany">Germany</SelectItem>
-                  <SelectItem value="France">France</SelectItem>
-                  <SelectItem value="Singapore">Singapore</SelectItem>
-                  <SelectItem value="UAE">UAE</SelectItem>
+                  <SelectItem value="India">Индия</SelectItem>
+                  <SelectItem value="USA">США</SelectItem>
+                  <SelectItem value="UK">Великобритания</SelectItem>
+                  <SelectItem value="Canada">Канада</SelectItem>
+                  <SelectItem value="Australia">Австралия</SelectItem>
+                  <SelectItem value="Germany">Германия</SelectItem>
+                  <SelectItem value="France">Франция</SelectItem>
+                  <SelectItem value="Singapore">Сингапур</SelectItem>
+                  <SelectItem value="UAE">ОАЭ</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -250,14 +250,14 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <CreditCard className="h-4 w-4" />
-            Payment Details
+            Платёжные реквизиты
           </CardTitle>
-          <CardDescription>Configure how you receive payouts</CardDescription>
+          <CardDescription>Настройка способа получения выплат</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Payment Method</Label>
+              <Label>Способ выплаты</Label>
               <Select
                 value={settingsForm.paymentMethod}
                 onValueChange={(v) => setSettingsForm({ ...settingsForm, paymentMethod: v })}
@@ -265,20 +265,20 @@ export default function SettingsPage() {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="PayPal">PayPal</SelectItem>
-                  <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                  <SelectItem value="Bank Transfer">Банковский перевод</SelectItem>
                   <SelectItem value="Stripe">Stripe</SelectItem>
                   <SelectItem value="Wise">Wise</SelectItem>
-                  <SelectItem value="Wire Transfer">Wire Transfer</SelectItem>
+                  <SelectItem value="Wire Transfer">SWIFT перевод</SelectItem>
                   <SelectItem value="UPI">UPI</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Payment Email / Account</Label>
+              <Label>Email / счёт для выплат</Label>
               <Input
                 value={settingsForm.paymentEmail}
                 onChange={(e) => setSettingsForm({ ...settingsForm, paymentEmail: e.target.value })}
-                placeholder="payment@example.com"
+                placeholder="pay@example.com"
               />
             </div>
           </div>
@@ -288,7 +288,7 @@ export default function SettingsPage() {
           <Alert>
             <Shield className="h-4 w-4" />
             <AlertDescription>
-              Your payment information is encrypted and stored securely. We will never share your details with third parties.
+              Платёжные данные зашифрованы и хранятся безопасно. Мы не передаём их третьим лицам.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -297,7 +297,7 @@ export default function SettingsPage() {
       {/* Save Button */}
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving} className="min-w-[120px]">
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving ? 'Сохранение...' : 'Сохранить изменения'}
         </Button>
       </div>
     </div>

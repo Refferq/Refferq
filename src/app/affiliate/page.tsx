@@ -32,7 +32,6 @@ import {
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
-  IndianRupee,
   MousePointerClick,
   Target,
   Users,
@@ -147,15 +146,15 @@ export default function AffiliateDashboard() {
       const data = await response.json();
 
       if (data.success) {
-        showNotification('success', 'Lead submitted successfully! Waiting for admin approval.');
+        showNotification('success', 'Лид успешно отправлен. Ожидайте подтверждения администратора.');
         setShowSubmitModal(false);
         setSubmitForm({ leadName: '', leadEmail: '', estimatedValue: '0' });
         loadDashboardData();
       } else {
-        showNotification('error', data.error || 'Failed to submit lead');
+        showNotification('error', data.error || 'Не удалось отправить лид');
       }
     } catch (_e) {
-      showNotification('error', 'An error occurred while submitting lead');
+      showNotification('error', 'Произошла ошибка при отправке лида');
     } finally {
       setSubmitLoading(false);
     }
@@ -168,10 +167,10 @@ export default function AffiliateDashboard() {
       if (data.success) {
         window.location.reload();
       } else {
-        showNotification('error', 'Failed to generate code: ' + data.error);
+        showNotification('error', 'Не удалось сгенерировать код: ' + data.error);
       }
     } catch (_e) {
-      showNotification('error', 'Failed to generate code. Please try again.');
+      showNotification('error', 'Не удалось сгенерировать код. Попробуйте ещё раз.');
     }
   };
 
@@ -203,10 +202,19 @@ export default function AffiliateDashboard() {
       FAILED: { variant: 'destructive', icon: AlertCircle },
     };
     const { variant, icon: Icon } = map[status] || { variant: 'outline' as const, icon: Clock };
+    const labels: Record<string, string> = {
+      APPROVED: 'Одобрен',
+      COMPLETED: 'Завершён',
+      PAID: 'Оплачен',
+      PENDING: 'В ожидании',
+      PROCESSING: 'Обработка',
+      REJECTED: 'Отклонён',
+      FAILED: 'Ошибка',
+    };
     return (
       <Badge variant={variant} className="gap-1 text-xs">
         <Icon className="h-3 w-3" />
-        {status}
+        {labels[status] || status}
       </Badge>
     );
   };
@@ -243,13 +251,13 @@ export default function AffiliateDashboard() {
                 <span className="text-2xl font-bold">{currencySymbol}</span>
               </div>
               <div>
-                <p className="text-sm text-white/90 font-medium tracking-wide">Earn 20% commission on all paid customers</p>
-                <p className="text-xl font-bold mt-1 tracking-tight">Start referring today and grow your wealth!</p>
+                <p className="text-sm text-white/90 font-medium tracking-wide">Зарабатывайте 20% комиссии с каждого оплаченного клиента</p>
+                <p className="text-xl font-bold mt-1 tracking-tight">Начните приглашать уже сегодня и увеличивайте доход!</p>
               </div>
             </div>
             <Button variant="secondary" onClick={() => setShowSubmitModal(true)} className="gap-2 hidden sm:flex bg-white text-emerald-700 hover:bg-emerald-50 border-0 shadow-md transform transition hover:scale-105 active:scale-95">
               <Plus className="h-4 w-4" />
-              Submit Lead
+              Отправить лид
             </Button>
           </CardContent>
         </Card>
@@ -259,26 +267,26 @@ export default function AffiliateDashboard() {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
         {[
           {
-            label: 'Available Balance',
+            label: 'Доступный баланс',
             value: formatCurrency(stats?.totalEarnings || 0),
             icon: Banknote,
             color: 'text-emerald-600',
             bg: 'bg-emerald-500/10',
-            description: 'Ready for payout'
+            description: 'Готов к выплате'
           },
           {
-            label: 'Pending Balance',
+            label: 'Ожидающий баланс',
             value: formatCurrency(stats?.pendingEarnings || 0),
             icon: Clock,
             color: 'text-amber-600',
             bg: 'bg-amber-500/10',
             description: stats?.nextMaturesAt
-              ? `Next maturity: ${new Date(stats.nextMaturesAt).toLocaleDateString()}`
-              : 'Held for refund period'
+              ? `Следующее созревание: ${new Date(stats.nextMaturesAt).toLocaleDateString()}`
+              : 'В холде на период возвратов'
           },
-          { label: 'Total Clicks', value: stats?.totalClicks || 0, icon: MousePointerClick, color: 'text-blue-600', bg: 'bg-blue-500/10' },
-          { label: 'Total Leads', value: stats?.totalLeads || 0, icon: Target, color: 'text-rose-600', bg: 'bg-rose-500/10' },
-          { label: 'Conv. Rate', value: `${stats?.conversionRate?.toFixed(1) || '0.0'}%`, icon: TrendingUp, color: 'text-violet-600', bg: 'bg-violet-500/10' },
+          { label: 'Всего кликов', value: stats?.totalClicks || 0, icon: MousePointerClick, color: 'text-blue-600', bg: 'bg-blue-500/10' },
+          { label: 'Всего лидов', value: stats?.totalLeads || 0, icon: Target, color: 'text-rose-600', bg: 'bg-rose-500/10' },
+          { label: 'Конверсия', value: `${stats?.conversionRate?.toFixed(1) || '0.0'}%`, icon: TrendingUp, color: 'text-violet-600', bg: 'bg-violet-500/10' },
         ].map((stat, i) => (
           <motion.div
             key={i}
@@ -318,7 +326,7 @@ export default function AffiliateDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Link className="h-4 w-4" />
-            Your Referral Links
+            Ваши реферальные ссылки
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -327,18 +335,18 @@ export default function AffiliateDashboard() {
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted mb-4">
                 <Link className="h-6 w-6 text-muted-foreground" />
               </div>
-              <p className="font-medium">No referral code found</p>
+              <p className="font-medium">Реферальный код не найден</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Generate your referral code to start earning commissions
+                Сгенерируйте реферальный код, чтобы начать зарабатывать комиссию
               </p>
               <Button className="mt-4" onClick={handleGenerateCode}>
-                Generate Referral Code
+                Сгенерировать реферальный код
               </Button>
             </div>
           ) : (
             <>
               <div className="space-y-2">
-                <Label>Referral Link</Label>
+                <Label>Реферальная ссылка</Label>
                 <div className="flex gap-2">
                   <Input readOnly value={stats?.referralLink || ''} className="font-mono text-sm" />
                   <Button
@@ -351,7 +359,7 @@ export default function AffiliateDashboard() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Referral Code</Label>
+                <Label>Реферальный код</Label>
                 <div className="flex gap-2">
                   <Input readOnly value={stats?.referralCode || ''} className="font-mono text-sm" />
                   <Button
@@ -372,29 +380,29 @@ export default function AffiliateDashboard() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-base">Recent Referrals</CardTitle>
-            <CardDescription>Latest 5 referrals</CardDescription>
+            <CardTitle className="text-base">Последние рефералы</CardTitle>
+            <CardDescription>5 последних рефералов</CardDescription>
           </div>
           {referrals.length > 5 && (
             <Button variant="ghost" size="sm" asChild>
               <a href="/affiliate/referrals" className="gap-1">
-                View All <ArrowRight className="h-3.5 w-3.5" />
+                Смотреть все <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </Button>
           )}
         </CardHeader>
         <CardContent className="p-0">
           {referrals.length === 0 ? (
-            <EmptyState icon={Users} message="No referrals yet" />
+            <EmptyState icon={Users} message="Рефералов пока нет" />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
+                  <TableHead>Имя</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Value</TableHead>
+                  <TableHead>Статус</TableHead>
+                  <TableHead>Дата</TableHead>
+                  <TableHead className="text-right">Сумма</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -421,8 +429,8 @@ export default function AffiliateDashboard() {
           <CardContent className="p-5 flex items-center gap-3">
             <Users className="h-5 w-5 text-blue-600" />
             <div>
-              <p className="font-medium">Manage Referrals</p>
-              <p className="text-xs text-muted-foreground">View all your submissions</p>
+              <p className="font-medium">Управление рефералами</p>
+              <p className="text-xs text-muted-foreground">Просмотр всех заявок</p>
             </div>
             <ArrowRight className="h-4 w-4 ml-auto text-muted-foreground" />
           </CardContent>
@@ -431,8 +439,8 @@ export default function AffiliateDashboard() {
           <CardContent className="p-5 flex items-center gap-3">
             <TrendingUp className="h-5 w-5 text-emerald-600" />
             <div>
-              <p className="font-medium">View Reports</p>
-              <p className="text-xs text-muted-foreground">Analyze your performance</p>
+              <p className="font-medium">Отчёты</p>
+              <p className="text-xs text-muted-foreground">Аналитика эффективности</p>
             </div>
             <ArrowRight className="h-4 w-4 ml-auto text-muted-foreground" />
           </CardContent>
@@ -441,8 +449,8 @@ export default function AffiliateDashboard() {
           <CardContent className="p-5 flex items-center gap-3">
             <Target className="h-5 w-5 text-violet-600" />
             <div>
-              <p className="font-medium">Resources</p>
-              <p className="text-xs text-muted-foreground">Marketing materials</p>
+              <p className="font-medium">Материалы</p>
+              <p className="text-xs text-muted-foreground">Маркетинговые материалы</p>
             </div>
             <ArrowRight className="h-4 w-4 ml-auto text-muted-foreground" />
           </CardContent>
@@ -453,24 +461,24 @@ export default function AffiliateDashboard() {
       <Dialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Submit Lead</DialogTitle>
+            <DialogTitle>Отправить лид</DialogTitle>
             <DialogDescription>
-              Enter the details below to submit a lead. Ensure all information is accurate for proper tracking.
+              Заполните данные лида. Убедитесь, что информация корректна для точного учёта.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmitLead} className="space-y-4">
             <div className="space-y-2">
-              <Label>Lead&apos;s Name *</Label>
+              <Label>Имя лида *</Label>
               <Input
                 required
                 value={submitForm.leadName}
                 onChange={(e) => setSubmitForm({ ...submitForm, leadName: e.target.value })}
-                placeholder="Full name"
+                placeholder="Полное имя"
               />
             </div>
             <div className="space-y-2">
-              <Label>Contact Email *</Label>
+              <Label>Email контакта *</Label>
               <Input
                 type="email"
                 required
@@ -480,7 +488,7 @@ export default function AffiliateDashboard() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Estimated Deal Size ({currencySymbol}) *</Label>
+              <Label>Оценка суммы сделки ({currencySymbol}) *</Label>
               <Input
                 type="number"
                 required
@@ -488,16 +496,16 @@ export default function AffiliateDashboard() {
                 onChange={(e) => setSubmitForm({ ...submitForm, estimatedValue: e.target.value })}
                 placeholder="0"
               />
-              <p className="text-xs text-muted-foreground">Type 0 if unsure</p>
+              <p className="text-xs text-muted-foreground">Если не уверены, укажите 0</p>
             </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowSubmitModal(false)}>
-                Cancel
+                Отмена
               </Button>
               <Button type="submit" disabled={submitLoading}>
                 {submitLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Submit Lead
+                Отправить лид
               </Button>
             </DialogFooter>
           </form>

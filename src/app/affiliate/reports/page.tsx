@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/table';
 import {
   BarChart3,
-  IndianRupee,
+  RussianRuble,
   TrendingUp,
   Target,
   Users,
@@ -55,6 +55,7 @@ export default function ReportsPage() {
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('6months');
+  const [currencySymbol, setCurrencySymbol] = useState('₽');
   const [stats, setStats] = useState<ReportStats>({
     totalEarnings: 0,
     totalClicks: 0,
@@ -74,6 +75,7 @@ export default function ReportsPage() {
       const res = await fetch('/api/affiliate/profile');
       const data = await res.json();
       if (data.success) {
+        setCurrencySymbol(data.currencySymbol || '₽');
         const referrals = data.referrals || [];
         const commissions = data.commissions || [];
         const conversions = data.conversions || [];
@@ -135,10 +137,10 @@ export default function ReportsPage() {
   };
 
   const formatCurrency = (cents: number) =>
-    `\u20B9${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    `${currencySymbol}${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const exportCSV = () => {
-    const headers = ['Month', 'Referrals', 'Conversions', 'Earnings (₽)'];
+    const headers = ['Месяц', 'Рефералы', 'Конверсии', 'Доход (₽)'];
     const rows = monthlyData.map((m) => [m.month, m.referrals, m.conversions, (m.earnings / 100).toFixed(2)]);
     const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -167,8 +169,8 @@ export default function ReportsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
-          <p className="text-muted-foreground">Analyze your affiliate performance</p>
+          <h1 className="text-2xl font-bold tracking-tight">Отчёты</h1>
+          <p className="text-muted-foreground">Анализ эффективности партнёрской программы</p>
         </div>
         <div className="flex items-center gap-2">
           <Select value={period} onValueChange={setPeriod}>
@@ -177,14 +179,14 @@ export default function ReportsPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="3months">Last 3 months</SelectItem>
-              <SelectItem value="6months">Last 6 months</SelectItem>
-              <SelectItem value="12months">Last 12 months</SelectItem>
+              <SelectItem value="3months">Последние 3 месяца</SelectItem>
+              <SelectItem value="6months">Последние 6 месяцев</SelectItem>
+              <SelectItem value="12months">Последние 12 месяцев</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={exportCSV} className="gap-1.5">
             <Download className="h-4 w-4" />
-            Export
+            Экспорт
           </Button>
         </div>
       </div>
@@ -195,11 +197,11 @@ export default function ReportsPage() {
           <CardContent className="p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
-                <IndianRupee className="h-4 w-4 text-emerald-600" />
+                <RussianRuble className="h-4 w-4 text-emerald-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-emerald-600">{formatCurrency(stats.totalEarnings)}</p>
-                <p className="text-xs text-muted-foreground">Total Earnings</p>
+                <p className="text-xs text-muted-foreground">Общий доход</p>
               </div>
             </div>
           </CardContent>
@@ -212,7 +214,7 @@ export default function ReportsPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.totalLeads}</p>
-                <p className="text-xs text-muted-foreground">Total Leads</p>
+                <p className="text-xs text-muted-foreground">Всего лидов</p>
               </div>
             </div>
           </CardContent>
@@ -225,7 +227,7 @@ export default function ReportsPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.totalConversions}</p>
-                <p className="text-xs text-muted-foreground">Conversions</p>
+                <p className="text-xs text-muted-foreground">Конверсии</p>
               </div>
             </div>
           </CardContent>
@@ -238,7 +240,7 @@ export default function ReportsPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.conversionRate.toFixed(1)}%</p>
-                <p className="text-xs text-muted-foreground">Conversion Rate</p>
+                <p className="text-xs text-muted-foreground">Конверсия</p>
               </div>
             </div>
           </CardContent>
@@ -248,8 +250,8 @@ export default function ReportsPage() {
       {/* Earnings Chart (CSS bar chart) */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Monthly Earnings</CardTitle>
-          <CardDescription>Revenue generated from your referrals</CardDescription>
+          <CardTitle className="text-base">Доход по месяцам</CardTitle>
+          <CardDescription>Доход, полученный от ваших рефералов</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-end gap-2 h-48">
@@ -270,16 +272,16 @@ export default function ReportsPage() {
       {/* Monthly Breakdown Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Monthly Breakdown</CardTitle>
+          <CardTitle className="text-base">Помесячная разбивка</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Month</TableHead>
-                <TableHead className="text-center">Referrals</TableHead>
-                <TableHead className="text-center">Conversions</TableHead>
-                <TableHead className="text-right">Earnings</TableHead>
+                <TableHead>Месяц</TableHead>
+                <TableHead className="text-center">Рефералы</TableHead>
+                <TableHead className="text-center">Конверсии</TableHead>
+                <TableHead className="text-right">Доход</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -292,7 +294,7 @@ export default function ReportsPage() {
                 </TableRow>
               ))}
               <TableRow className="bg-muted/50 font-bold">
-                <TableCell>Total</TableCell>
+                <TableCell>Итого</TableCell>
                 <TableCell className="text-center">{monthlyData.reduce((s, m) => s + m.referrals, 0)}</TableCell>
                 <TableCell className="text-center">{monthlyData.reduce((s, m) => s + m.conversions, 0)}</TableCell>
                 <TableCell className="text-right">{formatCurrency(monthlyData.reduce((s, m) => s + m.earnings, 0))}</TableCell>

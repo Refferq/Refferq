@@ -50,15 +50,15 @@ interface BrandSettings {
 }
 
 const mainNavItems = [
-  { title: 'Dashboard', url: '/affiliate', icon: LayoutDashboard },
-  { title: 'Referrals', url: '/affiliate/referrals', icon: Users },
-  { title: 'Payouts', url: '/affiliate/payouts', icon: Wallet },
-  { title: 'Resources', url: '/affiliate/resources', icon: BookOpen },
-  { title: 'Reports', url: '/affiliate/reports', icon: BarChart3, badge: 'BETA' },
+  { title: 'Панель', url: '/affiliate', icon: LayoutDashboard },
+  { title: 'Рефералы', url: '/affiliate/referrals', icon: Users },
+  { title: 'Выплаты', url: '/affiliate/payouts', icon: Wallet },
+  { title: 'Материалы', url: '/affiliate/resources', icon: BookOpen },
+  { title: 'Отчёты', url: '/affiliate/reports', icon: BarChart3, badge: 'БЕТА' },
 ];
 
 const accountNavItems = [
-  { title: 'Settings', url: '/affiliate/settings', icon: Settings },
+  { title: 'Настройки', url: '/affiliate/settings', icon: Settings },
 ];
 
 function AffiliateSidebar({ brand }: { brand: BrandSettings }) {
@@ -89,7 +89,7 @@ function AffiliateSidebar({ brand }: { brand: BrandSettings }) {
               )}
               <div className="flex flex-col">
                 <span className="text-sm font-bold">{brandName}</span>
-                <span className="text-xs text-muted-foreground">Affiliate Portal</span>
+                <span className="text-xs text-muted-foreground">Партнёрский кабинет</span>
               </div>
             </div>
           </SidebarMenuItem>
@@ -98,7 +98,7 @@ function AffiliateSidebar({ brand }: { brand: BrandSettings }) {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
+          <SidebarGroupLabel>Главное меню</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNavItems.map((item) => (
@@ -123,7 +123,7 @@ function AffiliateSidebar({ brand }: { brand: BrandSettings }) {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
+          <SidebarGroupLabel>Аккаунт</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {accountNavItems.map((item) => (
@@ -172,12 +172,12 @@ function AffiliateSidebar({ brand }: { brand: BrandSettings }) {
               >
                 <DropdownMenuItem onClick={() => router.push('/affiliate/settings')}>
                   <Settings className="mr-2 h-4 w-4" />
-                  Settings
+                  Настройки
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => logout()} className="text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
-                  Log out
+                  Выйти
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -211,7 +211,7 @@ export default function AffiliateLayout({ children }: { children: React.ReactNod
             <div className="absolute inset-0 rounded-full border-4 border-muted" />
             <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent" style={{ borderTopColor: brand.brandButtonColor || '#059669' }} />
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">Loading your dashboard...</p>
+          <p className="mt-4 text-sm text-muted-foreground">Загрузка кабинета...</p>
         </div>
       </div>
     );
@@ -224,10 +224,10 @@ export default function AffiliateLayout({ children }: { children: React.ReactNod
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10">
             <span className="text-3xl">🔒</span>
           </div>
-          <h1 className="text-xl font-bold">Access Denied</h1>
-          <p className="text-sm text-muted-foreground">Affiliate account required to access this page</p>
+          <h1 className="text-xl font-bold">Доступ запрещён</h1>
+          <p className="text-sm text-muted-foreground">Для доступа к этой странице нужен партнёрский аккаунт</p>
           <Button asChild>
-            <a href="/login">Go to Login</a>
+            <a href="/login">Перейти ко входу</a>
           </Button>
         </div>
       </div>
@@ -244,7 +244,7 @@ export default function AffiliateLayout({ children }: { children: React.ReactNod
           <div className="flex flex-1 items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">
-                Welcome back, {user.name?.split(' ')[0]}
+                С возвращением, {user.name?.split(' ')[0]}
               </p>
             </div>
             <div className="flex items-center gap-2">

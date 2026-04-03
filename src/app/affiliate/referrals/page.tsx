@@ -108,15 +108,15 @@ export default function ReferralsPage() {
       });
       const data = await res.json();
       if (data.success) {
-        showNotification('success', 'Lead submitted successfully!');
+        showNotification('success', 'Лид успешно отправлен!');
         setShowSubmitModal(false);
         setSubmitForm({ leadName: '', leadEmail: '', estimatedValue: '0' });
         fetchReferrals();
       } else {
-        showNotification('error', data.error || 'Failed to submit lead');
+        showNotification('error', data.error || 'Не удалось отправить лид');
       }
     } catch (_e) {
-      showNotification('error', 'An error occurred while submitting lead');
+      showNotification('error', 'Произошла ошибка при отправке лида');
     } finally {
       setSubmitLoading(false);
     }
@@ -137,10 +137,15 @@ export default function ReferralsPage() {
       REJECTED: { variant: 'destructive', icon: Ban },
     };
     const { variant, icon: Icon } = map[status] || { variant: 'outline' as const, icon: Clock };
+    const labels: Record<string, string> = {
+      APPROVED: 'Одобрен',
+      PENDING: 'В ожидании',
+      REJECTED: 'Отклонён',
+    };
     return (
       <Badge variant={variant} className="gap-1 text-xs">
         <Icon className="h-3 w-3" />
-        {status}
+        {labels[status] || status}
       </Badge>
     );
   };
@@ -162,7 +167,7 @@ export default function ReferralsPage() {
   };
 
   const exportCSV = () => {
-    const headers = ['Name', 'Email', 'Company', 'Status', 'Value', 'Date'];
+    const headers = ['Имя', 'Email', 'Компания', 'Статус', 'Сумма', 'Дата'];
     const rows = filteredReferrals.map((r) => [
       r.leadName,
       r.leadEmail,
@@ -204,12 +209,12 @@ export default function ReferralsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Referrals</h1>
-          <p className="text-muted-foreground">Track and manage your referral submissions</p>
+          <h1 className="text-2xl font-bold tracking-tight">Рефералы</h1>
+          <p className="text-muted-foreground">Отслеживайте и управляйте отправленными рефералами</p>
         </div>
         <Button onClick={() => setShowSubmitModal(true)} className="gap-1.5">
           <Plus className="h-4 w-4" />
-          Submit Lead
+          Отправить лид
         </Button>
       </div>
 
@@ -217,25 +222,25 @@ export default function ReferralsPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Total</p>
+            <p className="text-sm text-muted-foreground">Всего</p>
             <p className="text-2xl font-bold">{stats.total}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Pending</p>
+            <p className="text-sm text-muted-foreground">В ожидании</p>
             <p className="text-2xl font-bold text-amber-600">{stats.pending}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Approved</p>
+            <p className="text-sm text-muted-foreground">Одобрено</p>
             <p className="text-2xl font-bold text-emerald-600">{stats.approved}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Rejected</p>
+            <p className="text-sm text-muted-foreground">Отклонено</p>
             <p className="text-2xl font-bold text-red-600">{stats.rejected}</p>
           </CardContent>
         </Card>
@@ -246,7 +251,7 @@ export default function ReferralsPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by name or email..."
+            placeholder="Поиск по имени или email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -258,15 +263,15 @@ export default function ReferralsPage() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">All Status</SelectItem>
-            <SelectItem value="PENDING">Pending</SelectItem>
-            <SelectItem value="APPROVED">Approved</SelectItem>
-            <SelectItem value="REJECTED">Rejected</SelectItem>
+            <SelectItem value="ALL">Все статусы</SelectItem>
+            <SelectItem value="PENDING">В ожидании</SelectItem>
+            <SelectItem value="APPROVED">Одобрен</SelectItem>
+            <SelectItem value="REJECTED">Отклонён</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="outline" onClick={exportCSV} className="gap-1.5">
           <Download className="h-4 w-4" />
-          Export CSV
+          Экспорт CSV
         </Button>
       </div>
 
@@ -276,24 +281,24 @@ export default function ReferralsPage() {
           {filteredReferrals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Users className="h-12 w-12 text-muted-foreground/40 mb-3" />
-              <p className="font-medium">No referrals found</p>
+              <p className="font-medium">Рефералы не найдены</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {referrals.length === 0 ? 'Start submitting leads to earn commissions' : 'Try adjusting your filters'}
+                {referrals.length === 0 ? 'Начните отправлять лиды, чтобы зарабатывать комиссию' : 'Попробуйте изменить фильтры'}
               </p>
               {referrals.length === 0 && (
-                <Button className="mt-4" onClick={() => setShowSubmitModal(true)}>Submit your first lead</Button>
+                <Button className="mt-4" onClick={() => setShowSubmitModal(true)}>Отправить первый лид</Button>
               )}
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Lead Name</TableHead>
+                  <TableHead>Имя лида</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Est. Value</TableHead>
+                  <TableHead>Компания</TableHead>
+                  <TableHead>Статус</TableHead>
+                  <TableHead>Дата</TableHead>
+                  <TableHead className="text-right">Оценка</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -305,7 +310,7 @@ export default function ReferralsPage() {
                     <TableCell>{getStatusBadge(ref.status)}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{formatDate(ref.createdAt)}</TableCell>
                     <TableCell className="text-right font-semibold">
-                      {`\u20B9${(Number(ref.estimatedValue) || 0).toFixed(2)}`}
+                      {`\u20BD${(Number(ref.estimatedValue) || 0).toFixed(2)}`}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -319,23 +324,23 @@ export default function ReferralsPage() {
       <Dialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Submit Lead</DialogTitle>
+            <DialogTitle>Отправить лид</DialogTitle>
             <DialogDescription>
-              Enter the details below to submit a lead.
+              Заполните данные ниже, чтобы отправить лид.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmitLead} className="space-y-4">
             <div className="space-y-2">
-              <Label>Lead&apos;s Name *</Label>
+              <Label>Имя лида *</Label>
               <Input
                 required
                 value={submitForm.leadName}
                 onChange={(e) => setSubmitForm({ ...submitForm, leadName: e.target.value })}
-                placeholder="Full name"
+                placeholder="Полное имя"
               />
             </div>
             <div className="space-y-2">
-              <Label>Contact Email *</Label>
+              <Label>Email контакта *</Label>
               <Input
                 type="email"
                 required
@@ -345,7 +350,7 @@ export default function ReferralsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Estimated Deal Size (₽) *</Label>
+              <Label>Оценка суммы сделки (₽) *</Label>
               <Input
                 type="number"
                 required
@@ -353,13 +358,13 @@ export default function ReferralsPage() {
                 onChange={(e) => setSubmitForm({ ...submitForm, estimatedValue: e.target.value })}
                 placeholder="0"
               />
-              <p className="text-xs text-muted-foreground">Type 0 if unsure</p>
+              <p className="text-xs text-muted-foreground">Если не уверены, укажите 0</p>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowSubmitModal(false)}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setShowSubmitModal(false)}>Отмена</Button>
               <Button type="submit" disabled={submitLoading}>
                 {submitLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Submit Lead
+                Отправить лид
               </Button>
             </DialogFooter>
           </form>

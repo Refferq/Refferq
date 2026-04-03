@@ -21,7 +21,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  IndianRupee,
   Clock,
   CheckCircle2,
   Ban,
@@ -88,10 +87,17 @@ export default function PayoutsPage() {
       FAILED: { variant: 'destructive', icon: Ban },
     };
     const { variant, icon: Icon } = map[status] || { variant: 'outline' as const, icon: Clock };
+    const labels: Record<string, string> = {
+      COMPLETED: 'Завершён',
+      PAID: 'Оплачен',
+      PENDING: 'В ожидании',
+      PROCESSING: 'Обработка',
+      FAILED: 'Ошибка',
+    };
     return (
       <Badge variant={variant} className="gap-1 text-xs">
         <Icon className="h-3 w-3" />
-        {status}
+        {labels[status] || status}
       </Badge>
     );
   };
@@ -100,7 +106,7 @@ export default function PayoutsPage() {
   const pendingPayout = payouts.filter((p) => p.status === 'PENDING').reduce((sum, p) => sum + p.amount, 0);
 
   const exportCSV = () => {
-    const headers = ['Date', 'Method', 'Status', 'Amount'];
+    const headers = ['Дата', 'Метод', 'Статус', 'Сумма'];
     const rows = payouts.map((p) => [
       formatDate(p.paidAt || p.createdAt),
       p.method,
@@ -132,13 +138,13 @@ export default function PayoutsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Payouts</h1>
-          <p className="text-muted-foreground">Track your earnings and payout history</p>
+          <h1 className="text-2xl font-bold tracking-tight">Выплаты</h1>
+          <p className="text-muted-foreground">Отслеживайте доход и историю выплат</p>
         </div>
         {payouts.length > 0 && (
           <Button variant="outline" onClick={exportCSV} className="gap-1.5">
             <Download className="h-4 w-4" />
-            Export
+            Экспорт
           </Button>
         )}
       </div>
@@ -153,7 +159,7 @@ export default function PayoutsPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{formatCurrency(balance)}</p>
-                <p className="text-xs text-muted-foreground">Current Balance</p>
+                <p className="text-xs text-muted-foreground">Текущий баланс</p>
               </div>
             </div>
           </CardContent>
@@ -166,7 +172,7 @@ export default function PayoutsPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-blue-600">{formatCurrency(totalPaid)}</p>
-                <p className="text-xs text-muted-foreground">Total Paid</p>
+                <p className="text-xs text-muted-foreground">Всего выплачено</p>
               </div>
             </div>
           </CardContent>
@@ -179,7 +185,7 @@ export default function PayoutsPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-amber-600">{formatCurrency(pendingPayout)}</p>
-                <p className="text-xs text-muted-foreground">Pending</p>
+                <p className="text-xs text-muted-foreground">В ожидании</p>
               </div>
             </div>
           </CardContent>
@@ -192,7 +198,7 @@ export default function PayoutsPage() {
               </div>
               <div>
                 <p className="text-lg font-bold">{payouts.length}</p>
-                <p className="text-xs text-muted-foreground">Total Payouts</p>
+                <p className="text-xs text-muted-foreground">Всего выплат</p>
               </div>
             </div>
           </CardContent>
@@ -204,9 +210,9 @@ export default function PayoutsPage() {
         <CardContent className="flex items-start gap-3 p-4">
           <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-blue-900">Payout Schedule</p>
+            <p className="text-sm font-medium text-blue-900">График выплат</p>
             <p className="text-sm text-blue-700">
-              Payouts are processed on the 1st of each month for the previous month&apos;s earnings. Minimum payout threshold is {currencySymbol}1,000.
+              Выплаты обрабатываются 1-го числа каждого месяца за доходы предыдущего месяца. Минимальный порог выплаты — {currencySymbol}1,000.
             </p>
           </div>
         </CardContent>
@@ -215,33 +221,33 @@ export default function PayoutsPage() {
       {/* Payout History */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Payout History</CardTitle>
-          <CardDescription>{payouts.length} payout{payouts.length !== 1 ? 's' : ''}</CardDescription>
+          <CardTitle className="text-base">История выплат</CardTitle>
+          <CardDescription>{payouts.length} выплат</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           {payouts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Wallet className="h-12 w-12 text-muted-foreground/40 mb-3" />
-              <p className="font-medium">No payouts yet</p>
+              <p className="font-medium">Выплат пока нет</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Start referring customers to earn commissions
+                Начните привлекать клиентов, чтобы зарабатывать комиссию
               </p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead>Дата</TableHead>
+                  <TableHead>Метод</TableHead>
+                  <TableHead>Статус</TableHead>
+                  <TableHead className="text-right">Сумма</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {payouts.map((payout) => (
                   <TableRow key={payout.id}>
                     <TableCell className="text-sm">{formatDate(payout.paidAt || payout.createdAt)}</TableCell>
-                    <TableCell className="text-muted-foreground">{payout.method || 'N/A'}</TableCell>
+                    <TableCell className="text-muted-foreground">{payout.method || '—'}</TableCell>
                     <TableCell>{getStatusBadge(payout.status)}</TableCell>
                     <TableCell className="text-right font-semibold">{formatCurrency(payout.amount)}</TableCell>
                   </TableRow>
