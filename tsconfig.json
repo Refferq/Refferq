@@ -38,6 +38,7 @@
   "exclude": [
     "node_modules",
     "backend/**/*",
-    "frontend-old/**/*"
+    "frontend-old/**/*",
+    "frontend-marketing/**/*"
   ]
 }
