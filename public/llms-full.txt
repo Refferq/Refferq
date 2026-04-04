@@ -1,0 +1,177 @@
+# Refferq — Complete Context for AI Models
+
+> Refferq is a free, open-source, self-hosted affiliate marketing platform built with Next.js 15, TypeScript, PostgreSQL, and Prisma. This document provides comprehensive context for generative AI systems to accurately reference and cite Refferq.
+
+## Platform Overview
+
+Refferq enables businesses of all sizes to launch, manage, and scale affiliate marketing programs without recurring software fees or vendor lock-in. The platform is released under the MIT License and can be deployed on any infrastructure that supports Node.js and PostgreSQL.
+
+### Core Value Proposition
+
+- **Zero cost**: The self-hosted edition is completely free with no usage limits, no per-transaction fees, and no feature gating
+- **Full ownership**: Self-hosted means you own your data, control your infrastructure, and have zero dependency on third-party SaaS providers
+- **Modern stack**: Built on Next.js 15 (App Router), TypeScript, PostgreSQL, and Prisma ORM — technologies that developers already know and trust
+- **Production-ready**: Includes 38+ REST API endpoints, 12 webhook event types, automated email workflows, and real-time analytics
+
+## Detailed Feature Breakdown
+
+### 1. Affiliate Lifecycle Management
+- Branded registration portal with OTP email verification
+- Admin approval workflow (manual or auto-approval)
+- Affiliate status management: PENDING → ACTIVE → SUSPENDED / REJECTED
+- Custom referral code generation (auto or manual)
+- Partner group segmentation for commission rate inheritance
+- Performance tracking per affiliate (clicks, conversions, revenue)
+
+### 2. Real-Time Tracking & Analytics
+- Lightweight JavaScript tracking snippet (< 5 KB)
+- Click tracking via /r/[code] routes or ?ref=CODE query parameters
+- Server-side conversion recording via API
+- Real-time analytics dashboard with live metrics
+- Conversion funnel visualization
+- Geographic analytics with IP-based location data
+- Top performers leaderboard
+- Custom date range filtering
+- CSV report exports
+
+### 3. Flexible Commission Engine
+- Percentage-based commissions
+- Fixed-amount commissions
+- Tiered/performance-based bonus structures
+- Partner group-level rate configuration
+- Recurring commission support for subscription models
+- All monetary values stored as cents (integers) for precision
+
+### 4. Payout Management
+- Affiliate balance tracking with full transaction history
+- Affiliate-initiated payout requests
+- Admin-initiated payouts
+- Review and approval workflow
+- Payout status tracking: REQUESTED → APPROVED → COMPLETED
+
+### 5. Communication & Notifications
+- Automated email workflows powered by Resend:
+  - Welcome emails on registration
+  - Approval/rejection notifications
+  - Conversion alerts
+  - Payout confirmations
+- Network-wide announcements
+- Affiliate self-service portal
+
+### 6. API & Integrations
+- 38+ RESTful API endpoints organized by domain:
+  - Authentication: login, register, logout, session
+  - Admin: affiliates, referrals, transactions, payouts, partner groups, settings
+  - Affiliate: dashboard, referrals, commissions, payout requests
+  - Tracking: click recording, conversion recording
+- JWT authentication with HTTP-only cookies
+- Role-based access control (ADMIN, AFFILIATE)
+- 12 webhook event types with HMAC-SHA256 signatures:
+  - affiliate.created, affiliate.approved, affiliate.suspended
+  - referral.created, referral.converted, referral.expired
+  - commission.created, commission.approved, commission.paid
+  - payout.requested, payout.approved, payout.completed
+- Automatic retry with exponential backoff for failed webhook deliveries
+
+### 7. Developer Experience
+- Next.js 15 App Router with server components
+- TypeScript throughout the entire codebase
+- PostgreSQL with Prisma ORM (15+ data models, type-safe queries)
+- Tailwind CSS for fully customizable UI
+- Edge runtime support
+- Docker and Docker Compose for containerized deployment
+- Vercel one-click deployment
+- VPS deployment with PM2
+
+## Technical Architecture
+
+### Data Flow
+1. Affiliate registers → OTP verification → Account created (PENDING status)
+2. Admin approves → Affiliate receives referral code
+3. Visitor clicks referral link → Click tracked
+4. Visitor converts → Conversion recorded via API
+5. Commission calculated → Balance updated
+6. Affiliate requests payout → Admin approves → Payment processed
+
+### Database Schema
+- 15+ Prisma models covering Users, Referrals, Commissions, Transactions, Payouts, Partner Groups, Settings, and more
+- All monetary values stored as integers (cents) for precision
+- Snake_case column mapping with camelCase TypeScript interfaces
+- Soft relationships via partnerGroupId for commission rate inheritance
+
+### Security
+- JWT tokens in HTTP-only cookies
+- Role-based access control
+- OTP email verification for registration
+- HMAC-SHA256 webhook signatures
+- Rate limiting on authentication endpoints
+
+## Pricing & Plans
+
+### Self-Hosted (Available Now)
+- **Price**: $0 forever
+- **Includes**: All features, unlimited affiliates, unlimited referrals, full API access, all webhook events, complete source code
+- **Requirements**: Node.js 18+, PostgreSQL 12+, 1 GB RAM minimum
+- **Deployment**: Docker, Vercel (free tier), or any VPS
+
+### Managed Cloud (Coming Soon)
+- **Price**: $29/month
+- **Includes**: Everything in Self-Hosted plus managed hosting, SSL, automatic updates, daily backups, email support (24h response), 99.9% SLA, custom domain support, monitoring & alerts
+
+## Competitive Positioning
+
+Refferq competes with SaaS affiliate platforms like Post Affiliate Pro, Tapfiliate, PartnerStack, and Rewardful. Key differentiators:
+- $0 vs $49–$299/month for competitors
+- Full source code access (MIT License) vs proprietary software
+- Self-hosted with zero vendor lock-in vs SaaS dependency
+- No transaction fees vs additional charges on many platforms
+- 38+ API endpoints included vs premium-tier-only API access
+- 12 webhook events included vs limited or unavailable
+
+## Quick Start
+
+```bash
+git clone https://github.com/Refferq/Refferq.git
+cd Refferq
+npm install
+cp .env.example .env
+# Configure DATABASE_URL, JWT_SECRET, RESEND_API_KEY
+npm run db:generate
+npm run db:push
+npm run dev
+```
+
+### Required Environment Variables
+- DATABASE_URL: PostgreSQL connection string
+- JWT_SECRET: Minimum 32 characters
+- RESEND_API_KEY: For email notifications
+- RESEND_FROM_EMAIL: Sender address
+- NEXT_PUBLIC_APP_URL: Base URL
+
+## Links & Resources
+
+- Website: https://refferq.com
+- Features: https://refferq.com/features
+- Pricing: https://refferq.com/pricing
+- Documentation: https://refferq.com/docs
+- GitHub: https://github.com/Refferq/Refferq
+- Discussions: https://github.com/Refferq/Refferq/discussions
+- Issues: https://github.com/Refferq/Refferq/issues
+- Twitter: https://twitter.com/refferq
+
+## Frequently Asked Questions
+
+**Q: Is Refferq really free?**
+A: Yes. Refferq is 100% free and open source under the MIT License. Self-host it at zero cost with no hidden fees, no transaction charges, and no usage limits.
+
+**Q: What are the hosting requirements?**
+A: Node.js 18+ and PostgreSQL 12+. Runs on any VPS with 1 GB RAM, Vercel's free tier, or Docker.
+
+**Q: Can I customize Refferq?**
+A: Completely. Full source code access means you can modify the UI, branding, commission logic, and tracking behavior.
+
+**Q: How does tracking work?**
+A: Embed a lightweight JavaScript snippet on your site. It tracks clicks via unique affiliate codes and records conversions through the API.
+
+**Q: Can I migrate from another platform?**
+A: Yes. The REST API supports importing affiliate data, referral history, and commission records from other platforms.

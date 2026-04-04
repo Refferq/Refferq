@@ -1,0 +1,126 @@
+# ═══════════════════════════════════════════════════════════════════
+#  Refferq — robots.txt
+#  https://refferq.com/robots.txt
+#
+#  Controls how search engine crawlers and AI agents access the site.
+#  Optimized for SEO, AEO, and GEO discoverability.
+# ═══════════════════════════════════════════════════════════════════
+
+# ─── All Legitimate Crawlers ────────────────────────────────────
+User-agent: *
+Allow: /
+Disallow: /_next/static/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+
+# ─── Google Search & AI ────────────────────────────────────────
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Googlebot-Image
+Allow: /og-image.png
+Allow: /og-image-square.png
+Allow: /icon-512.png
+Allow: /images/
+
+User-agent: Google-Extended
+Allow: /
+
+# ─── Bing Search & AI ─────────────────────────────────────────
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+# ─── ChatGPT / OpenAI ─────────────────────────────────────────
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+# ─── Perplexity AI ─────────────────────────────────────────────
+User-agent: PerplexityBot
+Allow: /
+
+# ─── Anthropic (Claude) ───────────────────────────────────────
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+# ─── Meta AI ──────────────────────────────────────────────────
+User-agent: FacebookBot
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+# ─── Apple / Siri ─────────────────────────────────────────────
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# ─── X / Twitter ──────────────────────────────────────────────
+User-agent: Twitterbot
+Allow: /
+
+# ─── Yandex ──────────────────────────────────────────────────
+User-agent: Yandex
+Allow: /
+Crawl-delay: 3
+
+# ─── DuckDuckGo ──────────────────────────────────────────────
+User-agent: DuckDuckBot
+Allow: /
+
+# ─── LinkedIn ─────────────────────────────────────────────────
+User-agent: LinkedInBot
+Allow: /
+
+# ─── Slack ────────────────────────────────────────────────────
+User-agent: Slackbot
+Allow: /
+
+# ─── Discord ──────────────────────────────────────────────────
+User-agent: Discordbot
+Allow: /
+
+# ─── Telegram ─────────────────────────────────────────────────
+User-agent: TelegramBot
+Allow: /
+
+# ─── Cohere AI ────────────────────────────────────────────────
+User-agent: cohere-ai
+Allow: /
+
+# ─── You.com AI ───────────────────────────────────────────────
+User-agent: YouBot
+Allow: /
+
+# ─── Block Known Scrapers / Bad Bots ──────────────────────────
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+# ─── Sitemap Location ─────────────────────────────────────────
+Sitemap: https://refferq.com/sitemap.xml

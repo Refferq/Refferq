@@ -1,0 +1,32 @@
+# ═══════════════════════════════════════════════════════════════════
+#  Refferq — humans.txt
+#  https://refferq.com/humans.txt
+#
+#  The people behind Refferq
+# ═══════════════════════════════════════════════════════════════════
+
+/* TEAM */
+
+  Title: Refferq Core Team
+  Site: https://refferq.com
+  Contact: https://github.com/Refferq/Refferq/discussions
+  Twitter: @refferq
+  GitHub: https://github.com/Refferq
+
+/* THANKS */
+
+  Name: Open Source Community
+  Description: Thank you to all contributors, testers, and supporters.
+
+/* TECHNOLOGY */
+
+  Framework: Next.js 15 (App Router)
+  Language: TypeScript
+  Database: PostgreSQL
+  ORM: Prisma
+  Styling: Tailwind CSS
+  Email: Resend
+  Authentication: JWT (jose)
+  Hosting: Vercel, Docker, VPS
+  License: MIT
+  Version: 1.1.0

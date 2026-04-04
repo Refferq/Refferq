@@ -1,0 +1,72 @@
+# Refferq
+
+> Refferq is a free, open-source, self-hosted affiliate marketing platform built with Next.js 15, TypeScript, PostgreSQL, and Prisma. It enables businesses to launch, manage, and scale affiliate programs without recurring fees or vendor lock-in.
+
+## What is Refferq?
+
+Refferq is an affiliate marketing platform that provides:
+- **Affiliate management**: Register, approve, suspend, and manage affiliates with custom referral codes and partner groups
+- **Real-time tracking**: Lightweight JavaScript tracking snippet for click and conversion monitoring
+- **Flexible commissions**: Percentage-based, fixed-amount, or tiered commission structures per partner group
+- **Automated payouts**: Commission calculation with balance management and payout workflows
+- **38+ REST API endpoints**: Full admin, affiliate, and tracking APIs with JWT authentication
+- **12 webhook event types**: HMAC-SHA256 signed webhooks with retry logic and delivery tracking
+- **Email notifications**: Automated workflows for sign-ups, approvals, conversions, and payouts via Resend
+- **Analytics dashboard**: Real-time metrics, conversion funnels, geographic tracking, and CSV exports
+
+## Key Facts
+
+- **Price**: Free forever (self-hosted), $29/month (Managed Cloud — coming soon)
+- **License**: MIT License — fully open source
+- **Tech Stack**: Next.js 15 (App Router), TypeScript, PostgreSQL, Prisma ORM, Tailwind CSS
+- **Deployment**: Docker, Vercel, or any VPS with Node.js 18+
+- **Requirements**: Node.js 18+, PostgreSQL 12+
+- **Current Version**: 1.1.0
+- **Repository**: https://github.com/Refferq/Refferq
+
+## Pages
+
+- [Home](https://refferq.com): Main landing page with platform overview, features, pricing, and testimonials
+- [Features](https://refferq.com/features): Complete feature list including affiliate management, analytics, tracking, commissions, communication, and developer tools
+- [Pricing](https://refferq.com/pricing): Pricing plans comparison, feature comparison table vs competitors, and FAQ
+- [Documentation](https://refferq.com/docs): Setup guide, API reference, webhook events, and deployment instructions
+
+## How It Works
+
+1. **Affiliate Registration**: Affiliates apply through a branded registration portal with OTP email verification
+2. **Admin Approval**: Admins review and approve affiliates (or configure auto-approval)
+3. **Referral Links**: Each affiliate receives a unique referral code trackable via /r/[code] routes or ?ref=CODE parameters
+4. **Conversion Tracking**: A lightweight JavaScript snippet captures clicks and conversions in real-time
+5. **Commission Calculation**: Commissions are calculated automatically based on partner group rules
+6. **Payout Processing**: Admins review, approve, and process payouts through the admin panel
+
+## Comparison with Competitors
+
+| Feature | Refferq | Typical Competitors |
+|---------|---------|-------------------|
+| Price | $0/month | $49–$299/month |
+| Self-hosted | Yes | No |
+| Full source code | Yes | No |
+| Transaction fees | None | Additional charges |
+| API access | 38+ endpoints included | Premium tier only |
+| Webhooks | 12 events included | Not available |
+| White-label | Yes | Not available |
+| Setup fee | $0 | $299–$999 |
+
+## Installation (Quick Start)
+
+```bash
+git clone https://github.com/Refferq/Refferq.git
+cd Refferq
+npm install
+cp .env.example .env
+npm run db:generate
+npm run db:push
+npm run dev
+```
+
+## Optional
+
+- [GitHub Repository](https://github.com/Refferq/Refferq)
+- [GitHub Discussions](https://github.com/Refferq/Refferq/discussions)
+- [Report Issues](https://github.com/Refferq/Refferq/issues)

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+          http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd
+          http://www.google.com/schemas/sitemap-image/1.1
+          http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd">
+
+  <!-- ════════════════════════════════════════════════════════════════
+       Homepage — Highest Priority
+       ════════════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://refferq.com</loc>
+    <lastmod>2026-02-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://refferq.com/og-image.png</image:loc>
+      <image:title>Refferq — Free Open-Source Affiliate Marketing Platform</image:title>
+      <image:caption>Self-hosted affiliate marketing platform with real-time tracking, flexible commissions, and automated payouts</image:caption>
+    </image:image>
+  </url>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       Features Page
+       ════════════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://refferq.com/features</loc>
+    <lastmod>2026-02-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://refferq.com/og-image.png</image:loc>
+      <image:title>Refferq Features — Affiliate Management, Analytics, Tracking &amp; Commissions</image:title>
+      <image:caption>Complete feature overview: affiliate lifecycle management, real-time analytics, geographic tracking, webhook events, and 38+ API endpoints</image:caption>
+    </image:image>
+  </url>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       Pricing Page
+       ════════════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://refferq.com/pricing</loc>
+    <lastmod>2026-02-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://refferq.com/og-image.png</image:loc>
+      <image:title>Refferq Pricing — Free Self-Hosted &amp; Managed Cloud Plans</image:title>
+      <image:caption>Self-Hosted: $0/forever with unlimited affiliates. Managed Cloud: $29/month with dedicated support and automatic updates.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       Documentation
+       ════════════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://refferq.com/docs</loc>
+    <lastmod>2026-02-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://refferq.com/og-image.png</image:loc>
+      <image:title>Refferq Documentation — Setup, API Reference &amp; Deployment Guides</image:title>
+      <image:caption>Complete documentation: quick-start guide, API reference, webhook events, and deployment instructions for Vercel, Docker, and VPS</image:caption>
+    </image:image>
+  </url>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       Documentation Anchors (for deep-link indexing)
+       ════════════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://refferq.com/docs#quickstart</loc>
+    <lastmod>2026-02-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://refferq.com/docs#api</loc>
+    <lastmod>2026-02-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://refferq.com/docs#webhooks</loc>
+    <lastmod>2026-02-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://refferq.com/docs#docker</loc>
+    <lastmod>2026-02-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://refferq.com/docs#vercel</loc>
+    <lastmod>2026-02-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://refferq.com/docs#configuration</loc>
+    <lastmod>2026-02-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+</urlset>
