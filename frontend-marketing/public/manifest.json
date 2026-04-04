@@ -1,0 +1,50 @@
+{
+  "name": "Refferq — Open-Source Affiliate Marketing Platform",
+  "short_name": "Refferq",
+  "description": "Free, self-hosted, open-source affiliate marketing platform. Track referrals, manage commissions, automate payouts, and grow your partner program.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#10b981",
+  "background_color": "#000000",
+  "categories": ["business", "productivity", "developer tools"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "type": "image/png",
+      "sizes": "1200x630",
+      "label": "Refferq affiliate marketing platform homepage"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

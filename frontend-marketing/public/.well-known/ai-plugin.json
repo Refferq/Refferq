@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Refferq",
+  "name_for_model": "refferq",
+  "description_for_human": "Free, open-source, self-hosted affiliate marketing platform. Track referrals, manage commissions, automate payouts.",
+  "description_for_model": "Refferq is a free, open-source, self-hosted affiliate marketing platform built with Next.js 15, TypeScript, PostgreSQL, and Prisma. It provides affiliate management, real-time tracking, flexible commission rules, automated payouts, 38+ REST API endpoints, 12 webhook event types, and deployment via Docker or Vercel. It is licensed under MIT and costs $0 for the self-hosted version.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://refferq.com/docs#api"
+  },
+  "logo_url": "https://refferq.com/icon-512.png",
+  "contact_email": "support@refferq.com",
+  "legal_info_url": "https://github.com/Refferq/Refferq/blob/main/LICENSE"
+}
