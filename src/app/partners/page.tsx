@@ -41,6 +41,21 @@ export default function PartnersLandingPage() {
             ))}
           </ul>
         </section>
+
+        <section className="mt-4 rounded-2xl border bg-card p-6">
+          <h2 className="text-base font-medium">Вход в личный кабинет</h2>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button asChild variant="outline">
+              <Link href="/affiliate">Кабинет партнёра</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/admin">Кабинет администратора</Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link href="/login">Войти по email</Link>
+            </Button>
+          </div>
+        </section>
       </div>
     </main>
   );
