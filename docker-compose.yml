@@ -8,12 +8,12 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgres:XuroN0O5A1M2rlbfxGnJZRHuJYnen3Vh0ZnY2uLXOuLxFQUmPwTTP8R2d1WjIOUC@x13xbrcjfcsh91wuvjq5zem4:5432/postgres?sslmode=require
-      - JWT_SECRET=${a9f8b2e1d7c555a6e5b8d2f09c1a3b4e9d6f5c8a1b2d9e3f4c7b6a5d2e1f9c5}
-      - RESEND_API_KEY=${re_6WPdwsKR_K3jdzMwfcEsV8igz3rLLfMju}
-      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Nextra Money <notify@mails.nextra.noney>}
-      - ADMIN_EMAILS=${iam@rks.ad}
-      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://partners.}
+      - DATABASE_URL=postgresql://postgres:XuroN0O5A1M2rlbfxGnJZRHuJYnen3Vh0ZnY2uLXOuLxFQUmPwTTP8R2d1WjIOUC@db:5432/postgresql-database-x13xbrcjfcsh91wuvjq5zem4?sslmode=disable
+      - JWT_SECRET=a9f8b2e1d7c555a6e5b8d2f09c1a3b4e9d6f5c8a1b2d9e3f4c7b6a5d2e1f9c5
+      - RESEND_API_KEY=re_6WPdwsKR_K3jdzMwfcEsV8igz3rLLfMju
+      - RESEND_FROM_EMAIL=Nextra Money <notify@mails.nextra.money>
+      - ADMIN_EMAILS=iam@rks.ad
+      - NEXT_PUBLIC_APP_URL=https://partners.nextra.money
     depends_on:
       db:
         condition: service_healthy
@@ -33,7 +33,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U refferq"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
