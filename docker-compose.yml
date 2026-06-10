@@ -8,12 +8,12 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://refferq:refferq@db:5432/refferq
-      - JWT_SECRET=${JWT_SECRET:-change-me-to-a-random-string-min-32-chars}
-      - RESEND_API_KEY=${RESEND_API_KEY:-}
-      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Refferq <onboarding@resend.dev>}
-      - ADMIN_EMAILS=${ADMIN_EMAILS:-}
-      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      - DATABASE_URL=postgres:XuroN0O5A1M2rlbfxGnJZRHuJYnen3Vh0ZnY2uLXOuLxFQUmPwTTP8R2d1WjIOUC@x13xbrcjfcsh91wuvjq5zem4:5432/postgres?sslmode=require
+      - JWT_SECRET=${a9f8b2e1d7c555a6e5b8d2f09c1a3b4e9d6f5c8a1b2d9e3f4c7b6a5d2e1f9c5}
+      - RESEND_API_KEY=${re_6WPdwsKR_K3jdzMwfcEsV8igz3rLLfMju}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Nextra Money <notify@mails.nextra.noney>}
+      - ADMIN_EMAILS=${iam@rks.ad}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://partners.}
     depends_on:
       db:
         condition: service_healthy
@@ -25,9 +25,9 @@ services:
     container_name: refferq-db
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=refferq
-      - POSTGRES_PASSWORD=refferq
-      - POSTGRES_DB=refferq
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=XuroN0O5A1M2rlbfxGnJZRHuJYnen3Vh0ZnY2uLXOuLxFQUmPwTTP8R2d1WjIOUC
+      - POSTGRES_DB=postgresql-database-x13xbrcjfcsh91wuvjq5zem4
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
