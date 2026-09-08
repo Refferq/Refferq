@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { logAuditAction } from '@/lib/audit';
@@ -12,7 +15,7 @@ import { logAuditAction } from '@/lib/audit';
  * - A cron job (e.g. Vercel Cron, Railway Cron)
  * - Manually by an admin from the dashboard
  */
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
     try {
         // Auth check — must be admin or cron secret
         const cronSecret = request.headers.get('x-cron-secret');
@@ -34,7 +37,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (!isAuthorized) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
         }
 
         const now = new Date();
@@ -53,7 +56,7 @@ export async function POST(request: NextRequest) {
         if (maturedCommissions.length === 0) {
             return NextResponse.json({
                 success: true,
-                message: 'No commissions to mature',
+                message: __tr("No commissions to mature"),
                 matured: 0,
             });
         }
@@ -103,15 +106,17 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: `${maturedIds.length} commission(s) matured and approved`,
+            message: __tr("{0} commission(s) matured and approved", [maturedIds.length]),
             matured: maturedIds.length,
             affiliatesUpdated: affiliateUpdates.size,
         });
     } catch (error) {
         console.error('Commission maturation error:', error);
         return NextResponse.json(
-            { error: 'Failed to mature commissions' },
+            { error: __tr("Failed to mature commissions") },
             { status: 500 }
         );
     }
 }
+
+export const POST = withSystemLocale(POSTHandler);

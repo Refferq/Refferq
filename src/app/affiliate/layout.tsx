@@ -1,8 +1,9 @@
-'use client';
+"use client";
+import { useI18n } from "@/i18n/provider";
 
-import React, { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 import {
   SidebarProvider,
   Sidebar,
@@ -18,17 +19,17 @@ import {
   SidebarInset,
   SidebarTrigger,
   SidebarRail,
-} from '@/components/ui/sidebar';
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   Users,
@@ -39,7 +40,7 @@ import {
   LogOut,
   ChevronsUpDown,
   Bell,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface BrandSettings {
   companyName?: string;
@@ -49,30 +50,35 @@ interface BrandSettings {
   brandTextColor?: string;
 }
 
-const mainNavItems = [
-  { title: 'Dashboard', url: '/affiliate', icon: LayoutDashboard },
-  { title: 'Referrals', url: '/affiliate/referrals', icon: Users },
-  { title: 'Payouts', url: '/affiliate/payouts', icon: Wallet },
-  { title: 'Resources', url: '/affiliate/resources', icon: BookOpen },
-  { title: 'Reports', url: '/affiliate/reports', icon: BarChart3, badge: 'BETA' },
-];
-
-const accountNavItems = [
-  { title: 'Settings', url: '/affiliate/settings', icon: Settings },
-];
-
 function AffiliateSidebar({ brand }: { brand: BrandSettings }) {
+  const { t: __tr, label: __label } = useI18n();
+  const mainNavItems = [
+    { title: __tr("Dashboard"), url: "/affiliate", icon: LayoutDashboard },
+    { title: __tr("Referrals"), url: "/affiliate/referrals", icon: Users },
+    { title: __tr("Payouts"), url: "/affiliate/payouts", icon: Wallet },
+    { title: __tr("Resources"), url: "/affiliate/resources", icon: BookOpen },
+    {
+      title: __tr("Reports"),
+      url: "/affiliate/reports",
+      icon: BarChart3,
+      badge: "BETA",
+    },
+  ];
+  const accountNavItems = [
+    { title: __tr("Settings"), url: "/affiliate/settings", icon: Settings },
+  ];
+
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
 
   const isActive = (url: string) => {
-    if (url === '/affiliate') return pathname === '/affiliate';
+    if (url === "/affiliate") return pathname === "/affiliate";
     return pathname.startsWith(url);
   };
 
-  const accentColor = brand.brandButtonColor || '#059669';
-  const brandName = brand.companyName || 'Refferq';
+  const accentColor = brand.brandButtonColor || "#059669";
+  const brandName = brand.companyName || "Refferq";
 
   return (
     <Sidebar variant="inset">
@@ -81,15 +87,26 @@ function AffiliateSidebar({ brand }: { brand: BrandSettings }) {
           <SidebarMenuItem>
             <div className="flex items-center gap-3 px-2 py-1.5">
               {brand.companyLogo ? (
-                <img src={brand.companyLogo} alt={brandName} className="h-10 w-10 rounded-xl object-contain" />
+                <img
+                  src={brand.companyLogo}
+                  alt={brandName}
+                  className="h-10 w-10 rounded-xl object-contain"
+                />
               ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-sm" style={{ backgroundColor: accentColor }}>
-                  <span className="text-lg font-bold">{brandName.charAt(0)}</span>
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-sm"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  <span className="text-lg font-bold">
+                    {brandName.charAt(0)}
+                  </span>
                 </div>
               )}
               <div className="flex flex-col">
                 <span className="text-sm font-bold">{brandName}</span>
-                <span className="text-xs text-muted-foreground">Affiliate Portal</span>
+                <span className="text-xs text-muted-foreground">
+                  {__tr("Affiliate Portal")}
+                </span>
               </div>
             </div>
           </SidebarMenuItem>
@@ -98,11 +115,11 @@ function AffiliateSidebar({ brand }: { brand: BrandSettings }) {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
+          <SidebarGroupLabel>{__tr("Main Menu")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton
                     isActive={isActive(item.url)}
                     onClick={() => router.push(item.url)}
@@ -112,7 +129,7 @@ function AffiliateSidebar({ brand }: { brand: BrandSettings }) {
                     <span>{item.title}</span>
                     {item.badge && (
                       <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                        {item.badge}
+                        {__label(item.badge)}
                       </span>
                     )}
                   </SidebarMenuButton>
@@ -123,11 +140,11 @@ function AffiliateSidebar({ brand }: { brand: BrandSettings }) {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
+          <SidebarGroupLabel>{__tr("Account")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {accountNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton
                     isActive={isActive(item.url)}
                     onClick={() => router.push(item.url)}
@@ -153,13 +170,18 @@ function AffiliateSidebar({ brand }: { brand: BrandSettings }) {
                   className="data-[state=open]:bg-sidebar-accent"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarFallback className="rounded-lg text-white text-xs" style={{ backgroundColor: accentColor }}>
+                    <AvatarFallback
+                      className="rounded-lg text-white text-xs"
+                      style={{ backgroundColor: accentColor }}
+                    >
                       {user?.name?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">{user?.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {user?.email}
+                    </span>
                   </div>
                   <ChevronsUpDown className="ml-auto h-4 w-4" />
                 </SidebarMenuButton>
@@ -170,14 +192,19 @@ function AffiliateSidebar({ brand }: { brand: BrandSettings }) {
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuItem onClick={() => router.push('/affiliate/settings')}>
+                <DropdownMenuItem
+                  onClick={() => router.push("/affiliate/settings")}
+                >
                   <Settings className="mr-2 h-4 w-4" />
-                  Settings
+                  {__tr("Settings")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => logout()} className="text-destructive">
+                <DropdownMenuItem
+                  onClick={() => logout()}
+                  className="text-destructive"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
-                  Log out
+                  {__tr("Log out")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -190,14 +217,20 @@ function AffiliateSidebar({ brand }: { brand: BrandSettings }) {
   );
 }
 
-export default function AffiliateLayout({ children }: { children: React.ReactNode }) {
+export default function AffiliateLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { t: __tr } = useI18n();
+
   const { user, loading } = useAuth();
   const [brand, setBrand] = useState<BrandSettings>({});
 
   useEffect(() => {
-    fetch('/api/affiliate/branding')
-      .then(res => res.json())
-      .then(data => {
+    fetch("/api/affiliate/branding")
+      .then((res) => res.json())
+      .then((data) => {
         if (data.success && data.settings) setBrand(data.settings);
       })
       .catch(() => {});
@@ -209,9 +242,14 @@ export default function AffiliateLayout({ children }: { children: React.ReactNod
         <div className="text-center">
           <div className="relative mx-auto h-12 w-12">
             <div className="absolute inset-0 rounded-full border-4 border-muted" />
-            <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent" style={{ borderTopColor: brand.brandButtonColor || '#059669' }} />
+            <div
+              className="absolute inset-0 animate-spin rounded-full border-4 border-transparent"
+              style={{ borderTopColor: brand.brandButtonColor || "#059669" }}
+            />
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">Loading your dashboard...</p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            {__tr("Loading your dashboard...")}
+          </p>
         </div>
       </div>
     );
@@ -224,10 +262,12 @@ export default function AffiliateLayout({ children }: { children: React.ReactNod
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10">
             <span className="text-3xl">🔒</span>
           </div>
-          <h1 className="text-xl font-bold">Access Denied</h1>
-          <p className="text-sm text-muted-foreground">Affiliate account required to access this page</p>
+          <h1 className="text-xl font-bold">{__tr("Access Denied")}</h1>
+          <p className="text-sm text-muted-foreground">
+            {__tr("Affiliate account required to access this page")}
+          </p>
           <Button asChild>
-            <a href="/login">Go to Login</a>
+            <a href="/login">{__tr("Go to Login")}</a>
           </Button>
         </div>
       </div>
@@ -244,7 +284,7 @@ export default function AffiliateLayout({ children }: { children: React.ReactNod
           <div className="flex flex-1 items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">
-                Welcome back, {user.name?.split(' ')[0]}
+                {__tr("Welcome back,")} {user.name?.split(" ")[0]}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -254,9 +294,7 @@ export default function AffiliateLayout({ children }: { children: React.ReactNod
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto p-6">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

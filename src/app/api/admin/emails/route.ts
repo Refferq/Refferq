@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -15,13 +18,13 @@ async function verifyAuth(request: Request) {
 }
 
 // GET - Fetch all email templates
-export async function GET(request: Request) {
+ async function GETHandler(request: Request) {
   try {
     const user = await verifyAuth(request);
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: __tr("Unauthorized") },
         { status: 401 }
       );
     }
@@ -67,20 +70,20 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error fetching email templates:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch email templates' },
+      { error: __tr("Failed to fetch email templates") },
       { status: 500 }
     );
   }
 }
 
 // POST - Create or update email template
-export async function POST(request: Request) {
+ async function POSTHandler(request: Request) {
   try {
     const user = await verifyAuth(request);
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: __tr("Unauthorized") },
         { status: 401 }
       );
     }
@@ -90,7 +93,7 @@ export async function POST(request: Request) {
 
     if (!type || !name || !subject || !emailBody) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: __tr("Missing required fields") },
         { status: 400 }
       );
     }
@@ -148,20 +151,20 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error saving email template:', error);
     return NextResponse.json(
-      { error: 'Failed to save email template' },
+      { error: __tr("Failed to save email template") },
       { status: 500 }
     );
   }
 }
 
 // PUT - Toggle template active status
-export async function PUT(request: Request) {
+ async function PUTHandler(request: Request) {
   try {
     const user = await verifyAuth(request);
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: __tr("Unauthorized") },
         { status: 401 }
       );
     }
@@ -171,7 +174,7 @@ export async function PUT(request: Request) {
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Template ID is required' },
+        { error: __tr("Template ID is required") },
         { status: 400 }
       );
     }
@@ -191,20 +194,20 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error('Error updating template status:', error);
     return NextResponse.json(
-      { error: 'Failed to update template status' },
+      { error: __tr("Failed to update template status") },
       { status: 500 }
     );
   }
 }
 
 // DELETE - Delete template
-export async function DELETE(request: Request) {
+ async function DELETEHandler(request: Request) {
   try {
     const user = await verifyAuth(request);
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: __tr("Unauthorized") },
         { status: 401 }
       );
     }
@@ -214,7 +217,7 @@ export async function DELETE(request: Request) {
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Template ID is required' },
+        { error: __tr("Template ID is required") },
         { status: 400 }
       );
     }
@@ -225,13 +228,18 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Template deleted successfully',
+      message: __tr("Template deleted successfully"),
     });
   } catch (error) {
     console.error('Error deleting template:', error);
     return NextResponse.json(
-      { error: 'Failed to delete template' },
+      { error: __tr("Failed to delete template") },
       { status: 500 }
     );
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);
+export const PUT = withSystemLocale(PUTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

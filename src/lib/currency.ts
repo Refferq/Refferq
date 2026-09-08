@@ -1,3 +1,5 @@
+
+import { getIntlLocale as __locale } from "@/i18n";
 import { prisma } from './prisma';
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -23,7 +25,7 @@ export async function getCurrencySymbol(): Promise<string> {
 
 export function formatCurrency(cents: number, symbol: string): string {
     const amount = cents / 100;
-    return `${symbol}${amount.toLocaleString(undefined, {
+    return `${symbol}${amount.toLocaleString(__locale(), {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     })}`;

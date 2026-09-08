@@ -16,7 +16,7 @@ Complete API reference for Refferq affiliate management platform.
 
 ## Authentication
 
-All API endpoints (except auth endpoints) require authentication via JWT token stored in cookies.
+Protected API endpoints require authentication via JWT token stored in cookies. The locale snapshot endpoint described below is public.
 
 ### Register
 
@@ -502,3 +502,17 @@ Webhook support for external integrations is planned for future releases.
 
 **Documentation by Refferq Team**
 *Last Updated: October 2025*
+
+## Localization
+
+### Read the active language
+
+`GET /api/locale` is public so login and registration pages can use the installation language. It returns the active language pack, available language metadata and a revision. Responses include `ETag` and `Cache-Control: private, no-cache`; a matching `If-None-Match` returns `304` without a body.
+
+### Inspect language-file diagnostics
+
+`GET /api/admin/locale` requires an administrator session and returns `{ "diagnostics": [...] }`. Diagnostics identify rejected language files and validation failures. Responses use `Cache-Control: no-store`.
+
+### Change the installation language
+
+`PUT /api/admin/locale` requires an administrator session. Send `{ "locale": "ru" }` to select an installed language. Success returns `{ "success": true, "locale": "ru" }`. Invalid or unavailable languages return `400`; non-administrator access is denied; persistence failures return `500`. The choice is shared across all user roles.

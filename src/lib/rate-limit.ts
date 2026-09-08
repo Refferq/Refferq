@@ -1,3 +1,5 @@
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
@@ -183,7 +185,7 @@ export async function withRateLimit(
     const apiKey = await validateApiKey(apiKeyHeader);
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'Invalid or expired API key' },
+        { error: __tr("Invalid or expired API key") },
         { status: 401 }
       );
     }
@@ -195,7 +197,7 @@ export async function withRateLimit(
     const scopes = apiKey.scopes as string[];
     if (method !== 'GET' && !scopes.includes('write') && !scopes.includes('admin')) {
       return NextResponse.json(
-        { error: 'Insufficient API key permissions' },
+        { error: __tr("Insufficient API key permissions") },
         { status: 403 }
       );
     }
@@ -206,7 +208,7 @@ export async function withRateLimit(
 
   if (!rateResult.allowed) {
     const response = NextResponse.json(
-      { error: 'Rate limit exceeded', retryAfter: rateResult.resetAt.toISOString() },
+      { error: __tr("Rate limit exceeded"), retryAfter: rateResult.resetAt.toISOString() },
       { status: 429 }
     );
     const headers = rateLimitHeaders(rateResult);

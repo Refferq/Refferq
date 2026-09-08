@@ -1,3 +1,6 @@
+
+import { label as __label } from "@/i18n";
+import { t as __tr } from "@/i18n";
 // Real-time notification system for the affiliate platform
 export interface NotificationData {
   id: string;
@@ -84,8 +87,8 @@ class NotificationService {
     for (const adminId of adminIds) {
       await this.createNotification({
         type: 'referral_submitted',
-        title: 'New Referral Submitted',
-        message: `${referralData.affiliateName} submitted a referral for ${referralData.leadName}${referralData.company ? ` from ${referralData.company}` : ''}`,
+        title: __tr("New Referral Submitted"),
+        message: __tr("{0} submitted a referral for {1}{2}", [referralData.affiliateName, referralData.leadName, referralData.company ? ` from ${referralData.company}` : '']),
         userId: adminId,
         metadata: referralData,
       });
@@ -96,8 +99,8 @@ class NotificationService {
   async notifyReferralApproved(affiliateId: string, referralData: { leadName: string; commissionAmount: number }): Promise<void> {
     await this.createNotification({
       type: 'referral_approved',
-      title: 'Referral Approved!',
-      message: `Your referral for ${referralData.leadName} has been approved. Commission: $${(referralData.commissionAmount / 100).toFixed(2)}`,
+      title: __tr("Referral Approved!"),
+      message: __tr("Your referral for {0} has been approved. Commission: ${1}", [referralData.leadName, (referralData.commissionAmount / 100).toFixed(2)]),
       userId: affiliateId,
       metadata: referralData,
     });
@@ -106,8 +109,8 @@ class NotificationService {
   async notifyReferralRejected(affiliateId: string, referralData: { leadName: string; reason?: string }): Promise<void> {
     await this.createNotification({
       type: 'referral_rejected',
-      title: 'Referral Update',
-      message: `Your referral for ${referralData.leadName} needs attention${referralData.reason ? `: ${referralData.reason}` : ''}`,
+      title: __tr("Referral Update"),
+      message: __tr("Your referral for {0} needs attention{1}", [referralData.leadName, referralData.reason ? `: ${referralData.reason}` : '']),
       userId: affiliateId,
       metadata: referralData,
     });
@@ -116,8 +119,8 @@ class NotificationService {
   async notifyCommissionApproved(affiliateId: string, commissionData: { amount: number; referralName: string }): Promise<void> {
     await this.createNotification({
       type: 'commission_approved',
-      title: 'Commission Approved!',
-      message: `Commission of $${(commissionData.amount / 100).toFixed(2)} for ${commissionData.referralName} has been approved`,
+      title: __tr("Commission Approved!"),
+      message: __tr("Commission of ${0} for {1} has been approved", [(commissionData.amount / 100).toFixed(2), commissionData.referralName]),
       userId: affiliateId,
       metadata: commissionData,
     });
@@ -126,8 +129,8 @@ class NotificationService {
   async notifyPayoutProcessed(affiliateId: string, payoutData: { amount: number; method: string }): Promise<void> {
     await this.createNotification({
       type: 'payout_processed',
-      title: 'Payout Processed',
-      message: `Your payout of $${(payoutData.amount / 100).toFixed(2)} via ${payoutData.method} has been processed`,
+      title: __tr("Payout Processed"),
+      message: __tr("Your payout of ${0} via {1} has been processed", [(payoutData.amount / 100).toFixed(2), __label(payoutData.method)]),
       userId: affiliateId,
       metadata: payoutData,
     });
@@ -138,8 +141,8 @@ class NotificationService {
     for (const adminId of adminIds) {
       await this.createNotification({
         type: 'affiliate_registered',
-        title: 'New Affiliate Registration',
-        message: `${affiliateData.name} (${affiliateData.email}) has registered as an affiliate`,
+        title: __tr("New Affiliate Registration"),
+        message: __tr("{0} ({1}) has registered as an affiliate", [affiliateData.name, affiliateData.email]),
         userId: adminId,
         metadata: affiliateData,
       });

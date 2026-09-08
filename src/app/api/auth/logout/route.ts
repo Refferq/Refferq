@@ -1,10 +1,13 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     const response = NextResponse.json({
       success: true,
-      message: 'Logged out successfully'
+      message: __tr("Logged out successfully")
     });
 
     // Clear the auth token cookie
@@ -20,8 +23,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Logout error:', error);
     return NextResponse.json(
-      { error: 'Logout failed' },
+      { error: __tr("Logout failed") },
       { status: 500 }
     );
   }
 }
+export const POST = withSystemLocale(POSTHandler);

@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
@@ -34,7 +37,7 @@ function validateWebhookUrl(urlString: string): { valid: boolean; error?: string
   try {
     parsed = new URL(urlString);
   } catch (_e) {
-    return { valid: false, error: 'Invalid URL format' };
+    return { valid: false, error: __tr("Invalid URL format") };
   }
 
   // Only allow HTTPS (and HTTP in development)
@@ -42,23 +45,23 @@ function validateWebhookUrl(urlString: string): { valid: boolean; error?: string
     ? ['https:', 'http:']
     : ['https:'];
   if (!allowedProtocols.includes(parsed.protocol)) {
-    return { valid: false, error: 'Only HTTPS webhook URLs are allowed' };
+    return { valid: false, error: __tr("Only HTTPS webhook URLs are allowed") };
   }
 
   // Block known internal hostnames
   const hostname = parsed.hostname.toLowerCase();
   if (BLOCKED_HOSTNAMES.includes(hostname)) {
-    return { valid: false, error: 'Webhook URL must not point to internal or loopback addresses' };
+    return { valid: false, error: __tr("Webhook URL must not point to internal or loopback addresses") };
   }
 
   // Block private IP ranges
   if (PRIVATE_IP_RANGES.some(range => range.test(hostname))) {
-    return { valid: false, error: 'Webhook URL must not point to private network addresses' };
+    return { valid: false, error: __tr("Webhook URL must not point to private network addresses") };
   }
 
   // Block URLs without a valid TLD (e.g., http://intranet)
   if (!hostname.includes('.') && hostname !== 'localhost') {
-    return { valid: false, error: 'Webhook URL must use a fully qualified domain name' };
+    return { valid: false, error: __tr("Webhook URL must use a fully qualified domain name") };
   }
 
   return { valid: true };
@@ -74,12 +77,12 @@ async function verifyAdminAuth(request: NextRequest) {
     });
 
     if (!user || user.role !== 'ADMIN') {
-      return { error: 'Admin access required', status: 403 };
+      return { error: __tr("Admin access required"), status: 403 };
     }
 
     return { user };
   } catch (_error) {
-    return { error: 'Invalid token', status: 401 };
+    return { error: __tr("Invalid token"), status: 401 };
   }
 }
 
@@ -96,7 +99,7 @@ function generateSignature(payload: any, secret: string): string {
 }
 
 // GET - List all webhooks
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   const auth = await verifyAdminAuth(request);
   if ('error' in auth) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
@@ -149,14 +152,14 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Webhooks GET error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch webhooks' },
+      { error: __tr("Failed to fetch webhooks") },
       { status: 500 }
     );
   }
 }
 
 // POST - Create webhook, trigger webhook, or test webhook
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   const auth = await verifyAdminAuth(request);
   if ('error' in auth) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
@@ -172,7 +175,7 @@ export async function POST(request: NextRequest) {
 
       if (!name || !url) {
         return NextResponse.json(
-          { error: 'Name and URL are required' },
+          { error: __tr("Name and URL are required") },
           { status: 400 }
         );
       }
@@ -191,7 +194,7 @@ export async function POST(request: NextRequest) {
       const invalidEvents = selectedEvents.filter((e: string) => !AVAILABLE_EVENTS.includes(e as WebhookEventType));
       if (invalidEvents.length > 0) {
         return NextResponse.json(
-          { error: `Invalid events: ${invalidEvents.join(', ')}` },
+          { error: __tr("Invalid events: {0}", [invalidEvents.join(', ')]) },
           { status: 400 }
         );
       }
@@ -215,7 +218,7 @@ export async function POST(request: NextRequest) {
           ...webhook,
           secret // Return secret only on creation
         },
-        message: 'Webhook created successfully. Save your secret - it will not be shown again.'
+        message: __tr("Webhook created successfully. Save your secret - it will not be shown again.")
       });
     }
 
@@ -234,7 +237,7 @@ export async function POST(request: NextRequest) {
 
         if (!webhook) {
           return NextResponse.json(
-            { error: 'Webhook not found' },
+            { error: __tr("Webhook not found") },
             { status: 404 }
           );
         }
@@ -245,7 +248,7 @@ export async function POST(request: NextRequest) {
 
       if (!webhookUrl) {
         return NextResponse.json(
-          { error: 'Webhook URL is required' },
+          { error: __tr("Webhook URL is required") },
           { status: 400 }
         );
       }
@@ -263,7 +266,7 @@ export async function POST(request: NextRequest) {
         event: 'test',
         timestamp: new Date().toISOString(),
         data: { 
-          message: 'This is a test webhook from Refferq',
+          message: __tr("This is a test webhook from Refferq"),
           testId: crypto.randomBytes(8).toString('hex')
         }
       };
@@ -300,7 +303,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: response.ok,
           statusCode: response.status,
-          message: response.ok ? 'Webhook test successful' : `Webhook test failed with status ${response.status}`,
+          message: response.ok ? __tr("Webhook test successful") : __tr("Webhook test failed with status {0}", [response.status]),
           response: responseText.substring(0, 500)
         });
 
@@ -321,7 +324,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           success: false,
-          message: 'Webhook test failed: connection error'
+          message: __tr("Webhook test failed: connection error")
         });
       }
     }
@@ -332,14 +335,14 @@ export async function POST(request: NextRequest) {
 
       if (!eventType || !eventData) {
         return NextResponse.json(
-          { error: 'Event type and data are required' },
+          { error: __tr("Event type and data are required") },
           { status: 400 }
         );
       }
 
       if (!AVAILABLE_EVENTS.includes(eventType)) {
         return NextResponse.json(
-          { error: `Invalid event type: ${eventType}` },
+          { error: __tr("Invalid event type: {0}", [eventType]) },
           { status: 400 }
         );
       }
@@ -348,27 +351,27 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: `Webhook triggered for ${eventType}`,
+        message: __tr("Webhook triggered for {0}", [eventType]),
         results
       });
     }
 
     return NextResponse.json(
-      { error: 'Invalid action. Use: create, test, or trigger' },
+      { error: __tr("Invalid action. Use: create, test, or trigger") },
       { status: 400 }
     );
 
   } catch (error) {
     console.error('Webhooks POST error:', error);
     return NextResponse.json(
-      { error: 'Failed to process webhook request' },
+      { error: __tr("Failed to process webhook request") },
       { status: 500 }
     );
   }
 }
 
 // PUT - Update webhook
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   const auth = await verifyAdminAuth(request);
   if ('error' in auth) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
@@ -380,7 +383,7 @@ export async function PUT(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Webhook ID is required' },
+        { error: __tr("Webhook ID is required") },
         { status: 400 }
       );
     }
@@ -391,7 +394,7 @@ export async function PUT(request: NextRequest) {
 
     if (!existingWebhook) {
       return NextResponse.json(
-        { error: 'Webhook not found' },
+        { error: __tr("Webhook not found") },
         { status: 404 }
       );
     }
@@ -427,21 +430,21 @@ export async function PUT(request: NextRequest) {
         secret: regenerateSecret ? webhook.secret : '••••••••'
       },
       message: regenerateSecret 
-        ? 'Webhook updated with new secret. Save your secret - it will not be shown again.'
-        : 'Webhook updated successfully'
+        ? __tr("Webhook updated with new secret. Save your secret - it will not be shown again.")
+        : __tr("Webhook updated successfully")
     });
 
   } catch (error) {
     console.error('Webhooks PUT error:', error);
     return NextResponse.json(
-      { error: 'Failed to update webhook' },
+      { error: __tr("Failed to update webhook") },
       { status: 500 }
     );
   }
 }
 
 // DELETE - Remove webhook
-export async function DELETE(request: NextRequest) {
+ async function DELETEHandler(request: NextRequest) {
   const auth = await verifyAdminAuth(request);
   if ('error' in auth) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
@@ -453,7 +456,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!webhookId) {
       return NextResponse.json(
-        { error: 'Webhook ID is required' },
+        { error: __tr("Webhook ID is required") },
         { status: 400 }
       );
     }
@@ -464,7 +467,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!webhook) {
       return NextResponse.json(
-        { error: 'Webhook not found' },
+        { error: __tr("Webhook not found") },
         { status: 404 }
       );
     }
@@ -476,15 +479,20 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Webhook deleted successfully'
+      message: __tr("Webhook deleted successfully")
     });
 
   } catch (error) {
     console.error('Webhooks DELETE error:', error);
     return NextResponse.json(
-      { error: 'Failed to delete webhook' },
+      { error: __tr("Failed to delete webhook") },
       { status: 500 }
     );
   }
 }
 
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);
+export const PUT = withSystemLocale(PUTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

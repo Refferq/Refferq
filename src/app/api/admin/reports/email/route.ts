@@ -1,3 +1,10 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+import { reportCSV, reportValue } from "@/i18n";
+
+import { label as __label } from "@/i18n";
+
+import { getIntlLocale as __locale } from "@/i18n";
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { resend } from '@/lib/email';
@@ -18,9 +25,9 @@ async function verifyAdmin(request: NextRequest) {
  * POST - Send a report via email to specified recipients.
  * Body: { reportType, recipients, startDate?, endDate?, format? }
  */
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
@@ -28,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     if (!reportType || !recipients || !Array.isArray(recipients) || recipients.length === 0) {
       return NextResponse.json(
-        { error: 'reportType and recipients array are required' },
+        { error: __tr("reportType and recipients array are required") },
         { status: 400 }
       );
     }
@@ -40,7 +47,7 @@ export async function POST(request: NextRequest) {
     const csvContent = convertToCSV(reportData.data || [reportData.summary || reportData]);
 
     // Build email HTML
-    const reportDate = new Date().toLocaleDateString('en-IN', {
+    const reportDate = new Date().toLocaleDateString(__locale(), {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -66,23 +73,21 @@ export async function POST(request: NextRequest) {
     </head>
     <body>
       <div class="header">
-        <h1>📊 ${reportData.type || 'Report'}</h1>
-        <p style="margin: 5px 0; opacity: 0.9;">Generated on ${reportDate}</p>
+        <h1>📊 ${reportData.type || __tr("Report")}</h1>
+        <p style="margin: 5px 0; opacity: 0.9;">${__tr("Generated on {0}", [reportDate])}</p>
         ${startDate && endDate ? `<p style="margin: 0; opacity: 0.8; font-size: 14px;">${startDate} — ${endDate}</p>` : ''}
       </div>
       <div class="content">
         ${reportData.summary ? renderSummaryHTML(reportData.summary) : ''}
         ${reportData.data && reportData.data.length > 0 ? renderTableHTML(reportData.data.slice(0, 20)) : ''}
-        ${reportData.data && reportData.data.length > 20 ? `<p style="color: #888; font-size: 13px;">Showing 20 of ${reportData.data.length} records. Full data attached as CSV.</p>` : ''}
+        ${reportData.data && reportData.data.length > 20 ? `<p style="color: #888; font-size: 13px;">${__tr("Showing 20 of {0} records. Full data attached as CSV.", [reportData.data.length])}</p>` : ''}
         <p style="margin-top: 20px;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/reports" style="display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">
-            View Full Report
-          </a>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/reports" style="display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;"> ${__tr("View Full Report")} </a>
         </p>
       </div>
       <div class="footer">
-        <p>This report was sent from Refferq by ${user.name} (${user.email})</p>
-        <p>© ${new Date().getFullYear()} Refferq. All rights reserved.</p>
+        <p>${__tr("This report was sent from Refferq by {0} ({1})", [user.name, user.email])}</p>
+        <p>${__tr("© {0} Refferq. All rights reserved.", [new Date().getFullYear()])}</p>
       </div>
     </body>
     </html>
@@ -95,7 +100,7 @@ export async function POST(request: NextRequest) {
         resend.emails.send({
           from: fromEmail,
           to: email.trim(),
-          subject: `[Refferq] ${reportData.type || 'Report'} — ${reportDate}`,
+          subject: __tr("[Refferq] {0} — {1}", [reportData.type || __tr("Report"), reportDate]),
           html,
         })
       )
@@ -106,13 +111,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Report sent to ${sent} recipient(s)${failed > 0 ? `, ${failed} failed` : ''}`,
+      message: __tr("Report sent to {0} recipient(s){1}", [sent, failed > 0 ? __tr(", {0} failed", [failed]) : '']),
       sent,
       failed,
     });
   } catch (error) {
     console.error('Email report delivery error:', error);
-    return NextResponse.json({ error: 'Failed to send report email' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to send report email") }, { status: 500 });
   }
 }
 
@@ -130,7 +135,7 @@ async function generateReportData(reportType: string, startDate?: string, endDat
       },
     });
     return {
-      type: 'Affiliate Performance Report',
+      type: __tr("Affiliate Performance Report"),
       data: affiliates.map((a) => ({
         name: a.user.name,
         email: a.user.email,
@@ -150,7 +155,7 @@ async function generateReportData(reportType: string, startDate?: string, endDat
       orderBy: { createdAt: 'desc' },
     });
     return {
-      type: 'Referrals Report',
+      type: __tr("Referrals Report"),
       data: referrals.map((r) => ({
         leadName: r.leadName,
         leadEmail: r.leadEmail,
@@ -168,7 +173,7 @@ async function generateReportData(reportType: string, startDate?: string, endDat
       orderBy: { createdAt: 'desc' },
     });
     return {
-      type: 'Commissions Report',
+      type: __tr("Commissions Report"),
       data: commissions.map((c) => ({
         affiliate: c.affiliate.user.name,
         amountCents: c.amountCents,
@@ -186,7 +191,7 @@ async function generateReportData(reportType: string, startDate?: string, endDat
       orderBy: { createdAt: 'desc' },
     });
     return {
-      type: 'Payouts Report',
+      type: __tr("Payouts Report"),
       data: payouts.map((p) => ({
         affiliate: p.user.name,
         amountCents: p.amountCents,
@@ -213,7 +218,7 @@ async function generateReportData(reportType: string, startDate?: string, endDat
   });
 
   return {
-    type: 'Summary Report',
+    type: __tr("Summary Report"),
     summary: {
       totalAffiliates,
       totalReferrals,
@@ -233,12 +238,10 @@ function renderSummaryHTML(summary: Record<string, unknown>): string {
       .map(
         ([key, value]) => `
       <div class="stat">
-        <div class="stat-value">${
-          typeof value === 'number' && key.toLowerCase().includes('cents')
-            ? '₹' + (value / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })
-            : value
-        }</div>
-        <div class="stat-label">${key.replace(/([A-Z])/g, ' $1').replace(/cents$/i, '').trim()}</div>
+        <div class="stat-value">${typeof value === 'number' && key.toLowerCase().includes('cents')
+            ? '₹' + (value / 100).toLocaleString(__locale(), { minimumFractionDigits: 2 })
+            : value}</div>
+        <div class="stat-label">${__label(key)}</div>
       </div>`
       )
       .join('')}
@@ -250,7 +253,7 @@ function renderTableHTML(data: Record<string, unknown>[]): string {
   const cols = Object.keys(data[0]);
   return `
     <table>
-      <thead><tr>${cols.map((c) => `<th>${c.replace(/([A-Z])/g, ' $1').trim()}</th>`).join('')}</tr></thead>
+      <thead><tr>${cols.map((c) => `<th>${__label(c)}</th>`).join('')}</tr></thead>
       <tbody>${data
         .map(
           (row) => `<tr>${cols
@@ -259,7 +262,7 @@ function renderTableHTML(data: Record<string, unknown>[]): string {
               if (typeof v === 'number' && c.toLowerCase().includes('cents')) {
                 return `<td>₹${(v / 100).toFixed(2)}</td>`;
               }
-              return `<td>${v ?? '—'}</td>`;
+              return `<td>${reportValue(c, v)}</td>`;
             })
             .join('')}</tr>`
         )
@@ -268,12 +271,7 @@ function renderTableHTML(data: Record<string, unknown>[]): string {
 }
 
 function convertToCSV(data: Record<string, unknown>[]): string {
-  if (!data || data.length === 0) return '';
-  const headers = Object.keys(data[0]).join(',');
-  const rows = data.map((row) =>
-    Object.values(row)
-      .map((val) => (typeof val === 'string' && val.includes(',') ? `"${val}"` : val))
-      .join(',')
-  );
-  return [headers, ...rows].join('\n');
+  return reportCSV(data);
 }
+
+export const POST = withSystemLocale(POSTHandler);

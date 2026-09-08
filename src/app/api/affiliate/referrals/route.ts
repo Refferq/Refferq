@@ -1,7 +1,10 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
 
@@ -17,21 +20,21 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'AFFILIATE') {
       return NextResponse.json(
-        { error: 'Access denied. Affiliate role required.' },
+        { error: __tr("Access denied. Affiliate role required.") },
         { status: 403 }
       );
     }
 
     if (!user.affiliate) {
       return NextResponse.json(
-        { error: 'Affiliate profile not found' },
+        { error: __tr("Affiliate profile not found") },
         { status: 404 }
       );
     }
@@ -43,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     if (!success) {
       return NextResponse.json(
-        { error: 'Validation failed', details: validationError.issues },
+        { error: __tr("Validation failed"), details: validationError.issues },
         { status: 400 }
       );
     }
@@ -68,19 +71,19 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Referral submitted successfully',
+      message: __tr("Referral submitted successfully"),
       referral,
     });
   } catch (error) {
     console.error('Submit referral API error:', error);
     return NextResponse.json(
-      { error: 'Failed to submit referral' },
+      { error: __tr("Failed to submit referral") },
       { status: 500 }
     );
   }
 }
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
 
@@ -96,21 +99,21 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'AFFILIATE') {
       return NextResponse.json(
-        { error: 'Access denied. Affiliate role required.' },
+        { error: __tr("Access denied. Affiliate role required.") },
         { status: 403 }
       );
     }
 
     if (!user.affiliate) {
       return NextResponse.json(
-        { error: 'Affiliate profile not found' },
+        { error: __tr("Affiliate profile not found") },
         { status: 404 }
       );
     }
@@ -137,8 +140,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Get referrals API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch referrals' },
+      { error: __tr("Failed to fetch referrals") },
       { status: 500 }
     );
   }
 }
+export const POST = withSystemLocale(POSTHandler);
+export const GET = withSystemLocale(GETHandler);

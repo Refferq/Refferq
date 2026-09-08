@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -32,7 +35,7 @@ function isAllowedRedirectUrl(url: string, appUrl: string, websiteUrl?: string):
   }
 }
 
-export async function GET(
+ async function GETHandler(
   request: NextRequest,
   { params }: { params: Promise<{ code: string }> }
 ) {
@@ -71,7 +74,7 @@ export async function GET(
       request.headers.get('x-real-ip') ||
       '127.0.0.1';
     const cleanIP = clientIP.split(',')[0].trim();
-    const userAgent = request.headers.get('user-agent') || 'Unknown';
+    const userAgent = request.headers.get('user-agent') || __tr("Unknown");
     const referer = request.headers.get('referer') || null;
 
     // ─── Fraud Detection ───────────────────────────────────────
@@ -97,7 +100,7 @@ export async function GET(
       referral = await prisma.referral.create({
         data: {
           affiliateId: affiliate.id,
-          leadName: 'Click Visitor',
+          leadName: __tr("Click Visitor"),
           leadEmail: `click-${attributionKey}@tracking.internal`,
           status: 'PENDING',
           metadata: {
@@ -171,3 +174,4 @@ export async function GET(
     return NextResponse.redirect(appUrl);
   }
 }
+export const GET = withSystemLocale(GETHandler);

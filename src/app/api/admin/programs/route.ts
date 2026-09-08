@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -14,9 +17,9 @@ async function verifyAdmin(request: NextRequest) {
 }
 
 // GET: List all programs
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const programs = await prisma.program.findMany({
@@ -26,26 +29,26 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, programs });
   } catch (error) {
     console.error('Admin programs GET error:', error);
-    return NextResponse.json({ error: 'Failed to fetch programs' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to fetch programs") }, { status: 500 });
   }
 }
 
 // POST: Create program
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { name, slug, description, commissionRate, commissionType, cookieDuration, currency, autoApprove, minPayoutCents, payoutFrequency, termsUrl, logoUrl, brandColor } = body;
 
     if (!name || !slug) {
-      return NextResponse.json({ error: 'Name and slug are required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Name and slug are required") }, { status: 400 });
     }
 
     const existing = await prisma.program.findUnique({ where: { slug } });
     if (existing) {
-      return NextResponse.json({ error: 'Slug already exists' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Slug already exists") }, { status: 400 });
     }
 
     const program = await prisma.program.create({
@@ -69,21 +72,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, program });
   } catch (error) {
     console.error('Admin programs POST error:', error);
-    return NextResponse.json({ error: 'Failed to create program' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to create program") }, { status: 500 });
   }
 }
 
 // PUT: Update program
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { id } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'Program ID required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Program ID required") }, { status: 400 });
     }
 
     // Only allow specific fields (prevent mass assignment)
@@ -101,27 +104,32 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true, program });
   } catch (error) {
     console.error('Admin programs PUT error:', error);
-    return NextResponse.json({ error: 'Failed to update program' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to update program") }, { status: 500 });
   }
 }
 
 // DELETE: Delete program
-export async function DELETE(request: NextRequest) {
+ async function DELETEHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: 'Program ID required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Program ID required") }, { status: 400 });
     }
 
     await prisma.program.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Admin programs DELETE error:', error);
-    return NextResponse.json({ error: 'Failed to delete program' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to delete program") }, { status: 500 });
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);
+export const PUT = withSystemLocale(PUTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

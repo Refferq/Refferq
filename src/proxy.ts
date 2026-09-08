@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
@@ -6,14 +9,15 @@ const JWT_SECRET = new TextEncoder().encode(
     process.env.JWT_SECRET!
 );
 
-export async function middleware(request: NextRequest) {
+ async function proxyHandler(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // 1. Define protected routes
     const isAdminRoute = pathname.startsWith('/api/admin') || pathname.startsWith('/admin');
     const isAffiliateRoute = pathname.startsWith('/api/affiliate') || pathname.startsWith('/affiliate');
+    const isAuthMeRoute = pathname === '/api/auth/me';
 
-    if (!isAdminRoute && !isAffiliateRoute) {
+    if (!isAdminRoute && !isAffiliateRoute && !isAuthMeRoute) {
         return NextResponse.next();
     }
 
@@ -24,7 +28,7 @@ export async function middleware(request: NextRequest) {
         // If it's an API route, return 401
         if (pathname.startsWith('/api/')) {
             return NextResponse.json(
-                { error: 'Authentication required' },
+                { error: __tr("Authentication required") },
                 { status: 401 }
             );
         }
@@ -41,7 +45,7 @@ export async function middleware(request: NextRequest) {
         if (isAdminRoute && userRole !== 'ADMIN') {
             if (pathname.startsWith('/api/')) {
                 return NextResponse.json(
-                    { error: 'Forbidden: Admin access required' },
+                    { error: __tr("Forbidden: Admin access required") },
                     { status: 403 }
                 );
             }
@@ -51,7 +55,7 @@ export async function middleware(request: NextRequest) {
         if (isAffiliateRoute && userRole !== 'AFFILIATE' && userRole !== 'ADMIN') {
             if (pathname.startsWith('/api/')) {
                 return NextResponse.json(
-                    { error: 'Forbidden: Affiliate access required' },
+                    { error: __tr("Forbidden: Affiliate access required") },
                     { status: 403 }
                 );
             }
@@ -59,15 +63,15 @@ export async function middleware(request: NextRequest) {
         }
 
         // 5. Inject user info into headers for API usage (optional but helpful)
-        const response = NextResponse.next();
-        response.headers.set('x-user-id', payload.userId as string);
-        response.headers.set('x-user-role', userRole);
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set('x-user-id', payload.userId as string);
+        requestHeaders.set('x-user-role', userRole);
 
-        return response;
+        return NextResponse.next({ request: { headers: requestHeaders } });
     } catch (error) {
         if (pathname.startsWith('/api/')) {
             return NextResponse.json(
-                { error: 'Invalid or expired token' },
+                { error: __tr("Invalid or expired token") },
                 { status: 401 }
             );
         }
@@ -85,3 +89,5 @@ export const config = {
         '/api/auth/me',
     ],
 };
+
+export const proxy = withSystemLocale(proxyHandler);

@@ -1,3 +1,5 @@
+
+import { t as __tr } from "@/i18n";
 // Authentication and session management for the affiliate platform
 import { type User, Role, UserStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
@@ -43,7 +45,7 @@ class AuthService {
       });
 
       if (existingUser) {
-        return { success: false, message: 'User already exists with this email' };
+        return { success: false, message: __tr("User already exists with this email") };
       }
 
       // Hash password
@@ -81,12 +83,12 @@ class AuthService {
 
       return {
         success: true,
-        message: 'Registration successful',
+        message: __tr("Registration successful"),
         user: user
       };
     } catch (error) {
       console.error('Registration error:', error);
-      return { success: false, message: 'Registration failed' };
+      return { success: false, message: __tr("Registration failed") };
     }
   }
 
@@ -98,13 +100,13 @@ class AuthService {
     try {
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user) {
-        return { success: false, message: 'User not found' };
+        return { success: false, message: __tr("User not found") };
       }
 
       // Verify current password
       const isValidPassword = await bcrypt.compare(currentPassword, user.password);
       if (!isValidPassword) {
-        return { success: false, message: 'Current password is incorrect' };
+        return { success: false, message: __tr("Current password is incorrect") };
       }
 
       // Hash new password
@@ -116,10 +118,10 @@ class AuthService {
         data: { password: hashedPassword }
       });
 
-      return { success: true, message: 'Password updated successfully' };
+      return { success: true, message: __tr("Password updated successfully") };
     } catch (error) {
       console.error('Update password error:', error);
-      return { success: false, message: 'Password update failed' };
+      return { success: false, message: __tr("Password update failed") };
     }
   }
 }

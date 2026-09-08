@@ -1,27 +1,28 @@
-'use client';
+"use client";
+import { useI18n } from "@/i18n/provider";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
 import {
   TrendingUp,
   IndianRupee,
@@ -36,7 +37,7 @@ import {
   CreditCard,
   Activity,
   Eye,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface DashboardStats {
   totalRevenue: number;
@@ -69,6 +70,8 @@ interface RecentCustomer {
 }
 
 export default function AdminDashboardPage() {
+  const { t: __tr, getIntlLocale: __locale, plural: __plural } = useI18n();
+
   const { user } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -77,7 +80,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user && user.role === 'ADMIN') {
+    if (user && user.role === "ADMIN") {
       fetchDashboardData();
     }
   }, [user]);
@@ -86,9 +89,9 @@ export default function AdminDashboardPage() {
     try {
       setLoading(true);
       const [statsRes, analyticsRes, referralsRes] = await Promise.all([
-        fetch('/api/admin/dashboard'),
-        fetch('/api/admin/analytics?days=30'),
-        fetch('/api/admin/referrals'),
+        fetch("/api/admin/dashboard"),
+        fetch("/api/admin/analytics?days=30"),
+        fetch("/api/admin/referrals"),
       ]);
 
       const [statsData, analyticsData, referralsData] = await Promise.all([
@@ -101,7 +104,8 @@ export default function AdminDashboardPage() {
         setStats({
           totalRevenue: statsData.stats.totalRevenue || 0,
           totalEstimatedRevenue: statsData.stats.totalEstimatedRevenue || 0,
-          totalEstimatedCommission: statsData.stats.totalEstimatedCommission || 0,
+          totalEstimatedCommission:
+            statsData.stats.totalEstimatedCommission || 0,
           totalClicks: 0,
           totalLeads: statsData.stats.totalReferrals || 0,
           totalReferredCustomers: statsData.stats.approvedReferrals || 0,
@@ -127,7 +131,7 @@ export default function AdminDashboardPage() {
         setRecentCustomers(recent);
       }
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+      console.error("Failed to fetch dashboard data:", error);
     } finally {
       setLoading(false);
     }
@@ -139,79 +143,84 @@ export default function AdminDashboardPage() {
 
   const statCards = [
     {
-      title: 'Estimated Revenue',
-      value: `₹${stats ? (stats.totalEstimatedRevenue / 100).toFixed(2) : '0.00'}`,
+      id: "estimated",
+      title: __tr("Estimated Revenue"),
+      value: `₹${stats ? (stats.totalEstimatedRevenue / 100).toLocaleString(__locale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}`,
       icon: IndianRupee,
-      description: 'Total projected value',
-      trend: '+12%',
+      description: __tr("Total projected value"),
+      trend: "+12%",
       trendUp: true,
-      color: 'text-blue-600',
-      bg: 'bg-blue-500/10',
+      color: "text-blue-600",
+      bg: "bg-blue-500/10",
     },
     {
-      title: 'Confirmed Revenue',
-      value: `₹${stats ? (stats.totalRevenue / 100).toFixed(2) : '0.00'}`,
+      id: "confirmed",
+      title: __tr("Confirmed Revenue"),
+      value: `₹${stats ? (stats.totalRevenue / 100).toLocaleString(__locale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}`,
       icon: TrendingUp,
-      description: 'Approved transactions',
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-500/10',
+      description: __tr("Approved transactions"),
+      color: "text-emerald-600",
+      bg: "bg-emerald-500/10",
     },
     {
-      title: 'Commission Owed',
-      value: `₹${stats ? (stats.totalEstimatedCommission / 100).toFixed(2) : '0.00'}`,
+      id: "commission",
+      title: __tr("Commission Owed"),
+      value: `₹${stats ? (stats.totalEstimatedCommission / 100).toLocaleString(__locale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}`,
       icon: Wallet,
-      description: 'Pending payouts',
-      color: 'text-amber-600',
-      bg: 'bg-amber-500/10',
+      description: __tr("Pending payouts"),
+      color: "text-amber-600",
+      bg: "bg-amber-500/10",
     },
     {
-      title: 'Total Partners',
+      id: "partners",
+      title: __tr("Total Partners"),
       value: stats?.totalAffiliates || 0,
       icon: Users,
-      description: 'Active affiliates',
-      trend: '+5',
+      description: __tr("Active affiliates"),
+      trend: "+5",
       trendUp: true,
-      color: 'text-violet-600',
-      bg: 'bg-violet-500/10',
+      color: "text-violet-600",
+      bg: "bg-violet-500/10",
     },
   ];
 
-  const conversionRate = stats && stats.totalLeads > 0
-    ? ((stats.totalReferredCustomers / stats.totalLeads) * 100).toFixed(1)
-    : '0.0';
+  const conversionRate =
+    stats && stats.totalLeads > 0
+      ? (stats.totalReferredCustomers / stats.totalLeads) * 100
+      : 0;
 
   const quickActions = [
     {
-      title: 'Partners',
-      description: 'Manage affiliates',
+      title: __tr("Partners"),
+      description: __tr("Manage affiliates"),
       icon: Users,
-      href: '/admin/partners',
-      color: 'text-blue-600',
-      bg: 'bg-blue-500/10',
+      href: "/admin/partners",
+      color: "text-blue-600",
+      bg: "bg-blue-500/10",
     },
     {
-      title: 'Customers',
-      description: 'View referrals',
+      title: __tr("Customers"),
+      description: __tr("View referrals"),
       icon: UserCheck,
-      href: '/admin/customers',
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-500/10',
+      href: "/admin/customers",
+      color: "text-emerald-600",
+      bg: "bg-emerald-500/10",
     },
     {
-      title: 'Payouts',
-      description: 'Process payments',
+      title: __tr("Payouts"),
+      description: __tr("Process payments"),
       icon: CreditCard,
-      href: '/admin/payouts',
-      color: 'text-amber-600',
-      bg: 'bg-amber-500/10',
+      href: "/admin/payouts",
+      color: "text-amber-600",
+      bg: "bg-amber-500/10",
     },
     {
-      title: 'Reports',
-      description: 'Analytics & insights',
+      title: __tr("Reports"),
+      description: __tr("Analytics & insights"),
       icon: BarChart3,
-      href: '/admin/reports',
-      color: 'text-violet-600',
-      bg: 'bg-violet-500/10',
+      href: "/admin/reports",
+      color: "text-violet-600",
+      bg: "bg-violet-500/10",
     },
   ];
 
@@ -220,30 +229,43 @@ export default function AdminDashboardPage() {
       <div className="space-y-6">
         {/* Page Header */}
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {__tr("Dashboard")}
+          </h1>
           <p className="text-muted-foreground">
-            Overview of your affiliate program performance
+            {__tr("Overview of your affiliate program performance")}
           </p>
         </div>
 
         {/* Primary Stat Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {statCards.map((stat) => (
-            <Card key={stat.title} className="relative overflow-hidden">
+            <Card key={stat.id} className="relative overflow-hidden">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.bg}`}>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {stat.title}
+                  </p>
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.bg}`}
+                  >
                     <stat.icon className={`h-4 w-4 ${stat.color}`} />
                   </div>
                 </div>
                 <div className="mt-2">
-                  <span className="text-2xl font-bold tracking-tight">{stat.value}</span>
+                  <span className="text-2xl font-bold tracking-tight">
+                    {stat.value}
+                  </span>
                 </div>
                 <div className="mt-1 flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{stat.description}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {stat.description}
+                  </span>
                   {stat.trend && (
-                    <Badge variant="secondary" className="h-5 gap-0.5 px-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border-0">
+                    <Badge
+                      variant="secondary"
+                      className="h-5 gap-0.5 px-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border-0"
+                    >
                       <ArrowUpRight className="h-3 w-3" />
                       {stat.trend}
                     </Badge>
@@ -263,17 +285,26 @@ export default function AdminDashboardPage() {
                   <Clock className="h-5 w-5 text-amber-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-2xl font-bold">{stats?.pendingReferrals || 0}</p>
-                  <p className="text-sm text-muted-foreground">Pending Leads</p>
+                  <p className="text-2xl font-bold">
+                    {stats?.pendingReferrals || 0}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {__tr("Pending Leads")}
+                  </p>
                 </div>
                 {(stats?.pendingReferrals || 0) > 0 && (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => router.push('/admin/customers')}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => router.push("/admin/customers")}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Review pending</TooltipContent>
+                    <TooltipContent>{__tr("Review pending")}</TooltipContent>
                   </Tooltip>
                 )}
               </div>
@@ -288,7 +319,9 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-2xl font-bold">{stats?.totalLeads || 0}</p>
-                  <p className="text-sm text-muted-foreground">Total Leads</p>
+                  <p className="text-sm text-muted-foreground">
+                    {__tr("Total Leads")}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -301,16 +334,28 @@ export default function AdminDashboardPage() {
                   <Target className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-2xl font-bold">{stats?.totalReferredCustomers || 0}</p>
-                  <p className="text-sm text-muted-foreground">Conversions</p>
+                  <p className="text-2xl font-bold">
+                    {stats?.totalReferredCustomers || 0}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {__tr("Conversions")}
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-medium text-muted-foreground">Rate</p>
-                  <p className="text-sm font-bold text-emerald-600">{conversionRate}%</p>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    {__tr("Rate")}
+                  </p>
+                  <p className="text-sm font-bold text-emerald-600">
+                    {conversionRate.toLocaleString(__locale(), {
+                      minimumFractionDigits: 1,
+                      maximumFractionDigits: 1,
+                    })}
+                    %
+                  </p>
                 </div>
               </div>
               <Progress
-                value={parseFloat(conversionRate)}
+                value={conversionRate}
                 className="mt-3 h-1.5 [&>div]:bg-emerald-500"
               />
             </CardContent>
@@ -321,17 +366,21 @@ export default function AdminDashboardPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {quickActions.map((action) => (
             <Card
-              key={action.title}
+              key={action.href}
               className="group cursor-pointer transition-all hover:shadow-md hover:border-primary/20"
               onClick={() => router.push(action.href)}
             >
               <CardContent className="flex items-center gap-3 p-4">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${action.bg}`}>
+                <div
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${action.bg}`}
+                >
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold">{action.title}</p>
-                  <p className="text-xs text-muted-foreground">{action.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {action.description}
+                  </p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
               </CardContent>
@@ -345,11 +394,20 @@ export default function AdminDashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <div>
-                <CardTitle className="text-base font-semibold">Top Partners</CardTitle>
-                <CardDescription>Best performing affiliates</CardDescription>
+                <CardTitle className="text-base font-semibold">
+                  {__tr("Top Partners")}
+                </CardTitle>
+                <CardDescription>
+                  {__tr("Best performing affiliates")}
+                </CardDescription>
               </div>
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => router.push('/admin/partners')}>
-                View all
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+                onClick={() => router.push("/admin/partners")}
+              >
+                {__tr("View all")}
                 <ArrowRight className="ml-1 h-3 w-3" />
               </Button>
             </CardHeader>
@@ -361,7 +419,9 @@ export default function AdminDashboardPage() {
                     <div
                       key={affiliate.id}
                       className="flex items-center gap-3 rounded-lg p-2.5 transition-colors hover:bg-muted/50 cursor-pointer"
-                      onClick={() => router.push(`/admin/partners/${affiliate.id}`)}
+                      onClick={() =>
+                        router.push(`/admin/partners/${affiliate.id}`)
+                      }
                     >
                       <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
                         {index + 1}
@@ -372,12 +432,29 @@ export default function AdminDashboardPage() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{affiliate.name}</p>
-                        <p className="text-xs text-muted-foreground font-mono">{affiliate.referralCode}</p>
+                        <p className="text-sm font-medium truncate">
+                          {affiliate.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-mono">
+                          {affiliate.referralCode}
+                        </p>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-sm font-semibold">₹{(affiliate.totalRevenue / 100).toFixed(2)}</p>
-                        <p className="text-[11px] text-muted-foreground">{affiliate.totalReferrals} referrals</p>
+                        <p className="text-sm font-semibold">
+                          {affiliate.totalRevenue == null
+                            ? "—"
+                            : "₹" +
+                              (affiliate.totalRevenue / 100).toLocaleString(
+                                __locale(),
+                                {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                },
+                              )}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {__plural(affiliate.totalReferrals, "referral")}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -385,8 +462,8 @@ export default function AdminDashboardPage() {
               ) : (
                 <EmptyState
                   icon={Users}
-                  title="No partners yet"
-                  description="Partners will appear here once they join"
+                  title={__tr("No partners yet")}
+                  description={__tr("Partners will appear here once they join")}
                 />
               )}
             </CardContent>
@@ -396,11 +473,20 @@ export default function AdminDashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <div>
-                <CardTitle className="text-base font-semibold">Recent Customers</CardTitle>
-                <CardDescription>Latest referred customers</CardDescription>
+                <CardTitle className="text-base font-semibold">
+                  {__tr("Recent Customers")}
+                </CardTitle>
+                <CardDescription>
+                  {__tr("Latest referred customers")}
+                </CardDescription>
               </div>
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => router.push('/admin/customers')}>
-                View all
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+                onClick={() => router.push("/admin/customers")}
+              >
+                {__tr("View all")}
                 <ArrowRight className="ml-1 h-3 w-3" />
               </Button>
             </CardHeader>
@@ -414,14 +500,21 @@ export default function AdminDashboardPage() {
                       className="flex items-center gap-3 rounded-lg p-2.5 transition-colors hover:bg-muted/50"
                     >
                       <p className="text-[11px] text-muted-foreground w-12 shrink-0 text-center">
-                        {new Date(customer.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                        })}
+                        {new Date(customer.createdAt).toLocaleDateString(
+                          __locale(),
+                          {
+                            month: "short",
+                            day: "numeric",
+                          },
+                        )}
                       </p>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{customer.leadEmail}</p>
-                        <p className="text-xs text-muted-foreground">via {customer.affiliateName}</p>
+                        <p className="text-sm font-medium truncate">
+                          {customer.leadEmail}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {__tr("via")} {customer.affiliateName}
+                        </p>
                       </div>
                       <StatusBadge status={customer.status} />
                     </div>
@@ -430,8 +523,8 @@ export default function AdminDashboardPage() {
               ) : (
                 <EmptyState
                   icon={UserCheck}
-                  title="No customers yet"
-                  description="Referred customers will appear here"
+                  title={__tr("No customers yet")}
+                  description={__tr("Referred customers will appear here")}
                 />
               )}
             </CardContent>
@@ -443,12 +536,20 @@ export default function AdminDashboardPage() {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const config: Record<string, { variant: 'default' | 'secondary' | 'destructive'; label: string }> = {
-    APPROVED: { variant: 'default', label: 'Approved' },
-    PENDING: { variant: 'secondary', label: 'Pending' },
-    REJECTED: { variant: 'destructive', label: 'Rejected' },
+  const { t: __tr } = useI18n();
+
+  const config: Record<
+    string,
+    { variant: "default" | "secondary" | "destructive"; label: string }
+  > = {
+    APPROVED: { variant: "default", label: __tr("Approved") },
+    PENDING: { variant: "secondary", label: __tr("Pending") },
+    REJECTED: { variant: "destructive", label: __tr("Rejected") },
   };
-  const { variant, label } = config[status] || { variant: 'secondary' as const, label: status };
+  const { variant, label } = config[status] || {
+    variant: "secondary" as const,
+    label: status,
+  };
 
   return (
     <Badge variant={variant} className="text-[10px] font-medium px-2 py-0.5">
@@ -457,7 +558,15 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function EmptyState({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) {
+function EmptyState({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+}) {
   return (
     <div className="flex flex-col items-center justify-center py-10 text-center">
       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">

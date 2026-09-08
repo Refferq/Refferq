@@ -1,10 +1,13 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 /**
  * GET /api/admin/profile - Get admin profile
  */
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -15,14 +18,14 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'Access denied. Admin role required.' },
+        { success: false, error: __tr("Access denied. Admin role required.") },
         { status: 403 }
       );
     }
@@ -38,7 +41,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('GET /api/admin/profile error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch profile' },
+      { success: false, error: __tr("Failed to fetch profile") },
       { status: 500 }
     );
   }
@@ -47,7 +50,7 @@ export async function GET(request: NextRequest) {
 /**
  * PUT /api/admin/profile - Update admin profile
  */
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -58,14 +61,14 @@ export async function PUT(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'Access denied. Admin role required.' },
+        { success: false, error: __tr("Access denied. Admin role required.") },
         { status: 403 }
       );
     }
@@ -77,7 +80,7 @@ export async function PUT(request: NextRequest) {
     // Validate input
     if (!name || name.trim() === '') {
       return NextResponse.json(
-        { success: false, error: 'Name is required' },
+        { success: false, error: __tr("Name is required") },
         { status: 400 }
       );
     }
@@ -96,15 +99,18 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Profile updated successfully',
+      message: __tr("Profile updated successfully"),
       user: userProfile,
     });
 
   } catch (error) {
     console.error('PUT /api/admin/profile error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update profile' },
+      { success: false, error: __tr("Failed to update profile") },
       { status: 500 }
     );
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const PUT = withSystemLocale(PUTHandler);

@@ -1,8 +1,11 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -13,14 +16,14 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -94,8 +97,9 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Admin dashboard API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch admin data' },
+      { error: __tr("Failed to fetch admin data") },
       { status: 500 }
     );
   }
 }
+export const GET = withSystemLocale(GETHandler);

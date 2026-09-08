@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -14,12 +17,12 @@ async function verifyAdmin(req: NextRequest) {
 }
 
 // GET /api/admin/settings/profile - Get current user profile
-export async function GET(req: NextRequest) {
+ async function GETHandler(req: NextRequest) {
   try {
     const user = await verifyAdmin(req);
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: __tr("Unauthorized") },
         { status: 401 }
       );
     }
@@ -39,7 +42,7 @@ export async function GET(req: NextRequest) {
 
     if (!userData) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: __tr("User not found") },
         { status: 404 }
       );
     }
@@ -51,19 +54,19 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('GET /api/admin/settings/profile error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch profile' },
+      { success: false, error: __tr("Failed to fetch profile") },
       { status: 500 }
     );
   }
 }
 
 // PUT /api/admin/settings/profile - Update user profile
-export async function PUT(req: NextRequest) {
+ async function PUTHandler(req: NextRequest) {
   try {
     const user = await verifyAdmin(req);
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: __tr("Unauthorized") },
         { status: 401 }
       );
     }
@@ -74,7 +77,7 @@ export async function PUT(req: NextRequest) {
     // Validate required fields
     if (!name || !email) {
       return NextResponse.json(
-        { success: false, error: 'Name and email are required' },
+        { success: false, error: __tr("Name and email are required") },
         { status: 400 }
       );
     }
@@ -87,7 +90,7 @@ export async function PUT(req: NextRequest) {
 
       if (existingUser && existingUser.id !== user.id) {
         return NextResponse.json(
-          { success: false, error: 'Email is already in use' },
+          { success: false, error: __tr("Email is already in use") },
           { status: 400 }
         );
       }
@@ -115,13 +118,16 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({
       success: true,
       profile: updatedUser,
-      message: 'Profile updated successfully',
+      message: __tr("Profile updated successfully"),
     });
   } catch (error) {
     console.error('PUT /api/admin/settings/profile error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update profile' },
+      { success: false, error: __tr("Failed to update profile") },
       { status: 500 }
     );
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const PUT = withSystemLocale(PUTHandler);

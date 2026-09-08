@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -14,9 +17,9 @@ async function verifyAdmin(request: NextRequest) {
 }
 
 // GET - List all scheduled reports
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const reports = await prisma.scheduledReport.findMany({
@@ -25,21 +28,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, reports });
   } catch (error) {
     console.error('Scheduled reports GET error:', error);
-    return NextResponse.json({ error: 'Failed to fetch scheduled reports' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to fetch scheduled reports") }, { status: 500 });
   }
 }
 
 // POST - Create a new scheduled report
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { name, reportType, frequency, recipients, filters, format } = body;
 
     if (!name || !reportType || !frequency) {
-      return NextResponse.json({ error: 'Name, reportType, and frequency are required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Name, reportType, and frequency are required") }, { status: 400 });
     }
 
     // Calculate next run time
@@ -61,20 +64,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, report });
   } catch (error) {
     console.error('Scheduled reports POST error:', error);
-    return NextResponse.json({ error: 'Failed to create scheduled report' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to create scheduled report") }, { status: 500 });
   }
 }
 
 // PUT - Update a scheduled report
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { id, ...updates } = body;
 
-    if (!id) return NextResponse.json({ error: 'Report ID is required' }, { status: 400 });
+    if (!id) return NextResponse.json({ error: __tr("Report ID is required") }, { status: 400 });
 
     // Recalculate next run if frequency changed
     if (updates.frequency) {
@@ -89,24 +92,24 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true, report });
   } catch (error) {
     console.error('Scheduled reports PUT error:', error);
-    return NextResponse.json({ error: 'Failed to update scheduled report' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to update scheduled report") }, { status: 500 });
   }
 }
 
 // DELETE - Remove a scheduled report
-export async function DELETE(request: NextRequest) {
+ async function DELETEHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const { id } = await request.json();
-    if (!id) return NextResponse.json({ error: 'Report ID is required' }, { status: 400 });
+    if (!id) return NextResponse.json({ error: __tr("Report ID is required") }, { status: 400 });
 
     await prisma.scheduledReport.delete({ where: { id } });
-    return NextResponse.json({ success: true, message: 'Scheduled report deleted' });
+    return NextResponse.json({ success: true, message: __tr("Scheduled report deleted") });
   } catch (error) {
     console.error('Scheduled reports DELETE error:', error);
-    return NextResponse.json({ error: 'Failed to delete scheduled report' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to delete scheduled report") }, { status: 500 });
   }
 }
 
@@ -135,3 +138,8 @@ function calculateNextRun(frequency: string): Date {
   }
   return now;
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);
+export const PUT = withSystemLocale(PUTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

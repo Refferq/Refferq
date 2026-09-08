@@ -1,18 +1,30 @@
+
+import { createTranslator } from "@/i18n/translator";
 import React from 'react';
+import { LocaleProvider } from '@/i18n/provider';
+import { getSnapshot } from '@/i18n/runtime.server';
 import { Toaster } from '@/components/ui/sonner';
 import { db } from '@/lib/prisma';
 import './globals.css';
 
-export const metadata = {
-  title: 'Refferq - Modern Affiliate Marketing Platform',
-  description: 'Next-generation affiliate marketing platform with comprehensive tracking, commission management, and payout automation.',
-};
+export const dynamic = 'force-dynamic';
+
+export async function generateMetadata() {
+  const snapshot = await getSnapshot();
+  const { t: __tr } = createTranslator(snapshot.pack);
+  return {
+    title: __tr("Refferq - Modern Affiliate Marketing Platform"),
+    description: __tr("Next-generation affiliate marketing platform with comprehensive tracking, commission management, and payout automation."),
+  };
+}
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const snapshot = await getSnapshot();
+  const { t: __tr } = createTranslator(snapshot.pack);
   let settings = null;
   try {
     settings = await db.getPlatformSettings();
@@ -27,15 +39,14 @@ export default async function RootLayout({
   } as React.CSSProperties;
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={snapshot.locale} dir={snapshot.pack.meta.direction}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
       <body className="font-sans antialiased" style={dynamicStyles}>
-        {children}
-        <Toaster />
+        <LocaleProvider snapshot={snapshot}>{children}<Toaster /></LocaleProvider>
       </body>
     </html>
   );

@@ -1,11 +1,12 @@
-'use client';
+"use client";
+import { useI18n } from "@/i18n/provider";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -13,68 +14,82 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
   InputOTPSeparator,
-} from '@/components/ui/input-otp';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Target, User, Mail, ShieldCheck, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
+} from "@/components/ui/input-otp";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Target,
+  User,
+  Mail,
+  ShieldCheck,
+  ArrowLeft,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
 
-type Step = 'details' | 'otp' | 'success';
+type Step = "details" | "otp" | "success";
 
 export default function RegisterPage() {
+  const { t: __tr } = useI18n();
+
   const router = useRouter();
-  const [step, setStep] = useState<Step>('details');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
+  const [step, setStep] = useState<Step>("details");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       // Step 1: Register the user
-      const registerRes = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name, role: 'AFFILIATE' }),
+      const registerRes = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, role: "AFFILIATE" }),
       });
 
       const registerData = await registerRes.json();
 
       if (!registerRes.ok) {
-        setError(registerData.message || 'Registration failed');
+        setError(registerData.message || __tr("Registration failed"));
         setLoading(false);
         return;
       }
 
       // Step 2: Send OTP
-      const otpRes = await fetch('/api/auth/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const otpRes = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
 
       const otpData = await otpRes.json();
 
       if (otpRes.ok) {
-        setStep('otp');
-        setMessage('Account created! A verification code has been sent to your email.');
+        setStep("otp");
+        setMessage(
+          __tr(
+            "Account created! A verification code has been sent to your email.",
+          ),
+        );
       } else {
         // Registration succeeded but OTP failed - still move to OTP step
-        setStep('otp');
-        setError(otpData.error || 'Failed to send code. Try resending.');
+        setStep("otp");
+        setError(otpData.error || __tr("Failed to send code. Try resending."));
       }
     } catch (_e) {
-      setError('Something went wrong. Please try again.');
+      setError(__tr("Something went wrong. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -83,62 +98,62 @@ export default function RegisterPage() {
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otp.length < 6) {
-      setError('Please enter the full 6-digit code');
+      setError(__tr("Please enter the full 6-digit code"));
       return;
     }
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, code: otp }),
       });
 
       const data = await res.json();
 
       if (res.ok && data.success) {
-        setStep('success');
+        setStep("success");
         // Redirect after a short delay
         setTimeout(() => {
           const user = data.user;
-          if (user.role === 'ADMIN') {
-            router.push('/admin');
+          if (user.role === "ADMIN") {
+            router.push("/admin");
           } else {
-            router.push('/affiliate');
+            router.push("/affiliate");
           }
         }, 2000);
       } else {
-        setError(data.error || 'Invalid verification code');
+        setError(data.error || __tr("Invalid verification code"));
       }
     } catch (_e) {
-      setError('Verification failed. Please try again.');
+      setError(__tr("Verification failed. Please try again."));
     } finally {
       setLoading(false);
     }
   };
 
   const handleResendOTP = async () => {
-    setError('');
-    setMessage('');
+    setError("");
+    setMessage("");
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
 
       if (res.ok) {
-        setMessage('A new verification code has been sent.');
+        setMessage(__tr("A new verification code has been sent."));
       } else {
-        setError('Failed to resend code. Please try again.');
+        setError(__tr("Failed to resend code. Please try again."));
       }
     } catch (_e) {
-      setError('Failed to resend code.');
+      setError(__tr("Failed to resend code."));
     } finally {
       setLoading(false);
     }
@@ -154,18 +169,20 @@ export default function RegisterPage() {
           </div>
           <h1 className="text-2xl font-bold tracking-tight">Refferq</h1>
           <p className="text-sm text-muted-foreground">
-            Affiliate Marketing Platform
+            {__tr("Affiliate Marketing Platform")}
           </p>
         </div>
 
         {/* Card */}
         <Card className="border-0 shadow-xl shadow-black/5">
-          {step === 'details' && (
+          {step === "details" && (
             <>
               <CardHeader className="text-center pb-4">
-                <CardTitle className="text-xl">Create your account</CardTitle>
+                <CardTitle className="text-xl">
+                  {__tr("Create your account")}
+                </CardTitle>
                 <CardDescription>
-                  Join as an affiliate partner and start earning
+                  {__tr("Join as an affiliate partner and start earning")}
                 </CardDescription>
               </CardHeader>
               <form onSubmit={handleRegister}>
@@ -176,13 +193,13 @@ export default function RegisterPage() {
                     </Alert>
                   )}
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="name">{__tr("Full Name")}</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="name"
                         type="text"
-                        placeholder="Your name"
+                        placeholder={__tr("Your name")}
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="pl-10"
@@ -193,7 +210,7 @@ export default function RegisterPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email address</Label>
+                    <Label htmlFor="email">{__tr("Email address")}</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -219,22 +236,27 @@ export default function RegisterPage() {
                     {loading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : null}
-                    {loading ? 'Creating account...' : 'Create Account'}
+                    {loading
+                      ? __tr("Creating account...")
+                      : __tr("Create Account")}
                   </Button>
                 </CardFooter>
               </form>
             </>
           )}
 
-          {step === 'otp' && (
+          {step === "otp" && (
             <>
               <CardHeader className="text-center pb-4">
                 <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                   <ShieldCheck className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle className="text-xl">Verify your email</CardTitle>
+                <CardTitle className="text-xl">
+                  {__tr("Verify your email")}
+                </CardTitle>
                 <CardDescription>
-                  Enter the 6-digit code sent to <span className="font-medium text-foreground">{email}</span>
+                  {__tr("Enter the 6-digit code sent to")}{" "}
+                  <span className="font-medium text-foreground">{email}</span>
                 </CardDescription>
               </CardHeader>
               <form onSubmit={handleVerifyOTP}>
@@ -281,7 +303,7 @@ export default function RegisterPage() {
                     ) : (
                       <ShieldCheck className="mr-2 h-4 w-4" />
                     )}
-                    {loading ? 'Verifying...' : 'Verify & Continue'}
+                    {loading ? "Verifying..." : __tr("Verify & Continue")}
                   </Button>
                   <div className="flex items-center justify-between w-full">
                     <Button
@@ -289,14 +311,14 @@ export default function RegisterPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        setStep('details');
-                        setOtp('');
-                        setError('');
-                        setMessage('');
+                        setStep("details");
+                        setOtp("");
+                        setError("");
+                        setMessage("");
                       }}
                     >
                       <ArrowLeft className="mr-1 h-3 w-3" />
-                      Back
+                      {__tr("Back")}
                     </Button>
                     <Button
                       type="button"
@@ -305,7 +327,7 @@ export default function RegisterPage() {
                       onClick={handleResendOTP}
                       disabled={loading}
                     >
-                      Resend code
+                      {__tr("Resend code")}
                     </Button>
                   </div>
                 </CardFooter>
@@ -313,16 +335,20 @@ export default function RegisterPage() {
             </>
           )}
 
-          {step === 'success' && (
+          {step === "success" && (
             <CardContent className="py-12">
               <div className="text-center space-y-4">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
                   <CheckCircle2 className="h-8 w-8 text-emerald-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">Welcome aboard, {name}!</h3>
+                  <h3 className="text-lg font-semibold">
+                    {__tr("Welcome aboard,")} {name}!
+                  </h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Your account has been created. Redirecting to your dashboard...
+                    {__tr(
+                      "Your account has been created. Redirecting to your dashboard...",
+                    )}
                   </p>
                 </div>
                 <div className="flex justify-center">
@@ -334,11 +360,14 @@ export default function RegisterPage() {
         </Card>
 
         {/* Footer */}
-        {step !== 'success' && (
+        {step !== "success" && (
           <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link href="/login" className="font-medium text-primary hover:underline">
-              Sign in
+            {__tr("Already have an account?")}{" "}
+            <Link
+              href="/login"
+              className="font-medium text-primary hover:underline"
+            >
+              {__tr("Sign in")}
             </Link>
           </p>
         )}

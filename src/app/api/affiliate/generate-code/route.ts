@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
@@ -11,7 +14,7 @@ function generateReferralCode(name: string): string {
 /**
  * POST /api/affiliate/generate-code - Generate or regenerate referral code
  */
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -25,14 +28,14 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'AFFILIATE') {
       return NextResponse.json(
-        { success: false, error: 'Access denied. Affiliate role required.' },
+        { success: false, error: __tr("Access denied. Affiliate role required.") },
         { status: 403 }
       );
     }
@@ -54,7 +57,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: 'Affiliate profile created with referral code',
+        message: __tr("Affiliate profile created with referral code"),
         affiliate,
       });
     }
@@ -70,7 +73,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: 'Referral code generated',
+        message: __tr("Referral code generated"),
         affiliate,
       });
     }
@@ -78,15 +81,17 @@ export async function POST(request: NextRequest) {
     // Affiliate already has a referral code
     return NextResponse.json({
       success: true,
-      message: 'Referral code already exists',
+      message: __tr("Referral code already exists"),
       affiliate,
     });
 
   } catch (error) {
     console.error('Generate code API error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to generate referral code' },
+      { success: false, error: __tr("Failed to generate referral code") },
       { status: 500 }
     );
   }
 }
+
+export const POST = withSystemLocale(POSTHandler);

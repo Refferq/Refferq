@@ -1,3 +1,8 @@
+
+import { label as __label, plural as __plural } from "@/i18n";
+
+import { getIntlLocale as __locale } from "@/i18n";
+import { t as __tr } from "@/i18n";
 import { Resend } from 'resend';
 
 // Initialize Resend with API key only when needed (server-side)
@@ -139,10 +144,10 @@ class EmailService {
         html: params.html,
       });
 
-      return { success: true, message: 'Email sent successfully' };
+      return { success: true, message: __tr("Email sent successfully") };
     } catch (error) {
       console.error('Email sending error:', error);
-      return { success: false, message: 'Failed to send email' };
+      return { success: false, message: __tr("Failed to send email") };
     }
   }
 
@@ -178,7 +183,7 @@ class EmailService {
     <html>
     <head>
       <meta charset="utf-8">
-      <title>Welcome to Refferq</title>
+      <title>${__tr("Welcome to Refferq")}</title>
       <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
@@ -189,51 +194,51 @@ class EmailService {
     </head>
     <body>
       <div class="header">
-        <h1>Welcome to Refferq! 🎉</h1>
+        <h1>${__tr("Welcome to Refferq! 🎉")}</h1>
       </div>
       <div class="content">
-        <h2>Hello ${this.escapeHtml(data.name)}!</h2>
-        <p>Thank you for joining our affiliate platform as a <strong>${this.escapeHtml(data.role)}</strong>.</p>
+        <h2>${__tr("Hello {0}!", [this.escapeHtml(data.name)])}</h2>
+        <p>${__tr("Thank you for joining our affiliate platform as a")} <strong>${this.escapeHtml(__label(data.role))}</strong>.</p>
         
         ${data.role === 'affiliate' ? `
-        <p>Your account is currently pending approval. Our admin team will review your application and activate your account within 24-48 hours.</p>
-        <p>Once approved, you'll be able to:</p>
+        <p>${__tr("Your account is currently pending approval. Our admin team will review your application and activate your account within 24-48 hours.")}</p>
+        <p>${__tr("Once approved, you'll be able to:")}</p>
         <ul>
-          <li>Generate unique referral links</li>
-          <li>Submit manual referrals</li>
-          <li>Track your commissions and earnings</li>
-          <li>Access marketing materials</li>
+          <li>${__tr("Generate unique referral links")}</li>
+          <li>${__tr("Submit manual referrals")}</li>
+          <li>${__tr("Track your commissions and earnings")}</li>
+          <li>${__tr("Access marketing materials")}</li>
         </ul>
         ` : `
-        <p>Your admin account has been created and is ready to use.</p>
-        <p>You can now:</p>
+        <p>${__tr("Your admin account has been created and is ready to use.")}</p>
+        <p>${__tr("You can now:")}</p>
         <ul>
-          <li>Manage affiliate applications</li>
-          <li>Review and approve referrals</li>
-          <li>Process commission payments</li>
-          <li>Access platform analytics</li>
+          <li>${__tr("Manage affiliate applications")}</li>
+          <li>${__tr("Review and approve referrals")}</li>
+          <li>${__tr("Process commission payments")}</li>
+          <li>${__tr("Access platform analytics")}</li>
         </ul>
         `}
 
         ${data.password ? `
         <div style="background: #ffffff; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; margin: 20px 0;">
-          <p style="margin-top: 0; font-weight: bold; color: #64748b;">Your Initial Password:</p>
+          <p style="margin-top: 0; font-weight: bold; color: #64748b;">${__tr("Your Initial Password:")}</p>
           <code style="background: #f1f5f9; padding: 10px; display: block; border-radius: 4px; font-size: 18px; text-align: center; color: #0f172a;">${this.escapeHtml(data.password)}</code>
-          <p style="margin-bottom: 0; font-size: 13px; color: #94a3b8; text-align: center; margin-top: 10px;">For security, please change your password after your first login.</p>
+          <p style="margin-bottom: 0; font-size: 13px; color: #94a3b8; text-align: center; margin-top: 10px;">${__tr("For security, please change your password after your first login.")}</p>
         </div>
         ` : ''}
         
         <div style="text-align: center;">
-          <a href="${data.loginUrl}" class="button">Login to Your Account</a>
+          <a href="${data.loginUrl}" class="button">${__tr("Login to Your Account")}</a>
         </div>
         
-        <p>If you have any questions, please don't hesitate to contact our support team.</p>
+        <p>${__tr("If you have any questions, please don't hesitate to contact our support team.")}</p>
         
-        <p>Best regards,<br>The Refferq Team</p>
+        <p>${__tr("Best regards,")}<br>${__tr("The Refferq Team")}</p>
       </div>
       <div class="footer">
-        <p>This email was sent to ${this.escapeHtml(data.email)}</p>
-        <p>© ${new Date().getFullYear()} Refferq. All rights reserved.</p>
+        <p>${__tr("This email was sent to {0}", [this.escapeHtml(data.email)])}</p>
+        <p>${__tr("© {0} Refferq. All rights reserved.", [new Date().getFullYear()])}</p>
       </div>
     </body>
     </html>
@@ -246,7 +251,7 @@ class EmailService {
     <html>
     <head>
       <meta charset="utf-8">
-      <title>New Referral Submission</title>
+      <title>${__tr("New Referral Submission")}</title>
       <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
@@ -257,28 +262,28 @@ class EmailService {
     </head>
     <body>
       <div class="header">
-        <h1>New Referral Submission 📋</h1>
+        <h1>${__tr("New Referral Submission 📋")}</h1>
       </div>
       <div class="content">
-        <h2>Hello Admin!</h2>
-        <p>A new referral has been submitted and requires your review.</p>
+        <h2>${__tr("Hello Admin!")}</h2>
+        <p>${__tr("A new referral has been submitted and requires your review.")}</p>
         
         <div class="details">
-          <h3>Referral Details:</h3>
-          <p><strong>Affiliate:</strong> ${this.escapeHtml(data.affiliateName)}</p>
-          <p><strong>Lead Name:</strong> ${this.escapeHtml(data.leadName)}</p>
-          <p><strong>Lead Email:</strong> ${this.escapeHtml(data.leadEmail)}</p>
-          ${data.company ? `<p><strong>Company:</strong> ${this.escapeHtml(data.company)}</p>` : ''}
-          ${data.estimatedValue ? `<p><strong>Estimated Value:</strong> $${(data.estimatedValue / 100).toFixed(2)}</p>` : ''}
+          <h3>${__tr("Referral Details:")}</h3>
+          <p><strong>${__tr("Affiliate:")}</strong> ${this.escapeHtml(data.affiliateName)}</p>
+          <p><strong>${__tr("Lead Name:")}</strong> ${this.escapeHtml(data.leadName)}</p>
+          <p><strong>${__tr("Lead Email:")}</strong> ${this.escapeHtml(data.leadEmail)}</p>
+          ${data.company ? `<p><strong>${__tr("Company:")}</strong> ${this.escapeHtml(data.company)}</p>` : ''}
+          ${data.estimatedValue ? `<p><strong>${__tr("Estimated Value:")}</strong> $${(data.estimatedValue / 100).toFixed(2)}</p>` : ''}
         </div>
         
         <div style="text-align: center;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin" class="button">Review Referral</a>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin" class="button">${__tr("Review Referral")}</a>
         </div>
         
-        <p>Please review this referral in the admin dashboard and approve or reject it accordingly.</p>
+        <p>${__tr("Please review this referral in the admin dashboard and approve or reject it accordingly.")}</p>
         
-        <p>Best regards,<br>The Refferq System</p>
+        <p>${__tr("Best regards,")}<br>${__tr("The Refferq System")}</p>
       </div>
     </body>
     </html>
@@ -288,7 +293,7 @@ class EmailService {
   private generateApprovalEmailHTML(data: ApprovalEmailData, _symbol?: string): string {
     const isApproved = data.status === 'approved';
     const statusColor = isApproved ? '#28a745' : '#dc3545';
-    const statusText = isApproved ? 'Approved' : 'Rejected';
+    const statusText = isApproved ? __tr("Approved") : __tr("Rejected");
     const emoji = isApproved ? '✅' : '❌';
 
     return `
@@ -296,7 +301,7 @@ class EmailService {
     <html>
     <head>
       <meta charset="utf-8">
-      <title>Referral ${statusText}</title>
+      <title>${__tr("Referral {0}", [statusText])}</title>
       <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background: ${statusColor}; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
@@ -307,31 +312,31 @@ class EmailService {
     </head>
     <body>
       <div class="header">
-        <h1>Referral ${statusText} ${emoji}</h1>
+        <h1>${__tr("Referral {0} {1}", [statusText, emoji])}</h1>
       </div>
       <div class="content">
-        <h2>Hello ${this.escapeHtml(data.affiliateName)}!</h2>
-        <p>Your referral submission has been <strong>${statusText.toLowerCase()}</strong>.</p>
+        <h2>${__tr("Hello {0}!", [this.escapeHtml(data.affiliateName)])}</h2>
+        <p>${__tr("Your referral submission has been")} <strong>${statusText.toLowerCase()}</strong>.</p>
         
         <div class="details">
-          <h3>Referral Details:</h3>
-          <p><strong>Lead Name:</strong> ${this.escapeHtml(data.leadName)}</p>
-          <p><strong>Status:</strong> ${statusText}</p>
-          ${isApproved ? `<p><strong>Commission Amount:</strong> $${(data.commissionAmount / 100).toFixed(2)}</p>` : ''}
-          ${data.notes ? `<p><strong>Notes:</strong> ${this.escapeHtml(data.notes)}</p>` : ''}
+          <h3>${__tr("Referral Details:")}</h3>
+          <p><strong>${__tr("Lead Name:")}</strong> ${this.escapeHtml(data.leadName)}</p>
+          <p><strong>${__tr("Status:")}</strong> ${statusText}</p>
+          ${isApproved ? `<p><strong>${__tr("Commission Amount:")}</strong> $${(data.commissionAmount / 100).toFixed(2)}</p>` : ''}
+          ${data.notes ? `<p><strong>${__tr("Notes:")}</strong> ${this.escapeHtml(data.notes)}</p>` : ''}
         </div>
         
         ${isApproved ? `
-        <p>🎉 Congratulations! Your referral has been approved and the commission has been added to your account.</p>
+        <p>${__tr("🎉 Congratulations! Your referral has been approved and the commission has been added to your account.")}</p>
         ` : `
-        <p>Unfortunately, this referral did not meet our approval criteria. Please review the feedback and feel free to submit future referrals.</p>
+        <p>${__tr("Unfortunately, this referral did not meet our approval criteria. Please review the feedback and feel free to submit future referrals.")}</p>
         `}
         
         <div style="text-align: center;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">View Dashboard</a>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">${__tr("View Dashboard")}</a>
         </div>
         
-        <p>Best regards,<br>The Refferq Team</p>
+        <p>${__tr("Best regards,")}<br>${__tr("The Refferq Team")}</p>
       </div>
     </body>
     </html>
@@ -344,7 +349,7 @@ class EmailService {
     <html>
     <head>
       <meta charset="utf-8">
-      <title>Payout Processed</title>
+      <title>${__tr("Payout Processed")}</title>
       <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
@@ -355,32 +360,32 @@ class EmailService {
     </head>
     <body>
       <div class="header">
-        <h1>Payout Processed 💰</h1>
+        <h1>${__tr("Payout Processed 💰")}</h1>
       </div>
       <div class="content">
-        <h2>Hello ${this.escapeHtml(data.affiliateName)}!</h2>
-        <p>Great news! Your commission payout has been processed.</p>
+        <h2>${__tr("Hello {0}!", [this.escapeHtml(data.affiliateName)])}</h2>
+        <p>${__tr("Great news! Your commission payout has been processed.")}</p>
         
         <div class="details">
-          <h3>Payout Details:</h3>
-          <p><strong>Amount:</strong> ${this.formatAmount(data.amount, symbol)}</p>
-          <p><strong>Method:</strong> ${data.method === 'stripe_connect' ? 'Stripe Connect' : 'Bank Transfer'}</p>
-          <p><strong>Processing Date:</strong> ${this.escapeHtml(data.processingDate)}</p>
+          <h3>${__tr("Payout Details:")}</h3>
+          <p><strong>${__tr("Amount:")}</strong> ${this.formatAmount(data.amount, symbol)}</p>
+          <p><strong>${__tr("Method:")}</strong> ${data.method === 'stripe_connect' ? __tr("Stripe Connect") : __tr("Bank Transfer")}</p>
+          <p><strong>${__tr("Processing Date:")}</strong> ${this.escapeHtml(data.processingDate)}</p>
         </div>
         
         ${data.method === 'bank_csv' ? `
-        <p>Your payout will be processed via bank transfer within 3-5 business days.</p>
+        <p>${__tr("Your payout will be processed via bank transfer within 3-5 business days.")}</p>
         ` : `
-        <p>Your payout has been sent to your connected Stripe account and should be available immediately.</p>
+        <p>${__tr("Your payout has been sent to your connected Stripe account and should be available immediately.")}</p>
         `}
         
         <div style="text-align: center;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">View Dashboard</a>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">${__tr("View Dashboard")}</a>
         </div>
         
-        <p>Thank you for being a valued affiliate partner!</p>
+        <p>${__tr("Thank you for being a valued affiliate partner!")}</p>
         
-        <p>Best regards,<br>The Refferq Team</p>
+        <p>${__tr("Best regards,")}<br>${__tr("The Refferq Team")}</p>
       </div>
     </body>
     </html>
@@ -394,7 +399,7 @@ class EmailService {
     <html>
     <head>
       <meta charset="utf-8">
-      <title>Referral Converted!</title>
+      <title>${__tr("Referral Converted!")}</title>
       <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
@@ -405,30 +410,30 @@ class EmailService {
     </head>
     <body>
       <div class="header">
-        <h1>🎉 Referral Converted!</h1>
+        <h1>${__tr("🎉 Referral Converted!")}</h1>
       </div>
       <div class="content">
-        <h2>Hello ${this.escapeHtml(data.affiliateName)}!</h2>
-        <p>Great news! Your referred lead, <strong>${this.escapeHtml(data.leadName)}</strong>, has successfully converted!</p>
+        <h2>${__tr("Hello {0}!", [this.escapeHtml(data.affiliateName)])}</h2>
+        <p>${__tr("Great news! Your referred lead, {0}, has successfully converted!", ["<strong>" + this.escapeHtml(data.leadName) + "</strong>"])}</p>
         
         <div class="details">
-          <h3>Conversion Details:</h3>
-          <p><strong>Lead Name:</strong> ${this.escapeHtml(data.leadName)}</p>
-          <p><strong>Lead Email:</strong> ${this.escapeHtml(data.leadEmail)}</p>
-          ${data.company ? `<p><strong>Company:</strong> ${this.escapeHtml(data.company)}</p>` : ''}
-          <p><strong>Converted Amount:</strong> ${this.formatAmount(data.convertedAmountCents, symbol)}</p>
-          <p><strong>Your Commission:</strong> ${this.formatAmount(data.commissionCents, symbol)}</p>
+          <h3>${__tr("Conversion Details:")}</h3>
+          <p><strong>${__tr("Lead Name:")}</strong> ${this.escapeHtml(data.leadName)}</p>
+          <p><strong>${__tr("Lead Email:")}</strong> ${this.escapeHtml(data.leadEmail)}</p>
+          ${data.company ? `<p><strong>${__tr("Company:")}</strong> ${this.escapeHtml(data.company)}</p>` : ''}
+          <p><strong>${__tr("Converted Amount:")}</strong> ${this.formatAmount(data.convertedAmountCents, symbol)}</p>
+          <p><strong>${__tr("Your Commission:")}</strong> ${this.formatAmount(data.commissionCents, symbol)}</p>
         </div>
         
-        <p>The commission for this conversion has been added to your pending earnings.</p>
+        <p>${__tr("The commission for this conversion has been added to your pending earnings.")}</p>
         
         <div style="text-align: center;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">View Your Dashboard</a>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">${__tr("View Your Dashboard")}</a>
         </div>
         
-        <p>Keep up the fantastic work!</p>
+        <p>${__tr("Keep up the fantastic work!")}</p>
         
-        <p>Best regards,<br>The Refferq Team</p>
+        <p>${__tr("Best regards,")}<br>${__tr("The Refferq Team")}</p>
       </div>
     </body>
     </html>
@@ -446,7 +451,7 @@ class EmailService {
       <html>
       <head>
         <meta charset="utf-8">
-        <title>New Commission Earned!</title>
+        <title>${__tr("New Commission Earned!")}</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
           .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
@@ -460,53 +465,51 @@ class EmailService {
       </head>
       <body>
         <div class="header">
-          <h1>💰 New Commission Earned!</h1>
+          <h1>${__tr("💰 New Commission Earned!")}</h1>
         </div>
         <div class="content">
-          <h2>Great news, ${this.escapeHtml(data.affiliateName)}!</h2>
-          <p>A customer you referred has made a payment, and you've earned a commission!</p>
+          <h2>${__tr("Great news, {0}!", [this.escapeHtml(data.affiliateName)])}</h2>
+          <p>${__tr("A customer you referred has made a payment, and you've earned a commission!")}</p>
           
           <div class="amount-box">
-            <div style="font-size: 14px; color: #666; margin-bottom: 10px;">You earned</div>
+            <div style="font-size: 14px; color: #666; margin-bottom: 10px;">${__tr("You earned")}</div>
             <div class="commission">${commission}</div>
-            <div style="font-size: 14px; color: #666; margin-top: 10px;">${rate}% commission</div>
+            <div style="font-size: 14px; color: #666; margin-top: 10px;">${__tr("{0}% commission", [rate])}</div>
           </div>
           
           <div class="details">
-            <h3 style="margin-top: 0;">Transaction Details</h3>
+            <h3 style="margin-top: 0;">${__tr("Transaction Details")}</h3>
             <div class="detail-row">
-              <span>Customer:</span>
+              <span>${__tr("Customer:")}</span>
               <strong>${this.escapeHtml(data.customerName)}</strong>
             </div>
             <div class="detail-row">
-              <span>Transaction Amount:</span>
+              <span>${__tr("Transaction Amount:")}</span>
               <strong>${amount}</strong>
             </div>
             <div class="detail-row">
-              <span>Your Commission:</span>
+              <span>${__tr("Your Commission:")}</span>
               <strong style="color: #10b981;">${commission}</strong>
             </div>
             <div class="detail-row">
-              <span>Commission Rate:</span>
+              <span>${__tr("Commission Rate:")}</span>
               <strong>${rate}%</strong>
             </div>
             <div class="detail-row" style="border-bottom: none;">
-              <span>Transaction ID:</span>
+              <span>${__tr("Transaction ID:")}</span>
               <strong style="font-size: 12px;">${this.escapeHtml(data.transactionId)}</strong>
             </div>
           </div>
           
-          <p>This commission is currently <strong>pending</strong> and will be included in your next payout.</p>
+          <p>${__tr("This commission is currently {0} and will be included in your next payout.", ["<strong>" + __tr("pending") + "</strong>"])}</p>
           
           <div style="text-align: center;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">View Your Dashboard</a>
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">${__tr("View Your Dashboard")}</a>
           </div>
           
-          <p style="margin-top: 30px; color: #666; font-size: 14px;">
-            Keep up the great work! Continue referring customers to earn more commissions.
-          </p>
+          <p style="margin-top: 30px; color: #666; font-size: 14px;"> ${__tr("Keep up the great work! Continue referring customers to earn more commissions.")} </p>
           
-          <p>Best regards,<br>The Refferq Team</p>
+          <p>${__tr("Best regards,")}<br>${__tr("The Refferq Team")}</p>
         </div>
       </body>
       </html>
@@ -517,7 +520,7 @@ class EmailService {
     return this.sendTemplatedEmail({
       to: data.email,
       templateType: 'WELCOME_EMAIL',
-      fallbackSubject: `Welcome to Refferq - ${data.role === 'affiliate' ? 'Affiliate' : 'Admin'} Account Created`,
+      fallbackSubject: __tr("Welcome to Refferq - {0} Account Created", [data.role === 'affiliate' ? __tr("Affiliate") : __tr("Admin")]),
       variables: data,
       generateFallbackHtml: () => this.generateWelcomeEmailHTML(data),
     });
@@ -532,7 +535,7 @@ class EmailService {
         this.sendTemplatedEmail({
           to: email.trim(),
           templateType: 'NEW_REFERRAL',
-          fallbackSubject: `New Referral Submission from ${data.affiliateName}`,
+          fallbackSubject: __tr("New Referral Submission from {0}", [data.affiliateName]),
           variables: { ...data, symbol },
           generateFallbackHtml: () => this.generateReferralNotificationHTML(data, symbol),
         })
@@ -542,17 +545,17 @@ class EmailService {
     const success = results.every(r => r.success);
     return {
       success,
-      message: success ? 'Referral notifications sent' : 'Some notifications failed'
+      message: success ? __tr("Referral notifications sent") : __tr("Some notifications failed")
     };
   }
 
   async sendApprovalEmail(affiliateEmail: string, data: ApprovalEmailData): Promise<{ success: boolean; message: string }> {
-    const statusText = data.status === 'approved' ? 'Approved' : 'Rejected';
+    const statusText = data.status === 'approved' ? __tr("Approved") : __tr("Rejected");
     const symbol = await this.getCurrencySymbol();
     return this.sendTemplatedEmail({
       to: affiliateEmail,
       templateType: data.status === 'approved' ? 'PARTNER_APPROVAL' : 'PARTNER_DECLINED',
-      fallbackSubject: `Referral ${statusText} - ${data.leadName}`,
+      fallbackSubject: __tr("Referral {0} - {1}", [statusText, data.leadName]),
       variables: { ...data, statusText, symbol }, // Pass statusText and symbol for template variables
       generateFallbackHtml: () => this.generateApprovalEmailHTML(data, symbol),
     });
@@ -563,7 +566,7 @@ class EmailService {
     return this.sendTemplatedEmail({
       to: data.affiliateEmail,
       templateType: 'PAYOUT_PROCESSED',
-      fallbackSubject: `Payout Processed - ${this.formatAmount(data.amount, symbol)}`,
+      fallbackSubject: __tr("Payout Processed - {0}", [this.formatAmount(data.amount, symbol)]),
       variables: { ...data, symbol },
       generateFallbackHtml: () => this.generatePayoutNotificationHTML(data, symbol),
     });
@@ -575,7 +578,7 @@ class EmailService {
     return this.sendTemplatedEmail({
       to: data.affiliateEmail,
       templateType: 'REFERRAL_CONVERTED',
-      fallbackSubject: `🎉 Your Referral for ${data.leadName} Converted!`,
+      fallbackSubject: __tr("🎉 Your Referral for {0} Converted!", [data.leadName]),
       variables: { ...data, symbol },
       generateFallbackHtml: () => this.generateConversionNotificationHTML(data, symbol),
     });
@@ -587,7 +590,7 @@ class EmailService {
     return this.sendTemplatedEmail({
       to: data.affiliateEmail,
       templateType: 'COMMISSION_EARNED',
-      fallbackSubject: `💰 New Commission: ${this.formatAmount(data.commissionCents, symbol)} Earned!`,
+      fallbackSubject: __tr("💰 New Commission: {0} Earned!", [this.formatAmount(data.commissionCents, symbol)]),
       variables: { ...data, symbol },
       generateFallbackHtml: () => this.generateCommissionNotificationHTML(data, symbol),
     });
@@ -598,14 +601,14 @@ class EmailService {
     return this.sendTemplatedEmail({
       to: email,
       templateType: 'PASSWORD_RESET',
-      fallbackSubject: 'Password Reset Request - Refferq',
+      fallbackSubject: __tr("Password Reset Request - Refferq"),
       variables: { resetUrl },
       generateFallbackHtml: () => `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Password Reset Request</title>
+        <title>${__tr("Password Reset Request")}</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
           .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
@@ -616,29 +619,29 @@ class EmailService {
       </head>
       <body>
         <div class="header">
-          <h1>Password Reset Request 🔐</h1>
+          <h1>${__tr("Password Reset Request 🔐")}</h1>
         </div>
         <div class="content">
-          <h2>Hello!</h2>
-          <p>We received a request to reset your password for your affiliate platform account.</p>
+          <h2>${__tr("Hello!")}</h2>
+          <p>${__tr("We received a request to reset your password for your affiliate platform account.")}</p>
           
           <div style="text-align: center;">
-            <a href="${resetUrl}" class="button">Reset Your Password</a>
+            <a href="${resetUrl}" class="button">${__tr("Reset Your Password")}</a>
           </div>
           
           <div class="warning">
-            <strong>⚠️ Security Notice:</strong>
+            <strong>${__tr("⚠️ Security Notice:")}</strong>
             <ul>
-              <li>This link will expire in 1 hour</li>
-              <li>If you didn't request this reset, please ignore this email</li>
-              <li>Never share this link with others</li>
+              <li>${__tr("This link will expire in 1 hour")}</li>
+              <li>${__tr("If you didn't request this reset, please ignore this email")}</li>
+              <li>${__tr("Never share this link with others")}</li>
             </ul>
           </div>
           
-          <p>If the button doesn't work, copy and paste this link into your browser:</p>
+          <p>${__tr("If the button doesn't work, copy and paste this link into your browser:")}</p>
           <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 5px;">${resetUrl}</p>
           
-          <p>Best regards,<br>The Refferq Team</p>
+          <p>${__tr("Best regards,")}<br>${__tr("The Refferq Team")}</p>
         </div>
       </body>
       </html>
@@ -651,14 +654,14 @@ class EmailService {
     return this.sendTemplatedEmail({
       to: email,
       templateType: 'EMAIL_VERIFICATION',
-      fallbackSubject: 'Verify Your Email Address - Refferq',
+      fallbackSubject: __tr("Verify Your Email Address - Refferq"),
       variables: { verificationUrl },
       generateFallbackHtml: () => `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Verify Your Email Address</title>
+        <title>${__tr("Verify Your Email Address")}</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
           .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
@@ -668,22 +671,22 @@ class EmailService {
       </head>
       <body>
         <div class="header">
-          <h1>Verify Your Email Address ✉️</h1>
+          <h1>${__tr("Verify Your Email Address ✉️")}</h1>
         </div>
         <div class="content">
-          <h2>Hello!</h2>
-          <p>Thank you for registering with our affiliate platform. Please verify your email address to complete your registration.</p>
+          <h2>${__tr("Hello!")}</h2>
+          <p>${__tr("Thank you for registering with our affiliate platform. Please verify your email address to complete your registration.")}</p>
           
           <div style="text-align: center;">
-            <a href="${verificationUrl}" class="button">Verify Email Address</a>
+            <a href="${verificationUrl}" class="button">${__tr("Verify Email Address")}</a>
           </div>
           
-          <p>If the button doesn't work, copy and paste this link into your browser:</p>
+          <p>${__tr("If the button doesn't work, copy and paste this link into your browser:")}</p>
           <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 5px;">${verificationUrl}</p>
           
-          <p>This verification link will expire in 24 hours.</p>
+          <p>${__tr("This verification link will expire in 24 hours.")}</p>
           
-          <p>Best regards,<br>The Refferq Team</p>
+          <p>${__tr("Best regards,")}<br>${__tr("The Refferq Team")}</p>
         </div>
       </body>
       </html>
@@ -707,7 +710,7 @@ class EmailService {
     return this.sendTemplatedEmail({
       to: affiliateEmail,
       templateType: 'COMMISSION_EARNED', // Re-use commission earned template
-      fallbackSubject: `💰 New Commission: ${commission} Earned!`,
+      fallbackSubject: __tr("💰 New Commission: {0} Earned!", [commission]),
       variables: { ...data, symbol },
       generateFallbackHtml: () => this.generateCommissionNotificationHTML({ ...data, affiliateEmail }, symbol),
     });
@@ -724,18 +727,18 @@ class EmailService {
     }
   ): Promise<{ success: boolean; message: string }> {
     const symbol = await this.getCurrencySymbol();
-    const amount = (data.amountCents / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const amount = (data.amountCents / 100).toLocaleString(__locale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return this.sendTemplatedEmail({
       to: affiliateEmail,
       templateType: 'PAYOUT_GENERATED',
-      fallbackSubject: `🎉 Payout Initiated: ₹${amount}`,
+      fallbackSubject: __tr("🎉 Payout Initiated: ₹{0}", [amount]),
       variables: { ...data, amount: this.formatAmount(data.amountCents, symbol), symbol },
       generateFallbackHtml: () => `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Payout Initiated</title>
+        <title>${__tr("Payout Initiated")}</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
           .header { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
@@ -749,43 +752,39 @@ class EmailService {
       </head>
       <body>
         <div class="header">
-          <h1>🎉 Payout Initiated!</h1>
+          <h1>${__tr("🎉 Payout Initiated!")}</h1>
         </div>
         <div class="content">
-          <h2>Hello ${this.escapeHtml(data.affiliateName)}!</h2>
-          <p>Good news! A payout has been initiated for your earned commissions.</p>
+          <h2>${__tr("Hello {0}!", [this.escapeHtml(data.affiliateName)])}</h2>
+          <p>${__tr("Good news! A payout has been initiated for your earned commissions.")}</p>
           
           <div class="amount-box">
-            <div style="font-size: 14px; color: #666; margin-bottom: 10px;">Payout Amount</div>
+            <div style="font-size: 14px; color: #666; margin-bottom: 10px;">${__tr("Payout Amount")}</div>
             <div class="amount">₹${amount}</div>
             <div style="margin-top: 15px;">
-              <span class="status-badge">PENDING</span>
+              <span class="status-badge">${__tr("PENDING")}</span>
             </div>
           </div>
           
           <div class="details">
-            <h3 style="margin-top: 0;">Payout Details</h3>
-            <p><strong>Commissions Included:</strong> ${data.commissionCount} commission${data.commissionCount > 1 ? 's' : ''}</p>
-            ${data.method ? `<p><strong>Payment Method:</strong> ${this.escapeHtml(data.method)}</p>` : ''}
-            <p><strong>Payout ID:</strong> <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${this.escapeHtml(data.payoutId)}</code></p>
+            <h3 style="margin-top: 0;">${__tr("Payout Details")}</h3>
+            <p><strong>${__tr("Commissions Included:")}</strong> ${__plural(data.commissionCount, 'commission')}</p>
+            ${data.method ? `<p><strong>${__tr("Payment Method:")}</strong> ${this.escapeHtml(__label(data.method))}</p>` : ''}
+            <p><strong>${__tr("Payout ID:")}</strong> <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${this.escapeHtml(data.payoutId)}</code></p>
           </div>
           
-          <p>Your payout is currently being processed. You'll receive another email once the payment has been completed.</p>
+          <p>${__tr("Your payout is currently being processed. You'll receive another email once the payment has been completed.")}</p>
           
           <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <strong>⏱️ Processing Time:</strong><br>
-            Payouts typically take 3-5 business days to process, depending on the payment method.
-          </div>
+            <strong>${__tr("⏱️ Processing Time:")}</strong><br> ${__tr("Payouts typically take 3-5 business days to process, depending on the payment method.")} </div>
           
           <div style="text-align: center;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">View Payout Status</a>
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">${__tr("View Payout Status")}</a>
           </div>
           
-          <p style="margin-top: 30px; color: #666; font-size: 14px;">
-            Thank you for being a valued partner! Continue referring customers to earn more.
-          </p>
+          <p style="margin-top: 30px; color: #666; font-size: 14px;"> ${__tr("Thank you for being a valued partner! Continue referring customers to earn more.")} </p>
           
-          <p>Best regards,<br>The Refferq Team</p>
+          <p>${__tr("Best regards,")}<br>${__tr("The Refferq Team")}</p>
         </div>
       </body>
       </html>
@@ -805,8 +804,8 @@ class EmailService {
     }
   ): Promise<{ success: boolean; message: string }> {
     const symbol = await this.getCurrencySymbol();
-    const amount = (data.amountCents / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const date = new Date(data.processedAt).toLocaleDateString('en-IN', {
+    const amount = (data.amountCents / 100).toLocaleString(__locale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const date = new Date(data.processedAt).toLocaleDateString(__locale(), {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -814,14 +813,14 @@ class EmailService {
     return this.sendTemplatedEmail({
       to: affiliateEmail,
       templateType: 'PARTNER_PAID',
-      fallbackSubject: `✅ Payment Completed: ₹${amount} Paid!`,
+      fallbackSubject: __tr("✅ Payment Completed: ₹{0} Paid!", [amount]),
       variables: { ...data, amount: this.formatAmount(data.amountCents, symbol), date, symbol },
       generateFallbackHtml: () => `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Payment Completed!</title>
+        <title>${__tr("Payment Completed!")}</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
           .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
@@ -836,43 +835,39 @@ class EmailService {
       </head>
       <body>
         <div class="header">
-          <h1>✅ Payment Completed!</h1>
+          <h1>${__tr("✅ Payment Completed!")}</h1>
         </div>
         <div class="content">
           <div class="celebration">🎊 🎉 🥳</div>
           
-          <h2>Congratulations, ${this.escapeHtml(data.affiliateName)}!</h2>
-          <p>Your payout has been successfully processed and the funds have been transferred.</p>
+          <h2>${__tr("Congratulations, {0}!", [this.escapeHtml(data.affiliateName)])}</h2>
+          <p>${__tr("Your payout has been successfully processed and the funds have been transferred.")}</p>
           
           <div class="amount-box">
-            <div style="font-size: 14px; color: #666; margin-bottom: 10px;">Amount Paid</div>
+            <div style="font-size: 14px; color: #666; margin-bottom: 10px;">${__tr("Amount Paid")}</div>
             <div class="amount">₹${amount}</div>
             <div style="margin-top: 15px;">
-              <span class="status-badge">✓ COMPLETED</span>
+              <span class="status-badge">${__tr("✓ COMPLETED")}</span>
             </div>
           </div>
           
           <div class="details">
-            <h3 style="margin-top: 0;">Payment Details</h3>
-            <p><strong>Commissions Paid:</strong> ${data.commissionCount} commission${data.commissionCount > 1 ? 's' : ''}</p>
-            ${data.method ? `<p><strong>Payment Method:</strong> ${this.escapeHtml(data.method)}</p>` : ''}
-            <p><strong>Payout ID:</strong> <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${this.escapeHtml(data.payoutId)}</code></p>
+            <h3 style="margin-top: 0;">${__tr("Payment Details")}</h3>
+            <p><strong>${__tr("Commissions Paid:")}</strong> ${__plural(data.commissionCount, 'commission')}</p>
+            ${data.method ? `<p><strong>${__tr("Payment Method:")}</strong> ${this.escapeHtml(__label(data.method))}</p>` : ''}
+            <p><strong>${__tr("Payout ID:")}</strong> <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${this.escapeHtml(data.payoutId)}</code></p>
           </div>
           
           <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <strong>✓ Payment Confirmed</strong><br>
-            The funds should appear in your account within 1-2 business days, depending on your bank or payment provider.
-          </div>
+            <strong>${__tr("✓ Payment Confirmed")}</strong><br> ${__tr("The funds should appear in your account within 1-2 business days, depending on your bank or payment provider.")} </div>
           
           <div style="text-align: center;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">View Dashboard</a>
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/affiliate" class="button">${__tr("View Dashboard")}</a>
           </div>
           
-          <p style="margin-top: 30px; text-align: center; color: #666; font-size: 14px;">
-            Keep up the excellent work! Continue referring customers to earn more commissions.
-          </p>
+          <p style="margin-top: 30px; text-align: center; color: #666; font-size: 14px;"> ${__tr("Keep up the excellent work! Continue referring customers to earn more commissions.")} </p>
           
-          <p>Best regards,<br>The Refferq Team</p>
+          <p>${__tr("Best regards,")}<br>${__tr("The Refferq Team")}</p>
         </div>
       </body>
       </html>
@@ -892,10 +887,10 @@ class EmailService {
       });
 
       console.log('Custom email sent:', result);
-      return { success: true, message: 'Email sent successfully' };
+      return { success: true, message: __tr("Email sent successfully") };
     } catch (error) {
       console.error('Failed to send custom email:', error);
-      return { success: false, message: 'Failed to send email' };
+      return { success: false, message: __tr("Failed to send email") };
     }
   }
 
@@ -904,12 +899,12 @@ class EmailService {
     const html = `
       <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
         <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
-          <h1 style="color: #ffffff; font-size: 22px; margin: 0;">Refferq Notification</h1>
+          <h1 style="color: #ffffff; font-size: 22px; margin: 0;">${__tr("Refferq Notification")}</h1>
         </div>
         <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 16px 16px;">
           <p style="color: #374151; font-size: 15px; line-height: 1.6;">${this.escapeHtml(data.body)}</p>
           <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-          <p style="color: #9ca3af; font-size: 12px; text-align: center;">This is an automated notification from Refferq.</p>
+          <p style="color: #9ca3af; font-size: 12px; text-align: center;">${__tr("This is an automated notification from Refferq.")}</p>
         </div>
       </div>
     `;

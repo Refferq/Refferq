@@ -1,3 +1,4 @@
+import { t as __tr } from "@/i18n";
 import { prisma } from './prisma';
 import crypto from 'crypto';
 
@@ -18,7 +19,7 @@ export class OTPService {
       if (!user) {
         return {
           success: false,
-          message: 'No account found with this email address'
+          message: __tr("No account found with this email address")
         };
       }
 
@@ -26,13 +27,13 @@ export class OTPService {
       if (user.status === 'PENDING') {
         return {
           success: false,
-          message: 'Your account is pending approval. Please wait for admin activation.'
+          message: __tr("Your account is pending approval. Please wait for admin activation.")
         };
       }
       if (user.status === 'INACTIVE' || user.status === 'SUSPENDED') {
         return {
           success: false,
-          message: 'Your account is not active. Please contact support.'
+          message: __tr("Your account is not active. Please contact support.")
         };
       }
 
@@ -49,7 +50,7 @@ export class OTPService {
       if (recentOTP) {
         return {
           success: false,
-          message: 'Please wait 1 minute before requesting another OTP'
+          message: __tr("Please wait 1 minute before requesting another OTP")
         };
       }
 
@@ -83,28 +84,28 @@ export class OTPService {
       const emailResult = await resendClient.emails.send({
         from: process.env.RESEND_FROM_EMAIL!,
         to: email,
-        subject: 'Your Login Code',
-        html: this.generateOTPEmailTemplate(code, user.name || 'User')
+        subject: __tr("Your Login Code"),
+        html: this.generateOTPEmailTemplate(code, user.name || __tr("User"))
       });
 
       if (emailResult.error) {
         console.error('Failed to send OTP email:', emailResult.error);
         return {
           success: false,
-          message: 'Failed to send OTP email. Please try again.'
+          message: __tr("Failed to send OTP email. Please try again.")
         };
       }
 
       return {
         success: true,
-        message: 'OTP sent successfully to your email'
+        message: __tr("OTP sent successfully to your email")
       };
 
     } catch (error) {
       console.error('Error sending OTP:', error);
       return {
         success: false,
-        message: 'An error occurred while sending OTP'
+        message: __tr("An error occurred while sending OTP")
       };
     }
   }
@@ -145,7 +146,7 @@ export class OTPService {
 
         return {
           success: false,
-          message: 'Invalid or expired OTP'
+          message: __tr("Invalid or expired OTP")
         };
       }
 
@@ -158,7 +159,7 @@ export class OTPService {
 
         return {
           success: false,
-          message: 'Too many invalid attempts. Please request a new OTP.'
+          message: __tr("Too many invalid attempts. Please request a new OTP.")
         };
       }
 
@@ -179,21 +180,21 @@ export class OTPService {
       if (!user) {
         return {
           success: false,
-          message: 'User not found'
+          message: __tr("User not found")
         };
       }
 
       return {
         success: true,
         user,
-        message: 'OTP verified successfully'
+        message: __tr("OTP verified successfully")
       };
 
     } catch (error) {
       console.error('Error verifying OTP:', error);
       return {
         success: false,
-        message: 'An error occurred while verifying OTP'
+        message: __tr("An error occurred while verifying OTP")
       };
     }
   }
@@ -231,7 +232,7 @@ export class OTPService {
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Your Login Code</title>
+          <title>${__tr("Your Login Code")}</title>
           <style>
             body {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -291,30 +292,26 @@ export class OTPService {
         <body>
           <div class="container">
             <div class="header">
-              <div class="logo">${process.env.PLATFORM_NAME || 'Affiliate Platform'}</div>
-              <h1>Your Login Code</h1>
+              <div class="logo">${process.env.PLATFORM_NAME || __tr("Affiliate Platform")}</div>
+              <h1>${__tr("Your Login Code")}</h1>
             </div>
             
-            <p>Hello ${userName},</p>
-            <p>You requested to sign in to your account. Please use the verification code below:</p>
+            <p>${__tr("Hello {0},", [userName])}</p>
+            <p>${__tr("You requested to sign in to your account. Please use the verification code below:")}</p>
             
             <div class="otp-code">
               <div class="code">${code}</div>
-              <p style="margin: 10px 0 0 0; color: #6b7280;">This code expires in 10 minutes</p>
+              <p style="margin: 10px 0 0 0; color: #6b7280;">${__tr("This code expires in 10 minutes")}</p>
             </div>
             
             <div class="warning">
-              <strong>Security Notice:</strong> Never share this code with anyone. Our team will never ask for your verification code.
-            </div>
+              <strong>${__tr("Security Notice:")}</strong> ${__tr("Never share this code with anyone. Our team will never ask for your verification code.")} </div>
             
-            <p>If you didn't request this code, please ignore this email or contact our support team if you have concerns.</p>
+            <p>${__tr("If you didn't request this code, please ignore this email or contact our support team if you have concerns.")}</p>
             
             <div class="footer">
-              <p>Best regards,<br>
-              ${process.env.PLATFORM_NAME || 'Affiliate Platform'} Team</p>
-              <p>
-                Need help? Contact us at 
-                <a href="mailto:${process.env.PLATFORM_SUPPORT_EMAIL}" style="color: #2563eb;">
+              <p>${__tr("Best regards,")}<br> ${__tr("{0} Team", [process.env.PLATFORM_NAME || __tr("Affiliate Platform")])}</p>
+              <p> ${__tr("Need help? Contact us at")} <a href="mailto:${process.env.PLATFORM_SUPPORT_EMAIL}" style="color: #2563eb;">
                   ${process.env.PLATFORM_SUPPORT_EMAIL}
                 </a>
               </p>

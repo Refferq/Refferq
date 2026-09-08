@@ -32,7 +32,10 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
-    "test:email": "node scripts/test-email.js"
+    "test:email": "node scripts/test-email.js",
+    "i18n:check": "tsx src/i18n/check.ts",
+    "i18n:reference": "tsx src/i18n/check.ts --update-reference",
+    "test:i18n": "tsx --test src/i18n/__tests__/*.test.tsx"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

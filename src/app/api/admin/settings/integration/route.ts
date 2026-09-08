@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -14,12 +17,12 @@ async function verifyAdmin(req: NextRequest) {
 }
 
 // GET /api/admin/settings/integration - Get integration settings
-export async function GET(req: NextRequest) {
+ async function GETHandler(req: NextRequest) {
   try {
     const user = await verifyAdmin(req);
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: __tr("Unauthorized") },
         { status: 401 }
       );
     }
@@ -35,19 +38,19 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('GET /api/admin/settings/integration error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch integration settings' },
+      { success: false, error: __tr("Failed to fetch integration settings") },
       { status: 500 }
     );
   }
 }
 
 // POST /api/admin/settings/integration - Create or update integration settings
-export async function POST(req: NextRequest) {
+ async function POSTHandler(req: NextRequest) {
   try {
     const user = await verifyAdmin(req);
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: __tr("Unauthorized") },
         { status: 401 }
       );
     }
@@ -58,7 +61,7 @@ export async function POST(req: NextRequest) {
     // Validate provider
     if (!provider) {
       return NextResponse.json(
-        { success: false, error: 'Provider is required' },
+        { success: false, error: __tr("Provider is required") },
         { status: 400 }
       );
     }
@@ -104,24 +107,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       integration,
-      message: 'Integration settings saved successfully',
+      message: __tr("Integration settings saved successfully"),
     });
   } catch (error) {
     console.error('POST /api/admin/settings/integration error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to save integration settings' },
+      { success: false, error: __tr("Failed to save integration settings") },
       { status: 500 }
     );
   }
 }
 
 // DELETE /api/admin/settings/integration - Delete integration settings
-export async function DELETE(req: NextRequest) {
+ async function DELETEHandler(req: NextRequest) {
   try {
     const user = await verifyAdmin(req);
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: __tr("Unauthorized") },
         { status: 401 }
       );
     }
@@ -132,7 +135,7 @@ export async function DELETE(req: NextRequest) {
 
     if (!integration) {
       return NextResponse.json(
-        { success: false, error: 'Integration settings not found' },
+        { success: false, error: __tr("Integration settings not found") },
         { status: 404 }
       );
     }
@@ -143,13 +146,17 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Integration settings deleted successfully',
+      message: __tr("Integration settings deleted successfully"),
     });
   } catch (error) {
     console.error('DELETE /api/admin/settings/integration error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to delete integration settings' },
+      { success: false, error: __tr("Failed to delete integration settings") },
       { status: 500 }
     );
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { logAuditAction } from '@/lib/audit';
@@ -30,7 +33,7 @@ function verifyWebhookSignature(payload: string, signature: string | null, secre
  *   external_id?: string,           // Payment provider's refund ID
  * }
  */
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
     try {
         // ─── Authentication ────────────────────────────────────────
         const rawBody = await request.text();
@@ -54,7 +57,7 @@ export async function POST(request: NextRequest) {
 
         if (!authenticated) {
             return NextResponse.json(
-                { success: false, message: 'Unauthorized' },
+                { success: false, message: __tr("Unauthorized") },
                 { status: 401 }
             );
         }
@@ -65,13 +68,13 @@ export async function POST(request: NextRequest) {
             customer_email,
             referral_code,
             amount_cents,
-            reason = 'Customer refund',
+            reason = __tr("Customer refund"),
             external_id,
         } = body;
 
         if (!customer_email) {
             return NextResponse.json(
-                { success: false, message: 'customer_email is required' },
+                { success: false, message: __tr("customer_email is required") },
                 { status: 400 }
             );
         }
@@ -96,7 +99,7 @@ export async function POST(request: NextRequest) {
             console.log('Refund webhook: no conversions found for', customer_email);
             return NextResponse.json({
                 success: true,
-                message: 'Refund logged (no matching conversion found)',
+                message: __tr("Refund logged (no matching conversion found)"),
                 reversed: 0,
             });
         }
@@ -120,7 +123,7 @@ export async function POST(request: NextRequest) {
                         where: { id: commission.id },
                         data: {
                             status: 'CANCELLED',
-                            clawbackNote: `Refund: ${reason}. External ID: ${external_id || 'N/A'}`,
+                            clawbackNote: __tr("Refund: {0}. External ID: {1}", [reason, external_id || 'N/A']),
                         },
                     });
 
@@ -132,7 +135,7 @@ export async function POST(request: NextRequest) {
                         where: { id: commission.id },
                         data: {
                             status: 'CANCELLED',
-                            clawbackNote: `Refund clawback: ${reason}. External ID: ${external_id || 'N/A'}`,
+                            clawbackNote: __tr("Refund clawback: {0}. External ID: {1}", [reason, external_id || 'N/A']),
                         },
                     });
 
@@ -152,7 +155,7 @@ export async function POST(request: NextRequest) {
                         where: { id: commission.id },
                         data: {
                             status: 'CLAWBACK',
-                            clawbackNote: `Paid commission clawback: ${reason}. Will be deducted from next payout. External ID: ${external_id || 'N/A'}`,
+                            clawbackNote: __tr("Paid commission clawback: {0}. Will be deducted from next payout. External ID: {1}", [reason, external_id || 'N/A']),
                         },
                     });
 
@@ -205,8 +208,8 @@ export async function POST(request: NextRequest) {
                 if (affiliateUser?.email) {
                     const { emailService } = await import('@/lib/email');
                     await emailService.sendGenericEmail(affiliateUser.email, {
-                        subject: 'Commission Reversed — Customer Refund',
-                        body: `A commission has been reversed due to a customer refund. Reason: ${reason}. This has been reflected in your balance.`,
+                        subject: __tr("Commission Reversed — Customer Refund"),
+                        body: __tr("A commission has been reversed due to a customer refund. Reason: {0}. This has been reflected in your balance.", [reason]),
                     });
                 }
             }
@@ -216,7 +219,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: `Refund processed: ${reversedCount} commission(s) reversed`,
+            message: __tr("Refund processed: {0} commission(s) reversed", [reversedCount]),
             reversed: reversedCount,
             totalReversedCents,
             details: results,
@@ -224,8 +227,10 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('Refund webhook error:', error);
         return NextResponse.json(
-            { success: false, message: 'Failed to process refund' },
+            { success: false, message: __tr("Failed to process refund") },
             { status: 500 }
         );
     }
 }
+
+export const POST = withSystemLocale(POSTHandler);

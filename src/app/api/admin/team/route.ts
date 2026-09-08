@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -14,9 +17,9 @@ async function verifyAdmin(request: NextRequest) {
 }
 
 // GET: List team members
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const members = await prisma.teamMember.findMany({
@@ -26,27 +29,27 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, members });
   } catch (error) {
     console.error('Admin team GET error:', error);
-    return NextResponse.json({ error: 'Failed to fetch team members' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to fetch team members") }, { status: 500 });
   }
 }
 
 // POST: Invite team member
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { email, name, role, permissions } = body;
 
     if (!email || !name) {
-      return NextResponse.json({ error: 'Email and name are required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Email and name are required") }, { status: 400 });
     }
 
     // Check if already invited
     const existing = await prisma.teamMember.findUnique({ where: { email: email.toLowerCase() } });
     if (existing) {
-      return NextResponse.json({ error: 'This email has already been invited' }, { status: 400 });
+      return NextResponse.json({ error: __tr("This email has already been invited") }, { status: 400 });
     }
 
     const member = await prisma.teamMember.create({
@@ -63,21 +66,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, member });
   } catch (error) {
     console.error('Admin team POST error:', error);
-    return NextResponse.json({ error: 'Failed to invite team member' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to invite team member") }, { status: 500 });
   }
 }
 
 // PUT: Update team member
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { id } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'Team member ID required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Team member ID required") }, { status: 400 });
     }
 
     // Only allow specific fields (prevent mass assignment)
@@ -95,27 +98,32 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true, member });
   } catch (error) {
     console.error('Admin team PUT error:', error);
-    return NextResponse.json({ error: 'Failed to update team member' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to update team member") }, { status: 500 });
   }
 }
 
 // DELETE: Remove team member
-export async function DELETE(request: NextRequest) {
+ async function DELETEHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: 'Team member ID required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Team member ID required") }, { status: 400 });
     }
 
     await prisma.teamMember.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Admin team DELETE error:', error);
-    return NextResponse.json({ error: 'Failed to delete team member' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to delete team member") }, { status: 500 });
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);
+export const PUT = withSystemLocale(PUTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

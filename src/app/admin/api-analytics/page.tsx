@@ -1,16 +1,17 @@
-'use client';
+"use client";
+import { useI18n } from "@/i18n/provider";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -18,14 +19,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Activity,
   BarChart3,
@@ -37,7 +38,7 @@ import {
   Zap,
   Globe,
   TrendingUp,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface DailyBreakdown {
   date: string;
@@ -85,9 +86,11 @@ interface AnalyticsData {
 }
 
 export default function ApiAnalyticsPage() {
+  const { t: __tr, getIntlLocale: __locale } = useI18n();
+
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState('7d');
+  const [period, setPeriod] = useState("7d");
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
@@ -97,7 +100,7 @@ export default function ApiAnalyticsPage() {
       const json = await res.json();
       if (json.success) setData(json.analytics);
     } catch (error) {
-      console.error('Failed to fetch API analytics:', error);
+      console.error("Failed to fetch API analytics:", error);
     } finally {
       setLoading(false);
     }
@@ -108,27 +111,35 @@ export default function ApiAnalyticsPage() {
   }, [fetchAnalytics]);
 
   const statusColor = (code: number) => {
-    if (code < 300) return 'bg-green-500';
-    if (code < 400) return 'bg-blue-500';
-    if (code < 500) return 'bg-yellow-500';
-    return 'bg-red-500';
+    if (code < 300) return "bg-green-500";
+    if (code < 400) return "bg-blue-500";
+    if (code < 500) return "bg-yellow-500";
+    return "bg-red-500";
   };
 
-  const statusBadgeVariant = (code: number): 'default' | 'secondary' | 'destructive' | 'outline' => {
-    if (code < 300) return 'default';
-    if (code < 400) return 'secondary';
-    if (code < 500) return 'outline';
-    return 'destructive';
+  const statusBadgeVariant = (
+    code: number,
+  ): "default" | "secondary" | "destructive" | "outline" => {
+    if (code < 300) return "default";
+    if (code < 400) return "secondary";
+    if (code < 500) return "outline";
+    return "destructive";
   };
 
   const methodColor = (method: string) => {
     switch (method) {
-      case 'GET': return 'text-green-600';
-      case 'POST': return 'text-blue-600';
-      case 'PUT': return 'text-yellow-600';
-      case 'PATCH': return 'text-orange-600';
-      case 'DELETE': return 'text-red-600';
-      default: return 'text-muted-foreground';
+      case "GET":
+        return "text-green-600";
+      case "POST":
+        return "text-blue-600";
+      case "PUT":
+        return "text-yellow-600";
+      case "PATCH":
+        return "text-orange-600";
+      case "DELETE":
+        return "text-red-600";
+      default:
+        return "text-muted-foreground";
     }
   };
 
@@ -136,11 +147,17 @@ export default function ApiAnalyticsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">API Analytics</h1>
-          <p className="text-muted-foreground">Monitor API usage and performance</p>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {__tr("API Analytics")}
+          </h1>
+          <p className="text-muted-foreground">
+            {__tr("Monitor API usage and performance")}
+          </p>
         </div>
         <div className="grid gap-4 md:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-28" />)}
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-28" />
+          ))}
         </div>
         <Skeleton className="h-64" />
         <Skeleton className="h-64" />
@@ -148,27 +165,39 @@ export default function ApiAnalyticsPage() {
     );
   }
 
-  const maxDailyReqs = data ? Math.max(...data.dailyBreakdown.map((d) => d.requests), 1) : 1;
+  const maxDailyReqs = data
+    ? Math.max(...data.dailyBreakdown.map((d) => d.requests), 1)
+    : 1;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">API Analytics</h1>
-          <p className="text-muted-foreground">Monitor API usage and performance</p>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {__tr("API Analytics")}
+          </h1>
+          <p className="text-muted-foreground">
+            {__tr("Monitor API usage and performance")}
+          </p>
         </div>
         <div className="flex gap-2">
           <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
-              <SelectItem value="1d">Last 24h</SelectItem>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
+              <SelectItem value="1d">{__tr("Last 24h")}</SelectItem>
+              <SelectItem value="7d">{__tr("Last 7 days")}</SelectItem>
+              <SelectItem value="30d">{__tr("Last 30 days")}</SelectItem>
+              <SelectItem value="90d">{__tr("Last 90 days")}</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={fetchAnalytics} disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Activity className="h-4 w-4" />}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Activity className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </div>
@@ -179,42 +208,65 @@ export default function ApiAnalyticsPage() {
           <div className="grid gap-4 md:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {__tr("Total Requests")}
+                </CardTitle>
                 <Globe className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{data.totalRequests.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">in selected period</p>
+                <div className="text-2xl font-bold">
+                  {data.totalRequests.toLocaleString(__locale())}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {__tr("in selected period")}
+                </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Avg Response</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {__tr("Avg Response")}
+                </CardTitle>
                 <Zap className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{Math.round(data.avgResponseMs)}ms</div>
-                <p className="text-xs text-muted-foreground">average response time</p>
+                <div className="text-2xl font-bold">
+                  {Math.round(data.avgResponseMs)}
+                  {__tr("ms")}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {__tr("average response time")}
+                </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Error Count</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {__tr("Error Count")}
+                </CardTitle>
                 <AlertTriangle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-destructive">{data.errorCount.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">4xx/5xx responses</p>
+                <div className="text-2xl font-bold text-destructive">
+                  {data.errorCount.toLocaleString(__locale())}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {__tr("4xx/5xx responses")}
+                </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Error Rate</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {__tr("Error Rate")}
+                </CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{data.errorRate}%</div>
-                <p className="text-xs text-muted-foreground">of total requests</p>
+                <p className="text-xs text-muted-foreground">
+                  {__tr("of total requests")}
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -223,26 +275,46 @@ export default function ApiAnalyticsPage() {
           {data.dailyBreakdown.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5" />Daily Requests</CardTitle>
-                <CardDescription>Request volume over time</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  {__tr("Daily Requests")}
+                </CardTitle>
+                <CardDescription>
+                  {__tr("Request volume over time")}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-end gap-1 h-40">
                   {data.dailyBreakdown.map((day) => {
-                    const height = Math.max((day.requests / maxDailyReqs) * 100, 2);
+                    const height = Math.max(
+                      (day.requests / maxDailyReqs) * 100,
+                      2,
+                    );
                     return (
-                      <div key={day.date} className="flex-1 flex flex-col items-center gap-1 group" title={`${day.date}: ${day.requests} requests`}>
+                      <div
+                        key={day.date}
+                        className="flex-1 flex flex-col items-center gap-1 group"
+                        title={__tr("{0}: {1} requests", [
+                          day.date,
+                          day.requests,
+                        ])}
+                      >
                         <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                           {day.requests}
                         </span>
-                        <div className="w-full bg-primary/80 rounded-t transition-all hover:bg-primary" style={{ height: `${height}%` }} />
+                        <div
+                          className="w-full bg-primary/80 rounded-t transition-all hover:bg-primary"
+                          style={{ height: `${height}%` }}
+                        />
                       </div>
                     );
                   })}
                 </div>
                 <div className="flex justify-between mt-2 text-xs text-muted-foreground">
                   <span>{data.dailyBreakdown[0]?.date}</span>
-                  <span>{data.dailyBreakdown[data.dailyBreakdown.length - 1]?.date}</span>
+                  <span>
+                    {data.dailyBreakdown[data.dailyBreakdown.length - 1]?.date}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -252,27 +324,47 @@ export default function ApiAnalyticsPage() {
             {/* Top Endpoints */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-medium">Top Endpoints</CardTitle>
-                <CardDescription>Most called API endpoints</CardDescription>
+                <CardTitle className="text-sm font-medium">
+                  {__tr("Top Endpoints")}
+                </CardTitle>
+                <CardDescription>
+                  {__tr("Most called API endpoints")}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {data.topEndpoints.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No data yet</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    {__tr("No data yet")}
+                  </p>
                 ) : (
                   <div className="space-y-3">
                     {data.topEndpoints.map((ep, idx) => {
-                      const pct = data.totalRequests > 0 ? Math.round((ep.count / data.totalRequests) * 100) : 0;
+                      const pct =
+                        data.totalRequests > 0
+                          ? Math.round((ep.count / data.totalRequests) * 100)
+                          : 0;
                       return (
                         <div key={ep.endpoint} className="space-y-1">
                           <div className="flex items-center justify-between text-sm">
-                            <span className="font-mono text-xs truncate max-w-[200px]" title={ep.endpoint}>{ep.endpoint}</span>
+                            <span
+                              className="font-mono text-xs truncate max-w-[200px]"
+                              title={ep.endpoint}
+                            >
+                              {ep.endpoint}
+                            </span>
                             <div className="flex items-center gap-3 text-muted-foreground">
-                              <span>{ep.count.toLocaleString()}</span>
-                              <span className="text-xs">{Math.round(ep.avgResponseMs)}ms</span>
+                              <span>{ep.count.toLocaleString(__locale())}</span>
+                              <span className="text-xs">
+                                {Math.round(ep.avgResponseMs)}
+                                {__tr("ms")}
+                              </span>
                             </div>
                           </div>
                           <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
+                            <div
+                              className="h-full bg-primary rounded-full transition-all"
+                              style={{ width: `${pct}%` }}
+                            />
                           </div>
                         </div>
                       );
@@ -285,26 +377,50 @@ export default function ApiAnalyticsPage() {
             {/* Status Distribution */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-medium">Status Distribution</CardTitle>
-                <CardDescription>Response status code breakdown</CardDescription>
+                <CardTitle className="text-sm font-medium">
+                  {__tr("Status Distribution")}
+                </CardTitle>
+                <CardDescription>
+                  {__tr("Response status code breakdown")}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {data.statusDistribution.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No data yet</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    {__tr("No data yet")}
+                  </p>
                 ) : (
                   <div className="space-y-3">
                     {data.statusDistribution.map((s) => {
-                      const pct = data.totalRequests > 0 ? Math.round((s.count / data.totalRequests) * 100) : 0;
+                      const pct =
+                        data.totalRequests > 0
+                          ? Math.round((s.count / data.totalRequests) * 100)
+                          : 0;
                       return (
-                        <div key={s.statusCode} className="flex items-center gap-3">
-                          <Badge variant={statusBadgeVariant(s.statusCode)} className="w-14 justify-center">{s.statusCode}</Badge>
+                        <div
+                          key={s.statusCode}
+                          className="flex items-center gap-3"
+                        >
+                          <Badge
+                            variant={statusBadgeVariant(s.statusCode)}
+                            className="w-14 justify-center"
+                          >
+                            {s.statusCode}
+                          </Badge>
                           <div className="flex-1">
                             <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                              <div className={`h-full rounded-full ${statusColor(s.statusCode)}`} style={{ width: `${pct}%` }} />
+                              <div
+                                className={`h-full rounded-full ${statusColor(s.statusCode)}`}
+                                style={{ width: `${pct}%` }}
+                              />
                             </div>
                           </div>
-                          <span className="text-sm text-muted-foreground w-16 text-right">{s.count.toLocaleString()}</span>
-                          <span className="text-xs text-muted-foreground w-10 text-right">{pct}%</span>
+                          <span className="text-sm text-muted-foreground w-16 text-right">
+                            {s.count.toLocaleString(__locale())}
+                          </span>
+                          <span className="text-xs text-muted-foreground w-10 text-right">
+                            {pct}%
+                          </span>
                         </div>
                       );
                     })}
@@ -316,29 +432,48 @@ export default function ApiAnalyticsPage() {
             {/* Per-Key Usage */}
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle className="text-sm font-medium">Usage by API Key</CardTitle>
-                <CardDescription>Request distribution across API keys</CardDescription>
+                <CardTitle className="text-sm font-medium">
+                  {__tr("Usage by API Key")}
+                </CardTitle>
+                <CardDescription>
+                  {__tr("Request distribution across API keys")}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {data.keyUsage.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No data yet</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    {__tr("No data yet")}
+                  </p>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Key Name</TableHead>
-                        <TableHead className="text-right">Requests</TableHead>
-                        <TableHead className="text-right">% of Total</TableHead>
+                        <TableHead>{__tr("Key Name")}</TableHead>
+                        <TableHead className="text-right">
+                          {__tr("Requests")}
+                        </TableHead>
+                        <TableHead className="text-right">
+                          {__tr("% of Total")}
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {data.keyUsage.map((k) => {
-                        const pct = data.totalRequests > 0 ? ((k.count / data.totalRequests) * 100).toFixed(1) : '0';
+                        const pct =
+                          data.totalRequests > 0
+                            ? ((k.count / data.totalRequests) * 100).toFixed(1)
+                            : "0";
                         return (
                           <TableRow key={k.apiKeyId}>
-                            <TableCell className="font-medium">{k.keyName}</TableCell>
-                            <TableCell className="text-right">{k.count.toLocaleString()}</TableCell>
-                            <TableCell className="text-right text-muted-foreground">{pct}%</TableCell>
+                            <TableCell className="font-medium">
+                              {k.keyName}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {k.count.toLocaleString(__locale())}
+                            </TableCell>
+                            <TableCell className="text-right text-muted-foreground">
+                              {pct}%
+                            </TableCell>
                           </TableRow>
                         );
                       })}
@@ -352,47 +487,88 @@ export default function ApiAnalyticsPage() {
           {/* Recent Logs */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Clock className="h-5 w-5" />Recent API Calls</CardTitle>
-              <CardDescription>Latest 100 API requests</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                {__tr("Recent API Calls")}
+              </CardTitle>
+              <CardDescription>
+                {__tr("Latest 100 API requests")}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {data.recentLogs.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <Activity className="h-12 w-12 text-muted-foreground/50" />
-                  <h3 className="mt-4 text-lg font-semibold">No API calls yet</h3>
-                  <p className="text-sm text-muted-foreground">API requests will appear here once keys are in use</p>
+                  <h3 className="mt-4 text-lg font-semibold">
+                    {__tr("No API calls yet")}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {__tr("API requests will appear here once keys are in use")}
+                  </p>
                 </div>
               ) : (
                 <div className="rounded-md border overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Method</TableHead>
-                        <TableHead>Endpoint</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Response</TableHead>
-                        <TableHead>Key</TableHead>
-                        <TableHead>IP</TableHead>
-                        <TableHead>Time</TableHead>
+                        <TableHead>{__tr("Method")}</TableHead>
+                        <TableHead>{__tr("Endpoint")}</TableHead>
+                        <TableHead>{__tr("Status")}</TableHead>
+                        <TableHead className="text-right">
+                          {__tr("Response")}
+                        </TableHead>
+                        <TableHead>{__tr("Key")}</TableHead>
+                        <TableHead>{__tr("IP")}</TableHead>
+                        <TableHead>{__tr("Time")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {data.recentLogs.map((log) => (
                         <TableRow key={log.id}>
                           <TableCell>
-                            <span className={`font-mono text-xs font-bold ${methodColor(log.method)}`}>{log.method}</span>
+                            <span
+                              className={`font-mono text-xs font-bold ${methodColor(log.method)}`}
+                            >
+                              {log.method}
+                            </span>
                           </TableCell>
                           <TableCell>
-                            <span className="font-mono text-xs truncate max-w-[200px] block" title={log.endpoint}>{log.endpoint}</span>
+                            <span
+                              className="font-mono text-xs truncate max-w-[200px] block"
+                              title={log.endpoint}
+                            >
+                              {log.endpoint}
+                            </span>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={statusBadgeVariant(log.statusCode)} className="text-xs">{log.statusCode}</Badge>
+                            <Badge
+                              variant={statusBadgeVariant(log.statusCode)}
+                              className="text-xs"
+                            >
+                              {log.statusCode}
+                            </Badge>
                           </TableCell>
-                          <TableCell className="text-right text-sm">{log.responseMs}ms</TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{log.apiKey?.name || '—'}</TableCell>
-                          <TableCell className="text-xs text-muted-foreground font-mono">{log.ipAddress || '—'}</TableCell>
+                          <TableCell className="text-right text-sm">
+                            {log.responseMs}
+                            {__tr("ms")}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {log.apiKey?.name || "—"}
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground font-mono">
+                            {log.ipAddress || "—"}
+                          </TableCell>
                           <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                            {new Date(log.createdAt).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: 'numeric', month: 'short' })}
+                            {new Date(log.createdAt).toLocaleString(
+                              __locale(),
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                                day: "numeric",
+                                month: "short",
+                              },
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}

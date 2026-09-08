@@ -2,6 +2,7 @@
 const nextConfig = {
   // Output standalone build for Docker deployments
   output: 'standalone',
+  outputFileTracingIncludes: { '/*': ['./locales/*.json'] },
   // Enable Turbopack (default in Next.js 16)
   turbopack: {},
   // Keep webpack config for fallback compatibility

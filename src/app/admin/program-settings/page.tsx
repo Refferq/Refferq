@@ -1,20 +1,21 @@
-'use client';
+"use client";
+import { useI18n } from "@/i18n/provider";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -22,7 +23,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -31,20 +32,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Settings2,
   Save,
@@ -60,7 +56,7 @@ import {
   ExternalLink,
   Zap,
   Clock,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface ProgramSettings {
   id: string;
@@ -88,6 +84,8 @@ interface CommissionRule {
 }
 
 export default function ProgramSettingsPage() {
+  const { t: __tr, label: __label, rich: __rich } = useI18n();
+
   const [settings, setSettings] = useState<ProgramSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -97,15 +95,15 @@ export default function ProgramSettingsPage() {
   const [ruleDialog, setRuleDialog] = useState(false);
   const [editingRule, setEditingRule] = useState<CommissionRule | null>(null);
   const [ruleForm, setRuleForm] = useState({
-    name: '',
-    type: 'PERCENTAGE',
-    value: '',
+    name: "",
+    type: "PERCENTAGE",
+    value: "",
     isDefault: false,
   });
   const [savingRule, setSavingRule] = useState(false);
   const [copiedSnippet, setCopiedSnippet] = useState<string | null>(null);
 
-  const appUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const appUrl = typeof window !== "undefined" ? window.location.origin : "";
 
   const handleCopySnippet = async (id: string, text: string) => {
     await navigator.clipboard.writeText(text);
@@ -119,13 +117,13 @@ export default function ProgramSettingsPage() {
 
   const fetchSettings = async () => {
     try {
-      const res = await fetch('/api/admin/settings');
+      const res = await fetch("/api/admin/settings");
       const data = await res.json();
       if (data.success) {
         setSettings(data.settings);
       }
     } catch (error) {
-      console.error('Failed to fetch settings:', error);
+      console.error("Failed to fetch settings:", error);
     } finally {
       setLoading(false);
     }
@@ -136,9 +134,9 @@ export default function ProgramSettingsPage() {
     setSaving(true);
     setSaved(false);
     try {
-      const res = await fetch('/api/admin/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           productName: settings.productName,
           programName: settings.programName,
@@ -155,7 +153,7 @@ export default function ProgramSettingsPage() {
         setTimeout(() => setSaved(false), 3000);
       }
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      console.error("Failed to save settings:", error);
     } finally {
       setSaving(false);
     }
@@ -164,46 +162,62 @@ export default function ProgramSettingsPage() {
   const handleSaveRule = async () => {
     setSavingRule(true);
     try {
-      const action = editingRule ? 'update' : 'create';
+      const action = editingRule ? "update" : "create";
       const ruleData = editingRule
-        ? { id: editingRule.id, name: ruleForm.name, type: ruleForm.type, value: parseFloat(ruleForm.value), isDefault: ruleForm.isDefault }
-        : { name: ruleForm.name, type: ruleForm.type, value: parseFloat(ruleForm.value), isDefault: ruleForm.isDefault };
+        ? {
+            id: editingRule.id,
+            name: ruleForm.name,
+            type: ruleForm.type,
+            value: parseFloat(ruleForm.value),
+            isDefault: ruleForm.isDefault,
+          }
+        : {
+            name: ruleForm.name,
+            type: ruleForm.type,
+            value: parseFloat(ruleForm.value),
+            isDefault: ruleForm.isDefault,
+          };
 
-      const res = await fetch('/api/admin/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, ruleData }),
       });
       if (res.ok) {
         await fetchSettings();
         setRuleDialog(false);
         setEditingRule(null);
-        setRuleForm({ name: '', type: 'PERCENTAGE', value: '', isDefault: false });
+        setRuleForm({
+          name: "",
+          type: "PERCENTAGE",
+          value: "",
+          isDefault: false,
+        });
       }
     } catch (error) {
-      console.error('Failed to save rule:', error);
+      console.error("Failed to save rule:", error);
     } finally {
       setSavingRule(false);
     }
   };
 
   const handleDeleteRule = async (id: string) => {
-    if (!confirm('Delete this commission rule?')) return;
+    if (!confirm(__tr("Delete this commission rule?"))) return;
     try {
-      await fetch('/api/admin/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', ruleData: { id } }),
+      await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", ruleData: { id } }),
       });
       await fetchSettings();
     } catch (error) {
-      console.error('Failed to delete rule:', error);
+      console.error("Failed to delete rule:", error);
     }
   };
 
   const openCreateRule = () => {
     setEditingRule(null);
-    setRuleForm({ name: '', type: 'PERCENTAGE', value: '', isDefault: false });
+    setRuleForm({ name: "", type: "PERCENTAGE", value: "", isDefault: false });
     setRuleDialog(true);
   };
 
@@ -231,7 +245,9 @@ export default function ProgramSettingsPage() {
   if (!settings) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-muted-foreground">Failed to load settings</p>
+        <p className="text-muted-foreground">
+          {__tr("Failed to load settings")}
+        </p>
       </div>
     );
   }
@@ -239,8 +255,12 @@ export default function ProgramSettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Program Settings</h1>
-        <p className="text-muted-foreground">Configure your affiliate program</p>
+        <h1 className="text-2xl font-bold tracking-tight">
+          {__tr("Program Settings")}
+        </h1>
+        <p className="text-muted-foreground">
+          {__tr("Configure your affiliate program")}
+        </p>
       </div>
 
       {/* General Settings */}
@@ -250,20 +270,22 @@ export default function ProgramSettingsPage() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Settings2 className="h-5 w-5" />
-                General Settings
+                {__tr("General Settings")}
               </CardTitle>
-              <CardDescription>Basic program configuration</CardDescription>
+              <CardDescription>
+                {__tr("Basic program configuration")}
+              </CardDescription>
             </div>
             <Button onClick={handleSaveSettings} disabled={saving}>
               {saved ? (
                 <>
                   <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
-                  Saved
+                  {__tr("Saved")}
                 </>
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  {saving ? 'Saving...' : 'Save Changes'}
+                  {saving ? __tr("Saving...") : __tr("Save Changes")}
                 </>
               )}
             </Button>
@@ -272,48 +294,58 @@ export default function ProgramSettingsPage() {
         <CardContent className="grid gap-6">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="productName">Product Name</Label>
+              <Label htmlFor="productName">{__tr("Product Name")}</Label>
               <Input
                 id="productName"
                 value={settings.productName}
-                onChange={(e) => setSettings({ ...settings, productName: e.target.value })}
+                onChange={(e) =>
+                  setSettings({ ...settings, productName: e.target.value })
+                }
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="programName">Program Name</Label>
+              <Label htmlFor="programName">{__tr("Program Name")}</Label>
               <Input
                 id="programName"
                 value={settings.programName}
-                onChange={(e) => setSettings({ ...settings, programName: e.target.value })}
+                onChange={(e) =>
+                  setSettings({ ...settings, programName: e.target.value })
+                }
               />
             </div>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="websiteUrl">Website URL</Label>
+              <Label htmlFor="websiteUrl">{__tr("Website URL")}</Label>
               <div className="relative">
                 <Globe className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="websiteUrl"
                   className="pl-9"
                   value={settings.websiteUrl}
-                  onChange={(e) => setSettings({ ...settings, websiteUrl: e.target.value })}
+                  onChange={(e) =>
+                    setSettings({ ...settings, websiteUrl: e.target.value })
+                  }
                 />
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="portalSubdomain">Portal Subdomain</Label>
+              <Label htmlFor="portalSubdomain">
+                {__tr("Portal Subdomain")}
+              </Label>
               <Input
                 id="portalSubdomain"
                 value={settings.portalSubdomain}
-                onChange={(e) => setSettings({ ...settings, portalSubdomain: e.target.value })}
+                onChange={(e) =>
+                  setSettings({ ...settings, portalSubdomain: e.target.value })
+                }
               />
             </div>
           </div>
           <Separator />
           <div className="grid gap-4 md:grid-cols-3">
             <div className="grid gap-2">
-              <Label htmlFor="currency">Currency</Label>
+              <Label htmlFor="currency">{__tr("Currency")}</Label>
               <Select
                 value={settings.currency}
                 onValueChange={(v) => setSettings({ ...settings, currency: v })}
@@ -330,35 +362,44 @@ export default function ProgramSettingsPage() {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="minimumPayoutThreshold">Min Payout Threshold (cents)</Label>
+              <Label htmlFor="minimumPayoutThreshold">
+                {__tr("Min Payout Threshold (cents)")}
+              </Label>
               <Input
                 id="minimumPayoutThreshold"
                 type="number"
                 value={settings.minimumPayoutThreshold}
                 onChange={(e) =>
-                  setSettings({ ...settings, minimumPayoutThreshold: parseInt(e.target.value) || 0 })
+                  setSettings({
+                    ...settings,
+                    minimumPayoutThreshold: parseInt(e.target.value) || 0,
+                  })
                 }
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="payoutTerm">Payout Term</Label>
+              <Label htmlFor="payoutTerm">{__tr("Payout Term")}</Label>
               <Select
                 value={settings.payoutTerm}
-                onValueChange={(v) => setSettings({ ...settings, payoutTerm: v })}
+                onValueChange={(v) =>
+                  setSettings({ ...settings, payoutTerm: v })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="NET-15">NET-15</SelectItem>
-                  <SelectItem value="NET-30">NET-30</SelectItem>
-                  <SelectItem value="NET-60">NET-60</SelectItem>
-                  <SelectItem value="NET-90">NET-90</SelectItem>
+                  <SelectItem value="NET-15">{__tr("NET-15")}</SelectItem>
+                  <SelectItem value="NET-30">{__tr("NET-30")}</SelectItem>
+                  <SelectItem value="NET-60">{__tr("NET-60")}</SelectItem>
+                  <SelectItem value="NET-90">{__tr("NET-90")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="commissionHoldDays">Commission Hold Period (Days)</Label>
+              <Label htmlFor="commissionHoldDays">
+                {__tr("Commission Hold Period (Days)")}
+              </Label>
               <div className="relative">
                 <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -367,17 +408,25 @@ export default function ProgramSettingsPage() {
                   className="pl-9"
                   value={settings.commissionHoldDays}
                   onChange={(e) =>
-                    setSettings({ ...settings, commissionHoldDays: parseInt(e.target.value) || 0 })
+                    setSettings({
+                      ...settings,
+                      commissionHoldDays: parseInt(e.target.value) || 0,
+                    })
                   }
                   placeholder="30"
                 />
               </div>
-              <p className="text-[10px] text-muted-foreground">Number of days to hold commissions for refund protection</p>
+              <p className="text-[10px] text-muted-foreground">
+                {__tr(
+                  "Number of days to hold commissions for refund protection",
+                )}
+              </p>
             </div>
           </div>
           <div className="rounded-md bg-muted p-3">
             <p className="text-xs text-muted-foreground">
-              Program ID: <span className="font-mono">{settings.programId}</span>
+              {__tr("Program ID:")}{" "}
+              <span className="font-mono">{settings.programId}</span>
             </p>
           </div>
         </CardContent>
@@ -390,60 +439,83 @@ export default function ProgramSettingsPage() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Percent className="h-5 w-5" />
-                Commission Rules
+                {__tr("Commission Rules")}
               </CardTitle>
-              <CardDescription>Define how commissions are calculated</CardDescription>
+              <CardDescription>
+                {__tr("Define how commissions are calculated")}
+              </CardDescription>
             </div>
             <Dialog open={ruleDialog} onOpenChange={setRuleDialog}>
               <DialogTrigger asChild>
                 <Button variant="outline" onClick={openCreateRule}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Rule
+                  {__tr("Add Rule")}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{editingRule ? 'Edit Rule' : 'New Commission Rule'}</DialogTitle>
+                  <DialogTitle>
+                    {editingRule
+                      ? __tr("Edit Rule")
+                      : __tr("New Commission Rule")}
+                  </DialogTitle>
                   <DialogDescription>
-                    {editingRule ? 'Update commission rule details' : 'Create a new commission calculation rule'}
+                    {editingRule
+                      ? __tr("Update commission rule details")
+                      : __tr("Create a new commission calculation rule")}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
-                    <Label>Rule Name</Label>
+                    <Label>{__tr("Rule Name")}</Label>
                     <Input
                       value={ruleForm.name}
-                      onChange={(e) => setRuleForm({ ...ruleForm, name: e.target.value })}
-                      placeholder="e.g., Standard Commission"
+                      onChange={(e) =>
+                        setRuleForm({ ...ruleForm, name: e.target.value })
+                      }
+                      placeholder={__tr("e.g., Standard Commission")}
                     />
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
-                      <Label>Type</Label>
-                      <Select value={ruleForm.type} onValueChange={(v) => setRuleForm({ ...ruleForm, type: v })}>
+                      <Label>{__tr("Type")}</Label>
+                      <Select
+                        value={ruleForm.type}
+                        onValueChange={(v) =>
+                          setRuleForm({ ...ruleForm, type: v })
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="PERCENTAGE">Percentage</SelectItem>
-                          <SelectItem value="FLAT">Flat Amount</SelectItem>
+                          <SelectItem value="PERCENTAGE">
+                            {__tr("Percentage")}
+                          </SelectItem>
+                          <SelectItem value="FLAT">
+                            {__tr("Flat Amount")}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="grid gap-2">
-                      <Label>Value</Label>
+                      <Label>{__tr("Value")}</Label>
                       <div className="relative">
-                        {ruleForm.type === 'PERCENTAGE' ? (
+                        {ruleForm.type === "PERCENTAGE" ? (
                           <Percent className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         ) : (
                           <IndianRupee className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         )}
                         <Input
                           type="number"
-                          className={ruleForm.type === 'FLAT' ? 'pl-9' : ''}
+                          className={ruleForm.type === "FLAT" ? "pl-9" : ""}
                           value={ruleForm.value}
-                          onChange={(e) => setRuleForm({ ...ruleForm, value: e.target.value })}
-                          placeholder={ruleForm.type === 'PERCENTAGE' ? '10' : '500'}
+                          onChange={(e) =>
+                            setRuleForm({ ...ruleForm, value: e.target.value })
+                          }
+                          placeholder={
+                            ruleForm.type === "PERCENTAGE" ? "10" : "500"
+                          }
                         />
                       </div>
                     </div>
@@ -451,15 +523,29 @@ export default function ProgramSettingsPage() {
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={ruleForm.isDefault}
-                      onCheckedChange={(v) => setRuleForm({ ...ruleForm, isDefault: v })}
+                      onCheckedChange={(v) =>
+                        setRuleForm({ ...ruleForm, isDefault: v })
+                      }
                     />
-                    <Label>Set as default rule</Label>
+                    <Label>{__tr("Set as default rule")}</Label>
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setRuleDialog(false)}>Cancel</Button>
-                  <Button onClick={handleSaveRule} disabled={savingRule || !ruleForm.name || !ruleForm.value}>
-                    {savingRule ? 'Saving...' : editingRule ? 'Update' : 'Create'}
+                  <Button
+                    variant="outline"
+                    onClick={() => setRuleDialog(false)}
+                  >
+                    {__tr("Cancel")}
+                  </Button>
+                  <Button
+                    onClick={handleSaveRule}
+                    disabled={savingRule || !ruleForm.name || !ruleForm.value}
+                  >
+                    {savingRule
+                      ? __tr("Saving...")
+                      : editingRule
+                        ? __tr("Update")
+                        : __tr("Create")}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -470,19 +556,25 @@ export default function ProgramSettingsPage() {
           {settings.commissionRules.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Percent className="h-12 w-12 text-muted-foreground/50" />
-              <h3 className="mt-4 text-lg font-semibold">No commission rules</h3>
-              <p className="text-sm text-muted-foreground">Create your first commission rule to get started</p>
+              <h3 className="mt-4 text-lg font-semibold">
+                {__tr("No commission rules")}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {__tr("Create your first commission rule to get started")}
+              </p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Value</TableHead>
-                  <TableHead>Default</TableHead>
-                  <TableHead>Active</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{__tr("Name")}</TableHead>
+                  <TableHead>{__tr("Type")}</TableHead>
+                  <TableHead>{__tr("Value")}</TableHead>
+                  <TableHead>{__tr("Default")}</TableHead>
+                  <TableHead>{__tr("Active")}</TableHead>
+                  <TableHead className="text-right">
+                    {__tr("Actions")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -490,25 +582,37 @@ export default function ProgramSettingsPage() {
                   <TableRow key={rule.id}>
                     <TableCell className="font-medium">{rule.name}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{rule.type}</Badge>
+                      <Badge variant="outline">{__label(rule.type)}</Badge>
                     </TableCell>
                     <TableCell>
-                      {rule.type === 'PERCENTAGE' ? `${rule.value}%` : `₹${rule.value}`}
+                      {rule.type === "PERCENTAGE"
+                        ? `${rule.value}%`
+                        : `₹${rule.value}`}
                     </TableCell>
                     <TableCell>
-                      {rule.isDefault && <Badge variant="default">Default</Badge>}
+                      {rule.isDefault && (
+                        <Badge variant="default">{__tr("Default")}</Badge>
+                      )}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={rule.isActive ? 'default' : 'secondary'}>
-                        {rule.isActive ? 'Active' : 'Inactive'}
+                      <Badge variant={rule.isActive ? "default" : "secondary"}>
+                        {rule.isActive ? __tr("Active") : __tr("Inactive")}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEditRule(rule)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openEditRule(rule)}
+                        >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteRule(rule.id)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteRule(rule.id)}
+                        >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
@@ -526,10 +630,13 @@ export default function ProgramSettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Code2 className="h-5 w-5" />
-            Referral Tracking Widget
+            {__tr("Referral Tracking Widget")}
           </CardTitle>
           <CardDescription>
-            Embed this script on <strong>{settings.websiteUrl || 'your website'}</strong> to automatically track referral visits and conversions
+            {__rich(
+              "Embed this script on {0} to automatically track referral visits and conversions",
+              [<strong>{settings.websiteUrl || __tr("your website")}</strong>],
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -537,31 +644,71 @@ export default function ProgramSettingsPage() {
           {!settings.websiteUrl && (
             <div className="rounded-md border border-yellow-300 bg-yellow-50 p-4 dark:border-yellow-700 dark:bg-yellow-950">
               <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                Set your <strong>Website URL</strong> in General Settings above first so the snippet is pre-configured.
+                {__rich(
+                  "Set your {0} in General Settings above first so the snippet is pre-configured.",
+                  [<strong>{__tr("Website URL")}</strong>],
+                )}
               </p>
             </div>
           )}
 
           <Tabs defaultValue="script" className="space-y-4">
             <TabsList>
-              <TabsTrigger value="script">Tracking Script</TabsTrigger>
-              <TabsTrigger value="conversion">Conversion Tracking</TabsTrigger>
-              <TabsTrigger value="referral">Referral Links</TabsTrigger>
+              <TabsTrigger value="script">
+                {__tr("Tracking Script")}
+              </TabsTrigger>
+              <TabsTrigger value="conversion">
+                {__tr("Conversion Tracking")}
+              </TabsTrigger>
+              <TabsTrigger value="referral">
+                {__tr("Referral Links")}
+              </TabsTrigger>
             </TabsList>
 
             {/* ── Tab: Tracking Script ── */}
             <TabsContent value="script" className="space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <Label className="text-sm font-medium">1. Add this script before <code className="rounded bg-muted px-1.5 py-0.5 text-xs">&lt;/body&gt;</code> on every page</Label>
-                  <Button variant="ghost" size="sm" onClick={() => handleCopySnippet('script', `<script src="${appUrl}/scripts/refferq-tracker.js" data-api-url="${appUrl}"></script>`)}>
-                    {copiedSnippet === 'script' ? <><CheckCircle2 className="mr-1 h-3.5 w-3.5 text-green-600" />Copied</> : <><Copy className="mr-1 h-3.5 w-3.5" />Copy</>}
+                  <Label className="text-sm font-medium">
+                    {__rich("1. Add this script before {0} on every page", [
+                      <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+                        &lt;/body&gt;
+                      </code>,
+                    ])}
+                  </Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      handleCopySnippet(
+                        "script",
+                        `<script src="${appUrl}/scripts/refferq-tracker.js" data-api-url="${appUrl}"></script>`,
+                      )
+                    }
+                  >
+                    {copiedSnippet === "script" ? (
+                      <>
+                        <CheckCircle2 className="mr-1 h-3.5 w-3.5 text-green-600" />
+                        {__tr("Copied")}
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="mr-1 h-3.5 w-3.5" />
+                        {__tr("Copy")}
+                      </>
+                    )}
                   </Button>
                 </div>
                 <div className="rounded-md bg-muted p-4 font-mono text-sm overflow-x-auto">
-                  <span className="text-blue-600">&lt;script</span>
-                  {' '}<span className="text-purple-600">src</span>=<span className="text-green-600">&quot;{appUrl}/scripts/refferq-tracker.js&quot;</span><br />
-                  {'  '}<span className="text-purple-600">data-api-url</span>=<span className="text-green-600">&quot;{appUrl}&quot;</span>
+                  <span className="text-blue-600">&lt;script</span>{" "}
+                  <span className="text-purple-600">src</span>=
+                  <span className="text-green-600">
+                    &quot;{appUrl}/scripts/refferq-tracker.js&quot;
+                  </span>
+                  <br />
+                  {"  "}
+                  <span className="text-purple-600">data-api-url</span>=
+                  <span className="text-green-600">&quot;{appUrl}&quot;</span>
                   <span className="text-blue-600">&gt;&lt;/script&gt;</span>
                 </div>
               </div>
@@ -569,12 +716,47 @@ export default function ProgramSettingsPage() {
               <Separator />
 
               <div className="rounded-md border p-4 space-y-3">
-                <h4 className="text-sm font-medium flex items-center gap-2"><Zap className="h-4 w-4" />How it works</h4>
+                <h4 className="text-sm font-medium flex items-center gap-2">
+                  <Zap className="h-4 w-4" />
+                  {__tr("How it works")}
+                </h4>
                 <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                  <li>A visitor arrives on <strong>{settings.websiteUrl || 'your site'}</strong> via a referral link (e.g. <code className="rounded bg-muted px-1 py-0.5 text-xs">?ref=CODE</code>)</li>
-                  <li>The script automatically detects the <code className="rounded bg-muted px-1 py-0.5 text-xs">ref</code> parameter and stores a 30-day cookie</li>
-                  <li>When the visitor converts (signup, purchase, etc.), you call <code className="rounded bg-muted px-1 py-0.5 text-xs">Refferq.trackConversion()</code></li>
-                  <li>The referral and commission are recorded in your dashboard automatically</li>
+                  <li>
+                    {__rich(
+                      "A visitor arrives on {0} via a referral link (e.g. {1})",
+                      [
+                        <strong>
+                          {settings.websiteUrl || __tr("your site")}
+                        </strong>,
+                        <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                          ?ref=CODE
+                        </code>,
+                      ],
+                    )}
+                  </li>
+                  <li>
+                    {__rich(
+                      "The script automatically detects the {0} parameter and stores a 30-day cookie",
+                      [
+                        <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                          ref
+                        </code>,
+                      ],
+                    )}
+                  </li>
+                  <li>
+                    {__tr(
+                      "When the visitor converts (signup, purchase, etc.), you call",
+                    )}{" "}
+                    <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                      Refferq.trackConversion()
+                    </code>
+                  </li>
+                  <li>
+                    {__tr(
+                      "The referral and commission are recorded in your dashboard automatically",
+                    )}
+                  </li>
                 </ol>
               </div>
             </TabsContent>
@@ -583,19 +765,42 @@ export default function ProgramSettingsPage() {
             <TabsContent value="conversion" className="space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <Label className="text-sm font-medium">Call this when a visitor completes a conversion event</Label>
-                  <Button variant="ghost" size="sm" onClick={() => handleCopySnippet('conversion', `// Track a conversion (e.g. after signup or purchase)\nRefferq.trackConversion({\n  email: customer.email,\n  name: customer.name,\n  amount: 4999,        // amount in smallest unit (e.g. paise / cents)\n  currency: '${settings.currency || 'INR'}',\n  orderId: 'ORD-12345' // optional\n});`)}>
-                    {copiedSnippet === 'conversion' ? <><CheckCircle2 className="mr-1 h-3.5 w-3.5 text-green-600" />Copied</> : <><Copy className="mr-1 h-3.5 w-3.5" />Copy</>}
+                  <Label className="text-sm font-medium">
+                    {__tr(
+                      "Call this when a visitor completes a conversion event",
+                    )}
+                  </Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      handleCopySnippet(
+                        "conversion",
+                        `// ${__tr("Track a conversion (e.g. after signup or purchase)")}\nRefferq.trackConversion({\n  email: customer.email,\n  name: customer.name,\n  amount: 4999,        // ${__tr("amount in smallest unit (e.g. paise / cents)")}\n  currency: '${settings.currency || "INR"}',\n  orderId: 'ORD-12345' // ${__tr("optional")}\n});`,
+                      )
+                    }
+                  >
+                    {copiedSnippet === "conversion" ? (
+                      <>
+                        <CheckCircle2 className="mr-1 h-3.5 w-3.5 text-green-600" />
+                        {__tr("Copied")}
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="mr-1 h-3.5 w-3.5" />
+                        {__tr("Copy")}
+                      </>
+                    )}
                   </Button>
                 </div>
                 <div className="rounded-md bg-muted p-4 font-mono text-sm overflow-x-auto whitespace-pre">
-                  {`// Track a conversion (e.g. after signup or purchase)
+                  {`// ${__tr("Track a conversion (e.g. after signup or purchase)")}
 Refferq.trackConversion({
   email: customer.email,
   name: customer.name,
-  amount: 4999,        // amount in smallest unit (e.g. paise / cents)
-  currency: '${settings.currency || 'INR'}',
-  orderId: 'ORD-12345' // optional
+  amount: 4999,        // ${__tr("amount in smallest unit (e.g. paise / cents)")}
+  currency: '${settings.currency || "INR"}',
+  orderId: 'ORD-12345' // ${__tr("optional")}
 });`}
                 </div>
               </div>
@@ -604,16 +809,37 @@ Refferq.trackConversion({
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <Label className="text-sm font-medium">Other helpers</Label>
-                  <Button variant="ghost" size="sm" onClick={() => handleCopySnippet('helpers', `// Get the current referral code (or null)\nconst code = Refferq.getReferralCode();\n\n// Clear the stored referral code\nRefferq.clearReferralCode();`)}>
-                    {copiedSnippet === 'helpers' ? <><CheckCircle2 className="mr-1 h-3.5 w-3.5 text-green-600" />Copied</> : <><Copy className="mr-1 h-3.5 w-3.5" />Copy</>}
+                  <Label className="text-sm font-medium">
+                    {__tr("Other helpers")}
+                  </Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      handleCopySnippet(
+                        "helpers",
+                        `// ${__tr("Get the current referral code (or null)")}\nconst code = Refferq.getReferralCode();\n\n// ${__tr("Clear the stored referral code")}\nRefferq.clearReferralCode();`,
+                      )
+                    }
+                  >
+                    {copiedSnippet === "helpers" ? (
+                      <>
+                        <CheckCircle2 className="mr-1 h-3.5 w-3.5 text-green-600" />
+                        {__tr("Copied")}
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="mr-1 h-3.5 w-3.5" />
+                        {__tr("Copy")}
+                      </>
+                    )}
                   </Button>
                 </div>
                 <div className="rounded-md bg-muted p-4 font-mono text-sm overflow-x-auto whitespace-pre">
-                  {`// Get the current referral code (or null)
+                  {`// ${__tr("Get the current referral code (or null)")}
 const code = Refferq.getReferralCode();
 
-// Clear the stored referral code
+// ${__tr("Clear the stored referral code")}
 Refferq.clearReferralCode();`}
                 </div>
               </div>
@@ -622,26 +848,51 @@ Refferq.clearReferralCode();`}
             {/* ── Tab: Referral Links ── */}
             <TabsContent value="referral" className="space-y-4">
               <div className="rounded-md border p-4 space-y-3">
-                <h4 className="text-sm font-medium">Referral link format</h4>
+                <h4 className="text-sm font-medium">
+                  {__tr("Referral link format")}
+                </h4>
                 <p className="text-sm text-muted-foreground">
-                  Affiliates share links to your website with a <code className="rounded bg-muted px-1 py-0.5 text-xs">ref</code> query parameter.
-                  The tracking script picks this up automatically.
+                  {__rich(
+                    "Affiliates share links to your website with a {0} query parameter. The tracking script picks this up automatically.",
+                    [
+                      <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                        ref
+                      </code>,
+                    ],
+                  )}
                 </p>
                 <div className="rounded-md bg-muted p-3 font-mono text-sm break-all">
-                  {settings.websiteUrl || 'https://yoursite.com'}/<span className="text-blue-600">?ref=</span><span className="text-green-600">PARTNER-CODE</span>
+                  {settings.websiteUrl || "https://yoursite.com"}/
+                  <span className="text-blue-600">?ref=</span>
+                  <span className="text-green-600">PARTNER-CODE</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  The script also recognizes <code className="rounded bg-muted px-1 py-0.5 text-xs">?referral=</code> and <code className="rounded bg-muted px-1 py-0.5 text-xs">?affiliate=</code> parameters.
+                  {__rich(
+                    "The script also recognizes {0} and {1} parameters.",
+                    [
+                      <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                        ?referral=
+                      </code>,
+                      <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                        ?affiliate=
+                      </code>,
+                    ],
+                  )}
                 </p>
               </div>
 
               <div className="rounded-md border p-4 space-y-3">
-                <h4 className="text-sm font-medium">Direct referral route</h4>
+                <h4 className="text-sm font-medium">
+                  {__tr("Direct referral route")}
+                </h4>
                 <p className="text-sm text-muted-foreground">
-                  You can also use the built-in redirect route to send visitors through Refferq first:
+                  {__tr(
+                    "You can also use the built-in redirect route to send visitors through Refferq first:",
+                  )}
                 </p>
                 <div className="rounded-md bg-muted p-3 font-mono text-sm break-all">
-                  {appUrl}/<span className="text-blue-600">r/</span><span className="text-green-600">PARTNER-CODE</span>
+                  {appUrl}/<span className="text-blue-600">r/</span>
+                  <span className="text-green-600">PARTNER-CODE</span>
                 </div>
               </div>
             </TabsContent>

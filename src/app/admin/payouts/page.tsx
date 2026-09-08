@@ -1,16 +1,17 @@
-'use client';
+"use client";
+import { useI18n } from "@/i18n/provider";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -18,14 +19,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Wallet,
   Clock,
@@ -36,7 +37,7 @@ import {
   ArrowUpRight,
   Ban,
   Download,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface Payout {
   id: string;
@@ -52,18 +53,34 @@ interface Payout {
   processedAt: string | null;
 }
 
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType }> = {
-  PENDING: { label: 'Pending', variant: 'secondary', icon: Clock },
-  PROCESSING: { label: 'Processing', variant: 'outline', icon: Loader2 },
-  COMPLETED: { label: 'Completed', variant: 'default', icon: CheckCircle2 },
-  FAILED: { label: 'Failed', variant: 'destructive', icon: XCircle },
-};
-
 export default function PayoutsPage() {
+  const { t: __tr, getIntlLocale: __locale, label: __label } = useI18n();
+  const statusConfig: Record<
+    string,
+    {
+      label: string;
+      variant: "default" | "secondary" | "destructive" | "outline";
+      icon: React.ElementType;
+    }
+  > = {
+    PENDING: { label: __tr("Pending"), variant: "secondary", icon: Clock },
+    PROCESSING: {
+      label: __tr("Processing"),
+      variant: "outline",
+      icon: Loader2,
+    },
+    COMPLETED: {
+      label: __tr("Completed"),
+      variant: "default",
+      icon: CheckCircle2,
+    },
+    FAILED: { label: __tr("Failed"), variant: "destructive", icon: XCircle },
+  };
+
   const [payouts, setPayouts] = useState<Payout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [currencySymbol, setCurrencySymbol] = useState('₹');
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [currencySymbol, setCurrencySymbol] = useState("₹");
 
   useEffect(() => {
     fetchPayouts();
@@ -71,14 +88,14 @@ export default function PayoutsPage() {
 
   const fetchPayouts = async () => {
     try {
-      const res = await fetch('/api/admin/payouts');
+      const res = await fetch("/api/admin/payouts");
       const data = await res.json();
       if (data.success) {
         setPayouts(data.payouts || []);
-        setCurrencySymbol(data.currencySymbol || '₹');
+        setCurrencySymbol(data.currencySymbol || "₹");
       }
     } catch (error) {
-      console.error('Failed to fetch payouts:', error);
+      console.error("Failed to fetch payouts:", error);
     } finally {
       setLoading(false);
     }
@@ -86,16 +103,16 @@ export default function PayoutsPage() {
 
   const handleExport = async () => {
     try {
-      const res = await fetch('/api/admin/payouts?format=csv');
+      const res = await fetch("/api/admin/payouts?format=csv");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `payouts-export-${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Failed to export payouts:', error);
+      console.error("Failed to export payouts:", error);
     }
   };
 
@@ -103,14 +120,16 @@ export default function PayoutsPage() {
     return <PayoutsSkeleton />;
   }
 
-  const filtered = payouts.filter((p) => statusFilter === 'all' || p.status === statusFilter);
+  const filtered = payouts.filter(
+    (p) => statusFilter === "all" || p.status === statusFilter,
+  );
 
   const stats = {
     total: payouts.length,
-    pending: payouts.filter((p) => p.status === 'PENDING').length,
-    completed: payouts.filter((p) => p.status === 'COMPLETED').length,
+    pending: payouts.filter((p) => p.status === "PENDING").length,
+    completed: payouts.filter((p) => p.status === "COMPLETED").length,
     totalPaid: payouts
-      .filter((p) => p.status === 'COMPLETED')
+      .filter((p) => p.status === "COMPLETED")
       .reduce((sum, p) => sum + p.amountCents, 0),
   };
 
@@ -119,7 +138,9 @@ export default function PayoutsPage() {
       <div className="space-y-6">
         <Skeleton className="h-8 w-48" />
         <div className="grid gap-4 md:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
         </div>
         <Skeleton className="h-96" />
       </div>
@@ -129,14 +150,18 @@ export default function PayoutsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Payouts</h1>
-        <p className="text-muted-foreground">Manage partner commission payouts</p>
+        <h1 className="text-2xl font-bold tracking-tight">{__tr("Payouts")}</h1>
+        <p className="text-muted-foreground">
+          {__tr("Manage partner commission payouts")}
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Payouts</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {__tr("Total Payouts")}
+            </CardTitle>
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -145,7 +170,9 @@ export default function PayoutsPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {__tr("Pending")}
+            </CardTitle>
             <Clock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
@@ -154,7 +181,9 @@ export default function PayoutsPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {__tr("Completed")}
+            </CardTitle>
             <CheckCircle2 className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -163,12 +192,19 @@ export default function PayoutsPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Paid</CardTitle>
-            <span className="text-sm font-bold text-muted-foreground">{currencySymbol}</span>
+            <CardTitle className="text-sm font-medium">
+              {__tr("Total Paid")}
+            </CardTitle>
+            <span className="text-sm font-bold text-muted-foreground">
+              {currencySymbol}
+            </span>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {currencySymbol}{(stats.totalPaid / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              {currencySymbol}
+              {(stats.totalPaid / 100).toLocaleString(__locale(), {
+                minimumFractionDigits: 2,
+              })}
             </div>
           </CardContent>
         </Card>
@@ -178,24 +214,28 @@ export default function PayoutsPage() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>Payout History</CardTitle>
-              <CardDescription>All partner payout records</CardDescription>
+              <CardTitle>{__tr("Payout History")}</CardTitle>
+              <CardDescription>
+                {__tr("All partner payout records")}
+              </CardDescription>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={handleExport}>
                 <Download className="mr-2 h-4 w-4" />
-                Export CSV
+                {__tr("Export CSV")}
               </Button>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder={__tr("Status")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="PENDING">Pending</SelectItem>
-                  <SelectItem value="PROCESSING">Processing</SelectItem>
-                  <SelectItem value="COMPLETED">Completed</SelectItem>
-                  <SelectItem value="FAILED">Failed</SelectItem>
+                  <SelectItem value="all">{__tr("All Status")}</SelectItem>
+                  <SelectItem value="PENDING">{__tr("Pending")}</SelectItem>
+                  <SelectItem value="PROCESSING">
+                    {__tr("Processing")}
+                  </SelectItem>
+                  <SelectItem value="COMPLETED">{__tr("Completed")}</SelectItem>
+                  <SelectItem value="FAILED">{__tr("Failed")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -205,58 +245,81 @@ export default function PayoutsPage() {
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Wallet className="h-12 w-12 text-muted-foreground/50" />
-              <h3 className="mt-4 text-lg font-semibold">No payouts found</h3>
-              <p className="text-sm text-muted-foreground">Payouts will appear here once processed</p>
+              <h3 className="mt-4 text-lg font-semibold">
+                {__tr("No payouts found")}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {__tr("Payouts will appear here once processed")}
+              </p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Partner</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Commissions</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Requested</TableHead>
-                  <TableHead>Processed</TableHead>
+                  <TableHead>{__tr("Partner")}</TableHead>
+                  <TableHead>{__tr("Amount")}</TableHead>
+                  <TableHead>{__tr("Commissions")}</TableHead>
+                  <TableHead>{__tr("Method")}</TableHead>
+                  <TableHead>{__tr("Status")}</TableHead>
+                  <TableHead>{__tr("Requested")}</TableHead>
+                  <TableHead>{__tr("Processed")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map((payout) => {
-                  const cfg = statusConfig[payout.status] || statusConfig.PENDING;
+                  const cfg =
+                    statusConfig[payout.status] || statusConfig.PENDING;
                   return (
                     <TableRow key={payout.id}>
                       <TableCell>
                         <div>
-                          <p className="font-medium text-sm">{payout.affiliateName}</p>
-                          <p className="text-xs text-muted-foreground">{payout.affiliateEmail}</p>
+                          <p className="font-medium text-sm">
+                            {payout.affiliateName}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {payout.affiliateEmail}
+                          </p>
                         </div>
                       </TableCell>
                       <TableCell>
                         <span className="font-semibold">
-                          {currencySymbol}{(payout.amountCents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          {currencySymbol}
+                          {(payout.amountCents / 100).toLocaleString(
+                            __locale(),
+                            { minimumFractionDigits: 2 },
+                          )}
                         </span>
                       </TableCell>
-                      <TableCell className="text-sm">{payout.commissionCount}</TableCell>
-                      <TableCell className="text-sm">{payout.method || '—'}</TableCell>
+                      <TableCell className="text-sm">
+                        {payout.commissionCount}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {__label(payout.method) || "—"}
+                      </TableCell>
                       <TableCell>
                         <Badge variant={cfg.variant}>{cfg.label}</Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {new Date(payout.createdAt).toLocaleDateString('en-IN', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
+                        {new Date(payout.createdAt).toLocaleDateString(
+                          __locale(),
+                          {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          },
+                        )}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {payout.processedAt
-                          ? new Date(payout.processedAt).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                          })
-                          : '—'}
+                          ? new Date(payout.processedAt).toLocaleDateString(
+                              __locale(),
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            )
+                          : "—"}
                       </TableCell>
                     </TableRow>
                   );

@@ -1,7 +1,10 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
 
@@ -17,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
@@ -36,8 +39,9 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Auth check error:', error);
     return NextResponse.json(
-      { error: 'Invalid or expired token' },
+      { error: __tr("Invalid or expired token") },
       { status: 401 }
     );
   }
 }
+export const GET = withSystemLocale(GETHandler);

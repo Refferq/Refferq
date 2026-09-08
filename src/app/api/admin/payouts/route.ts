@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { logAuditAction } from '@/lib/audit';
@@ -14,18 +17,18 @@ interface JWTPayload {
 async function verifyAdmin(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id');
-    if (!userId) return { error: 'Unauthorized', status: 401 };
+    if (!userId) return { error: __tr("Unauthorized"), status: 401 };
 
     const user = await prisma.user.findUnique({
       where: { id: userId }
     });
 
     if (!user || user.role !== 'ADMIN' || user.status !== 'ACTIVE') {
-      return { error: 'Forbidden', status: 403 };
+      return { error: __tr("Forbidden"), status: 403 };
     }
     return { user };
   } catch (err) {
-    return { error: 'Authentication internal error', status: 500 };
+    return { error: __tr("Authentication internal error"), status: 500 };
   }
 }
 
@@ -50,7 +53,7 @@ function convertToCSV(data: any[]): string {
   return [headers, ...rows].join('\n');
 }
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const auth = await verifyAdmin(request);
     if ('error' in auth) {
@@ -123,13 +126,13 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error('Payouts API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch payouts' },
+      { error: __tr("Failed to fetch payouts") },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     const auth = await verifyAdmin(request);
     if ('error' in auth) {
@@ -142,7 +145,7 @@ export async function POST(request: NextRequest) {
     const { success, data, error: validationError } = await import('@/lib/validations').then(m => m.payoutSchema.safeParse(body));
 
     if (!success) {
-      return NextResponse.json({ error: 'Validation failed', details: validationError.issues }, { status: 400 });
+      return NextResponse.json({ error: __tr("Validation failed"), details: validationError.issues }, { status: 400 });
     }
 
     const { affiliateId, commissionIds, method, notes } = data;
@@ -153,7 +156,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!affiliate) {
-      return NextResponse.json({ error: 'Affiliate not found' }, { status: 404 });
+      return NextResponse.json({ error: __tr("Affiliate not found") }, { status: 404 });
     }
 
     // Fetch commissions for these IDs (must be APPROVED)
@@ -166,7 +169,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (commissions.length === 0) {
-      return NextResponse.json({ error: 'No valid (approved) commissions found' }, { status: 404 });
+      return NextResponse.json({ error: __tr("No valid (approved) commissions found") }, { status: 404 });
     }
 
     if (commissions.length !== commissionIds.length) {
@@ -177,12 +180,12 @@ export async function POST(request: NextRequest) {
 
       if (pCount > 0) {
         return NextResponse.json({
-          error: `${pCount} commission(s) are still in the hold period and cannot be paid out yet.`
+          error: __tr("{0} commission(s) are still in the hold period and cannot be paid out yet.", [pCount])
         }, { status: 400 });
       }
 
       return NextResponse.json(
-        { error: 'Some commissions are invalid, cancelled, or already paid.' },
+        { error: __tr("Some commissions are invalid, cancelled, or already paid.") },
         { status: 400 }
       );
     }
@@ -200,7 +203,7 @@ export async function POST(request: NextRequest) {
         amountCents: totalAmountCents,
         commissionCount: commissions.length,
         status: 'PENDING',
-        method: method || 'Bank Transfer',
+        method: method || __tr("Bank Transfer"),
         notes: notes || null,
         createdBy: auth.user.id,
         createdAt: new Date(),
@@ -250,11 +253,11 @@ export async function POST(request: NextRequest) {
       if (affiliateUser?.email) {
         const { emailService } = await import('@/lib/email');
         await emailService.sendPayoutCreatedEmail(affiliateUser.email, {
-          affiliateName: payout.affiliate.name || affiliateUser.name || 'Partner',
+          affiliateName: payout.affiliate.name || affiliateUser.name || __tr("Partner"),
           amountCents: totalAmountCents,
           commissionCount: commissions.length,
           payoutId: payout.id,
-          method: method || 'Bank Transfer'
+          method: method || __tr("Bank Transfer")
         });
       }
     } catch (emailError) {
@@ -281,14 +284,14 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Process payouts API error:', error);
     return NextResponse.json(
-      { error: 'Failed to create payout' },
+      { error: __tr("Failed to create payout") },
       { status: 500 }
     );
   }
 }
 
 // PUT - Update payout status
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   try {
     const auth = await verifyAdmin(request);
     if ('error' in auth) {
@@ -301,7 +304,7 @@ export async function PUT(request: NextRequest) {
     const { success, data, error: validationError } = await import('@/lib/validations').then(m => m.payoutUpdateSchema.safeParse(body));
 
     if (!success) {
-      return NextResponse.json({ error: 'Validation failed', details: validationError.issues }, { status: 400 });
+      return NextResponse.json({ error: __tr("Validation failed"), details: validationError.issues }, { status: 400 });
     }
 
     const { id, status, method, notes } = data;
@@ -356,11 +359,11 @@ export async function PUT(request: NextRequest) {
         if (affiliateUser?.email) {
           const { emailService } = await import('@/lib/email');
           await emailService.sendPayoutCompletedEmail(affiliateUser.email, {
-            affiliateName: payout.affiliate.name || affiliateUser.name || 'Partner',
+            affiliateName: payout.affiliate.name || affiliateUser.name || __tr("Partner"),
             amountCents: payout.amountCents,
             commissionCount: payout.commissionCount,
             payoutId: payout.id,
-            method: payout.method || 'Bank Transfer',
+            method: payout.method || __tr("Bank Transfer"),
             processedAt: payout.processedAt?.toISOString() || new Date().toISOString()
           });
         }
@@ -389,14 +392,14 @@ export async function PUT(request: NextRequest) {
   } catch (error: any) {
     console.error('Error updating payout:', error);
     return NextResponse.json(
-      { error: 'Failed to update payout' },
+      { error: __tr("Failed to update payout") },
       { status: 500 }
     );
   }
 }
 
 // DELETE - Delete payout
-export async function DELETE(request: NextRequest) {
+ async function DELETEHandler(request: NextRequest) {
   try {
     const auth = await verifyAdmin(request);
     if ('error' in auth) {
@@ -407,7 +410,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: 'Payout ID is required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Payout ID is required") }, { status: 400 });
     }
 
     // Delete payout
@@ -425,13 +428,18 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Payout deleted successfully',
+      message: __tr("Payout deleted successfully"),
     });
   } catch (error: any) {
     console.error('Error deleting payout:', error);
     return NextResponse.json(
-      { error: 'Failed to delete payout' },
+      { error: __tr("Failed to delete payout") },
       { status: 500 }
     );
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);
+export const PUT = withSystemLocale(PUTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

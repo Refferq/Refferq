@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -14,9 +17,9 @@ async function verifyAdmin(request: NextRequest) {
 }
 
 // GET: List all coupons
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const coupons = await prisma.coupon.findMany({
@@ -26,27 +29,27 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, coupons });
   } catch (error) {
     console.error('Admin coupons GET error:', error);
-    return NextResponse.json({ error: 'Failed to fetch coupons' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to fetch coupons") }, { status: 500 });
   }
 }
 
 // POST: Create coupon
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { code, description, discountType, discountValue, currency, maxUses, affiliateId, startsAt, expiresAt } = body;
 
     if (!code || !discountValue) {
-      return NextResponse.json({ error: 'Code and discount value are required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Code and discount value are required") }, { status: 400 });
     }
 
     // Check unique
     const existing = await prisma.coupon.findUnique({ where: { code: code.toUpperCase() } });
     if (existing) {
-      return NextResponse.json({ error: 'Coupon code already exists' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Coupon code already exists") }, { status: 400 });
     }
 
     const coupon = await prisma.coupon.create({
@@ -67,21 +70,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, coupon });
   } catch (error) {
     console.error('Admin coupons POST error:', error);
-    return NextResponse.json({ error: 'Failed to create coupon' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to create coupon") }, { status: 500 });
   }
 }
 
 // PUT: Update coupon
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { id } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'Coupon ID required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Coupon ID required") }, { status: 400 });
     }
 
     // Only allow specific fields (prevent mass assignment)
@@ -101,27 +104,32 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true, coupon });
   } catch (error) {
     console.error('Admin coupons PUT error:', error);
-    return NextResponse.json({ error: 'Failed to update coupon' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to update coupon") }, { status: 500 });
   }
 }
 
 // DELETE: Delete coupon
-export async function DELETE(request: NextRequest) {
+ async function DELETEHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { id } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'Coupon ID required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Coupon ID required") }, { status: 400 });
     }
 
     await prisma.coupon.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Admin coupons DELETE error:', error);
-    return NextResponse.json({ error: 'Failed to delete coupon' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to delete coupon") }, { status: 500 });
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);
+export const PUT = withSystemLocale(PUTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

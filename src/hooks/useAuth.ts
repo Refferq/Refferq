@@ -1,7 +1,8 @@
-'use client';
+"use client";
+import { useI18n } from "@/i18n/provider";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface User {
   id: string;
@@ -19,10 +20,12 @@ interface AuthState {
 }
 
 export function useAuth() {
+  const { t: __tr } = useI18n();
+
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     loading: true,
-    error: null
+    error: null,
   });
   const router = useRouter();
 
@@ -32,9 +35,9 @@ export function useAuth() {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/auth/me', {
-        method: 'GET',
-        credentials: 'include', // Include cookies
+      const response = await fetch("/api/auth/me", {
+        method: "GET",
+        credentials: "include", // Include cookies
       });
 
       if (response.ok) {
@@ -42,48 +45,48 @@ export function useAuth() {
         setAuthState({
           user: userData.user,
           loading: false,
-          error: null
+          error: null,
         });
       } else {
         // Not authenticated
         setAuthState({
           user: null,
           loading: false,
-          error: null
+          error: null,
         });
-        router.push('/login');
+        router.push("/login");
       }
     } catch (error) {
       setAuthState({
         user: null,
         loading: false,
-        error: 'Failed to check authentication'
+        error: __tr("Failed to check authentication"),
       });
-      router.push('/login');
+      router.push("/login");
     }
   };
 
   const logout = async () => {
     try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       setAuthState({
         user: null,
         loading: false,
-        error: null
+        error: null,
       });
-      router.push('/login');
+      router.push("/login");
     }
   };
 
   return {
     ...authState,
     logout,
-    checkAuth
+    checkAuth,
   };
 }
