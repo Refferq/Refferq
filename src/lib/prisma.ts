@@ -1,3 +1,5 @@
+
+import { t as __tr } from "@/i18n";
 import { PrismaClient } from '@prisma/client';
 import { unstable_cache } from 'next/cache';
 import * as bcrypt from 'bcryptjs';
@@ -304,7 +306,7 @@ export class DatabaseService {
         affiliateId: payoutData.affiliateId,
         amountCents: payoutData.amountCents,
         commissionCount: payoutData.commissionCount,
-        method: payoutData.method || 'Bank Transfer',
+        method: payoutData.method || __tr("Bank Transfer"),
         notes: payoutData.notes,
         status: 'PENDING',
         createdBy: payoutData.createdBy,
@@ -488,7 +490,7 @@ export class DatabaseService {
       const adminUser = await this.createUser({
         email: 'admin@example.com',
         password: 'password',
-        name: 'Admin User',
+        name: __tr("Admin User"),
         role: 'ADMIN',
       });
 
@@ -496,14 +498,14 @@ export class DatabaseService {
       const affiliate1User = await this.createUser({
         email: 'sarah.johnson@example.com',
         password: 'password',
-        name: 'Sarah Johnson',
+        name: __tr("Sarah Johnson"),
         role: 'AFFILIATE',
       });
 
       const affiliate2User = await this.createUser({
         email: 'david.lee@example.com',
         password: 'password',
-        name: 'David Lee',
+        name: __tr("David Lee"),
         role: 'AFFILIATE',
       });
 
@@ -533,21 +535,21 @@ export class DatabaseService {
 
       // Create commission rules
       await this.createCommissionRule({
-        name: 'Standard Rate',
+        name: __tr("Standard Rate"),
         type: 'PERCENTAGE',
         value: 15,
         isDefault: true,
       });
 
       await this.createCommissionRule({
-        name: 'Enterprise Tier',
+        name: __tr("Enterprise Tier"),
         type: 'PERCENTAGE',
         value: 20,
         conditions: { minAmountCents: 500000 }, // $5000+
       });
 
       await this.createCommissionRule({
-        name: 'Bonus Rate',
+        name: __tr("Bonus Rate"),
         type: 'PERCENTAGE',
         value: 25,
         conditions: {
@@ -560,22 +562,22 @@ export class DatabaseService {
       // Create sample referrals
       const referral1 = await this.createReferral({
         affiliateId: affiliate1.id,
-        leadName: 'John Smith',
+        leadName: __tr("John Smith"),
         leadEmail: 'john@techcorp.com',
         metadata: {
           company: 'TechCorp',
-          notes: 'Enterprise client, high value lead',
+          notes: __tr("Enterprise client, high value lead"),
           estimatedValue: 150000,
         },
       });
 
       const referral2 = await this.createReferral({
         affiliateId: affiliate2.id,
-        leadName: 'Maria Garcia',
+        leadName: __tr("Maria Garcia"),
         leadEmail: 'maria@startup.io',
         metadata: {
           company: 'StartupXYZ',
-          notes: 'Interested in premium plan',
+          notes: __tr("Interested in premium plan"),
           estimatedValue: 80000,
         },
       });
@@ -585,7 +587,7 @@ export class DatabaseService {
         status: 'APPROVED',
         reviewedBy: adminUser.id,
         reviewedAt: new Date(),
-        reviewNotes: 'Approved - verified lead quality',
+        reviewNotes: __tr("Approved - verified lead quality"),
       });
 
       // Create conversion for approved referral

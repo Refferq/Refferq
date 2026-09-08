@@ -1,16 +1,19 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 /**
  * POST /api/track/referral - Track referral clicks
  */
-export async function POST(req: NextRequest) {
+ async function POSTHandler(req: NextRequest) {
   try {
     const apiKey = req.headers.get('X-API-Key') || req.headers.get('x-api-key');
     
     if (!apiKey) {
       return NextResponse.json(
-        { success: false, error: 'API key is required' },
+        { success: false, error: __tr("API key is required") },
         { status: 401 }
       );
     }
@@ -25,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     if (!integration) {
       return NextResponse.json(
-        { success: false, error: 'Invalid or inactive API key' },
+        { success: false, error: __tr("Invalid or inactive API key") },
         { status: 401 }
       );
     }
@@ -35,7 +38,7 @@ export async function POST(req: NextRequest) {
 
     if (!referralCode) {
       return NextResponse.json(
-        { success: false, error: 'Referral code is required' },
+        { success: false, error: __tr("Referral code is required") },
         { status: 400 }
       );
     }
@@ -57,14 +60,14 @@ export async function POST(req: NextRequest) {
 
     if (!affiliate) {
       return NextResponse.json(
-        { success: false, error: 'Invalid referral code' },
+        { success: false, error: __tr("Invalid referral code") },
         { status: 404 }
       );
     }
 
     if (affiliate.user.status !== 'ACTIVE') {
       return NextResponse.json(
-        { success: false, error: 'Affiliate is not active' },
+        { success: false, error: __tr("Affiliate is not active") },
         { status: 403 }
       );
     }
@@ -83,7 +86,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Referral tracked successfully',
+      message: __tr("Referral tracked successfully"),
       affiliate: {
         name: affiliate.user.name,
         code: affiliate.referralCode,
@@ -92,14 +95,14 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('POST /api/track/referral error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to track referral' },
+      { success: false, error: __tr("Failed to track referral") },
       { status: 500 }
     );
   }
 }
 
 // Handle OPTIONS for CORS
-export async function OPTIONS() {
+ async function OPTIONSHandler() {
   return new NextResponse(null, {
     status: 200,
     headers: {
@@ -109,3 +112,6 @@ export async function OPTIONS() {
     },
   });
 }
+
+export const POST = withSystemLocale(POSTHandler);
+export const OPTIONS = withSystemLocale(OPTIONSHandler);

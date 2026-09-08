@@ -1,8 +1,11 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // GET: List active resources for affiliates
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     const user = await prisma.user.findUnique({
@@ -10,7 +13,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user || user.role !== 'AFFILIATE') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      return NextResponse.json({ error: __tr("Access denied") }, { status: 403 });
     }
 
     const resources = await prisma.resource.findMany({
@@ -36,12 +39,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Affiliate resources API error:', error);
-    return NextResponse.json({ error: 'Failed to fetch resources' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to fetch resources") }, { status: 500 });
   }
 }
 
 // POST: Track download (increment counter)
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     const user = await prisma.user.findUnique({
@@ -49,14 +52,14 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user || user.role !== 'AFFILIATE') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      return NextResponse.json({ error: __tr("Access denied") }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: 'Resource ID required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Resource ID required") }, { status: 400 });
     }
 
     await prisma.resource.update({
@@ -67,6 +70,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Track download error:', error);
-    return NextResponse.json({ error: 'Failed to track download' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to track download") }, { status: 500 });
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);

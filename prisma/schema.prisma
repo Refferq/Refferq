@@ -689,3 +689,12 @@ enum TeamMemberStatus {
   ACTIVE
   DEACTIVATED
 }
+
+// Installation-wide settings, shared by all application instances.
+model SystemSettings {
+  id        String   @id @default("system")
+  locale    String   @default("en")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}

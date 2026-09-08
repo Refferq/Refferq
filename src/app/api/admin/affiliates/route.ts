@@ -1,7 +1,10 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
 
@@ -14,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Access denied. Admin role required.' },
+        { error: __tr("Access denied. Admin role required.") },
         { status: 403 }
       );
     }
@@ -55,13 +58,13 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Get affiliates API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch affiliates' },
+      { error: __tr("Failed to fetch affiliates") },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
 
@@ -74,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Access denied. Admin role required.' },
+        { error: __tr("Access denied. Admin role required.") },
         { status: 403 }
       );
     }
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     if (!success) {
       return NextResponse.json(
-        { error: 'Validation failed', details: validationError.issues },
+        { error: __tr("Validation failed"), details: validationError.issues },
         { status: 400 }
       );
     }
@@ -100,7 +103,7 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'User with this email already exists' },
+        { error: __tr("User with this email already exists") },
         { status: 400 }
       );
     }
@@ -135,7 +138,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Affiliate created successfully',
+      message: __tr("Affiliate created successfully"),
       affiliate: {
         id: affiliate.id,
         userId: newUser.id,
@@ -152,8 +155,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Create affiliate API error:', error);
     return NextResponse.json(
-      { error: 'Failed to create affiliate' },
+      { error: __tr("Failed to create affiliate") },
       { status: 500 }
     );
   }
 }
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);

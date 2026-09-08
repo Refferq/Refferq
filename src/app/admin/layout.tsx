@@ -1,8 +1,9 @@
-'use client';
+"use client";
+import { useI18n } from "@/i18n/provider";
 
-import React from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import React from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 import {
   SidebarProvider,
   Sidebar,
@@ -18,17 +19,17 @@ import {
   SidebarInset,
   SidebarTrigger,
   SidebarRail,
-} from '@/components/ui/sidebar';
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   Users,
@@ -48,39 +49,51 @@ import {
   FileText,
   UsersRound,
   Layers,
-} from 'lucide-react';
-
-const mainNavItems = [
-  { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
-  { title: 'Partners', url: '/admin/partners', icon: Users },
-  { title: 'Customers', url: '/admin/customers', icon: UserCheck },
-  { title: 'Payouts', url: '/admin/payouts', icon: Wallet },
-  { title: 'Invoices', url: '/admin/invoices', icon: FileText },
-  { title: 'Emails', url: '/admin/emails', icon: Mail },
-];
-
-const marketingNavItems = [
-  { title: 'Coupons', url: '/admin/coupons', icon: Ticket },
-  { title: 'Resources', url: '/admin/resources', icon: FolderOpen },
-  { title: 'Programs', url: '/admin/programs', icon: Layers, badge: 'NEW' },
-];
-
-const configNavItems = [
-  { title: 'Program Settings', url: '/admin/program-settings', icon: Sliders },
-  { title: 'Team Members', url: '/admin/team', icon: UsersRound },
-  { title: 'Settings', url: '/admin/settings', icon: Settings },
-  { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
-  { title: 'API Keys', url: '/admin/api-keys', icon: KeyRound },
-  { title: 'API Analytics', url: '/admin/api-analytics', icon: Activity },
-];
+} from "lucide-react";
 
 function AdminSidebar() {
+  const { t: __tr, label: __label } = useI18n();
+  const mainNavItems = [
+    { title: __tr("Dashboard"), url: "/admin", icon: LayoutDashboard },
+    { title: __tr("Partners"), url: "/admin/partners", icon: Users },
+    { title: __tr("Customers"), url: "/admin/customers", icon: UserCheck },
+    { title: __tr("Payouts"), url: "/admin/payouts", icon: Wallet },
+    { title: __tr("Invoices"), url: "/admin/invoices", icon: FileText },
+    { title: __tr("Emails"), url: "/admin/emails", icon: Mail },
+  ];
+  const marketingNavItems = [
+    { title: __tr("Coupons"), url: "/admin/coupons", icon: Ticket },
+    { title: __tr("Resources"), url: "/admin/resources", icon: FolderOpen },
+    {
+      title: __tr("Programs"),
+      url: "/admin/programs",
+      icon: Layers,
+      badge: "NEW",
+    },
+  ];
+  const configNavItems = [
+    {
+      title: __tr("Program Settings"),
+      url: "/admin/program-settings",
+      icon: Sliders,
+    },
+    { title: __tr("Team Members"), url: "/admin/team", icon: UsersRound },
+    { title: __tr("Settings"), url: "/admin/settings", icon: Settings },
+    { title: __tr("Reports"), url: "/admin/reports", icon: BarChart3 },
+    { title: __tr("API Keys"), url: "/admin/api-keys", icon: KeyRound },
+    {
+      title: __tr("API Analytics"),
+      url: "/admin/api-analytics",
+      icon: Activity,
+    },
+  ];
+
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
 
   const isActive = (url: string) => {
-    if (url === '/admin') return pathname === '/admin';
+    if (url === "/admin") return pathname === "/admin";
     return pathname.startsWith(url);
   };
 
@@ -95,7 +108,9 @@ function AdminSidebar() {
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-bold">Refferq</span>
-                <span className="text-xs text-muted-foreground">Admin Dashboard</span>
+                <span className="text-xs text-muted-foreground">
+                  {__tr("Admin Dashboard")}
+                </span>
               </div>
             </div>
           </SidebarMenuItem>
@@ -104,11 +119,11 @@ function AdminSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
+          <SidebarGroupLabel>{__tr("Main Menu")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton
                     isActive={isActive(item.url)}
                     onClick={() => router.push(item.url)}
@@ -124,11 +139,11 @@ function AdminSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Marketing</SidebarGroupLabel>
+          <SidebarGroupLabel>{__tr("Marketing")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {marketingNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton
                     isActive={isActive(item.url)}
                     onClick={() => router.push(item.url)}
@@ -138,7 +153,7 @@ function AdminSidebar() {
                     <span>{item.title}</span>
                     {item.badge && (
                       <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                        {item.badge}
+                        {__label(item.badge)}
                       </span>
                     )}
                   </SidebarMenuButton>
@@ -149,11 +164,11 @@ function AdminSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Configure</SidebarGroupLabel>
+          <SidebarGroupLabel>{__tr("Configure")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {configNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton
                     isActive={isActive(item.url)}
                     onClick={() => router.push(item.url)}
@@ -186,7 +201,9 @@ function AdminSidebar() {
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">{user?.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {user?.email}
+                    </span>
                   </div>
                   <ChevronsUpDown className="ml-auto h-4 w-4" />
                 </SidebarMenuButton>
@@ -197,14 +214,19 @@ function AdminSidebar() {
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuItem onClick={() => router.push('/admin/settings')}>
+                <DropdownMenuItem
+                  onClick={() => router.push("/admin/settings")}
+                >
                   <Settings className="mr-2 h-4 w-4" />
-                  Settings
+                  {__tr("Settings")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => logout()} className="text-destructive">
+                <DropdownMenuItem
+                  onClick={() => logout()}
+                  className="text-destructive"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
-                  Log out
+                  {__tr("Log out")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -217,7 +239,13 @@ function AdminSidebar() {
   );
 }
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { t: __tr } = useI18n();
+
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -228,23 +256,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="absolute inset-0 rounded-full border-4 border-muted" />
             <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-primary" />
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">Loading your dashboard...</p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            {__tr("Loading your dashboard...")}
+          </p>
         </div>
       </div>
     );
   }
 
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || user.role !== "ADMIN") {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center space-y-4">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10">
             <span className="text-3xl">🔒</span>
           </div>
-          <h1 className="text-xl font-bold">Access Denied</h1>
-          <p className="text-sm text-muted-foreground">You need admin privileges to access this page</p>
+          <h1 className="text-xl font-bold">{__tr("Access Denied")}</h1>
+          <p className="text-sm text-muted-foreground">
+            {__tr("You need admin privileges to access this page")}
+          </p>
           <Button asChild>
-            <a href="/login">Go to Login</a>
+            <a href="/login">{__tr("Go to Login")}</a>
           </Button>
         </div>
       </div>
@@ -261,7 +293,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex flex-1 items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">
-                Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, {user.name?.split(' ')[0]}
+                {__tr("Hello!")} {user.name?.split(" ")[0]}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -274,9 +306,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto p-6">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

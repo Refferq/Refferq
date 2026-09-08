@@ -1,8 +1,11 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -13,14 +16,14 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Access denied. Admin role required.' },
+        { error: __tr("Access denied. Admin role required.") },
         { status: 403 }
       );
     }
@@ -68,7 +71,7 @@ export async function GET(request: NextRequest) {
             name: affiliate.user.name,
             email: affiliate.user.email,
             referralCode: affiliate.referralCode,
-            partnerGroup: pgData?.name || 'Default',
+            partnerGroup: pgData?.name || __tr("Default"),
             partnerGroupId: pgId,
             commissionRate: pgData?.rate || 0.20
           }
@@ -79,13 +82,13 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Admin referrals API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch referrals' },
+      { error: __tr("Failed to fetch referrals") },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -96,14 +99,14 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Access denied. Admin role required.' },
+        { error: __tr("Access denied. Admin role required.") },
         { status: 403 }
       );
     }
@@ -113,14 +116,14 @@ export async function POST(request: NextRequest) {
 
     if (!referralIds || !Array.isArray(referralIds) || referralIds.length === 0) {
       return NextResponse.json(
-        { error: 'Referral IDs array is required' },
+        { error: __tr("Referral IDs array is required") },
         { status: 400 }
       );
     }
 
     if (!action || !['approve', 'reject'].includes(action)) {
       return NextResponse.json(
-        { error: 'Invalid action. Must be "approve" or "reject"' },
+        { error: __tr("Invalid action. Must be \"approve\" or \"reject\"") },
         { status: 400 }
       );
     }
@@ -140,15 +143,17 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${updatedReferrals.count} referrals ${action}d successfully`,
+      message: __tr("{0} referrals {1}d successfully", [updatedReferrals.count, action]),
       updatedCount: updatedReferrals.count
     });
 
   } catch (error) {
     console.error('Batch referral API error:', error);
     return NextResponse.json(
-      { error: 'Failed to process referrals' },
+      { error: __tr("Failed to process referrals") },
       { status: 500 }
     );
   }
 }
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);

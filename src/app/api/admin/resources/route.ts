@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -14,9 +17,9 @@ async function verifyAdmin(request: NextRequest) {
 }
 
 // GET: List all resources
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const resources = await prisma.resource.findMany({
@@ -26,21 +29,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, resources });
   } catch (error) {
     console.error('Admin resources GET error:', error);
-    return NextResponse.json({ error: 'Failed to fetch resources' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to fetch resources") }, { status: 500 });
   }
 }
 
 // POST: Create resource
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { title, description, type, fileUrl, fileName, fileSize, mimeType, category, tags } = body;
 
     if (!title || !type || !fileUrl || !fileName) {
-      return NextResponse.json({ error: 'Title, type, fileUrl, and fileName are required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Title, type, fileUrl, and fileName are required") }, { status: 400 });
     }
 
     const resource = await prisma.resource.create({
@@ -61,21 +64,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, resource });
   } catch (error) {
     console.error('Admin resources POST error:', error);
-    return NextResponse.json({ error: 'Failed to create resource' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to create resource") }, { status: 500 });
   }
 }
 
 // PUT: Update resource
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { id } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'Resource ID required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Resource ID required") }, { status: 400 });
     }
 
     // Only allow specific fields (prevent mass assignment)
@@ -93,27 +96,32 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true, resource });
   } catch (error) {
     console.error('Admin resources PUT error:', error);
-    return NextResponse.json({ error: 'Failed to update resource' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to update resource") }, { status: 500 });
   }
 }
 
 // DELETE: Delete resource
-export async function DELETE(request: NextRequest) {
+ async function DELETEHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { id } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'Resource ID required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Resource ID required") }, { status: 400 });
     }
 
     await prisma.resource.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Admin resources DELETE error:', error);
-    return NextResponse.json({ error: 'Failed to delete resource' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to delete resource") }, { status: 500 });
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);
+export const PUT = withSystemLocale(PUTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

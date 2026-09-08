@@ -1,22 +1,23 @@
-'use client';
+"use client";
+import { useI18n } from "@/i18n/provider";
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 import {
   ArrowLeft,
   Mail,
@@ -45,7 +46,7 @@ import {
   FileText,
   Shield,
   Loader2,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface Referral {
   id: string;
@@ -68,13 +69,29 @@ interface Referral {
   };
 }
 
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType }> = {
-  PENDING: { label: 'Pending', variant: 'secondary', icon: Clock },
-  APPROVED: { label: 'Approved', variant: 'default', icon: CheckCircle2 },
-  REJECTED: { label: 'Rejected', variant: 'destructive', icon: XCircle },
-};
-
 export default function CustomerDetailPage() {
+  const { t: __tr, getIntlLocale: __locale, rich: __rich } = useI18n();
+  const statusConfig: Record<
+    string,
+    {
+      label: string;
+      variant: "default" | "secondary" | "destructive" | "outline";
+      icon: React.ElementType;
+    }
+  > = {
+    PENDING: { label: __tr("Pending"), variant: "secondary", icon: Clock },
+    APPROVED: {
+      label: __tr("Approved"),
+      variant: "default",
+      icon: CheckCircle2,
+    },
+    REJECTED: {
+      label: __tr("Rejected"),
+      variant: "destructive",
+      icon: XCircle,
+    },
+  };
+
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
@@ -87,9 +104,9 @@ export default function CustomerDetailPage() {
   const [deleting, setDeleting] = useState(false);
 
   // Editable fields
-  const [editName, setEditName] = useState('');
-  const [editEmail, setEditEmail] = useState('');
-  const [reviewNotes, setReviewNotes] = useState('');
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [reviewNotes, setReviewNotes] = useState("");
 
   useEffect(() => {
     fetchReferral();
@@ -97,7 +114,7 @@ export default function CustomerDetailPage() {
 
   const fetchReferral = async () => {
     try {
-      const res = await fetch('/api/admin/referrals');
+      const res = await fetch("/api/admin/referrals");
       const data = await res.json();
       if (data.success) {
         const found = data.referrals.find((r: Referral) => r.id === id);
@@ -108,7 +125,7 @@ export default function CustomerDetailPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch referral:', error);
+      console.error("Failed to fetch referral:", error);
     } finally {
       setLoading(false);
     }
@@ -119,8 +136,8 @@ export default function CustomerDetailPage() {
     setSaved(false);
     try {
       const res = await fetch(`/api/admin/referrals/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           leadName: editName,
           leadEmail: editEmail,
@@ -132,26 +149,26 @@ export default function CustomerDetailPage() {
         await fetchReferral();
       }
     } catch (error) {
-      console.error('Failed to save:', error);
+      console.error("Failed to save:", error);
     } finally {
       setSaving(false);
     }
   };
 
-  const handleAction = async (action: 'approve' | 'reject') => {
+  const handleAction = async (action: "approve" | "reject") => {
     setActionLoading(true);
     try {
       const res = await fetch(`/api/admin/referrals/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, reviewNotes: reviewNotes || undefined }),
       });
       if (res.ok) {
         await fetchReferral();
-        setReviewNotes('');
+        setReviewNotes("");
       }
     } catch (error) {
-      console.error('Failed to process action:', error);
+      console.error("Failed to process action:", error);
     } finally {
       setActionLoading(false);
     }
@@ -160,12 +177,14 @@ export default function CustomerDetailPage() {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      const res = await fetch(`/api/admin/referrals/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/referrals/${id}`, {
+        method: "DELETE",
+      });
       if (res.ok) {
-        router.push('/admin/customers');
+        router.push("/admin/customers");
       }
     } catch (error) {
-      console.error('Failed to delete:', error);
+      console.error("Failed to delete:", error);
     } finally {
       setDeleting(false);
     }
@@ -189,14 +208,18 @@ export default function CustomerDetailPage() {
   if (!referral) {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => router.push('/admin/customers')}>
+        <Button variant="ghost" onClick={() => router.push("/admin/customers")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Customers
+          {__tr("Back to Customers")}
         </Button>
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <User className="h-12 w-12 text-muted-foreground/50" />
-          <h3 className="mt-4 text-lg font-semibold">Customer not found</h3>
-          <p className="text-sm text-muted-foreground">This referral lead may have been deleted</p>
+          <h3 className="mt-4 text-lg font-semibold">
+            {__tr("Customer not found")}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            {__tr("This referral lead may have been deleted")}
+          </p>
         </div>
       </div>
     );
@@ -204,14 +227,20 @@ export default function CustomerDetailPage() {
 
   const cfg = statusConfig[referral.status] || statusConfig.PENDING;
   const StatusIcon = cfg.icon;
-  const estimatedCommission = Math.round(referral.estimatedValue * referral.affiliate.commissionRate);
+  const estimatedCommission = Math.round(
+    referral.estimatedValue * referral.affiliate.commissionRate,
+  );
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.push('/admin/customers')}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.push("/admin/customers")}
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-3">
@@ -221,8 +250,12 @@ export default function CustomerDetailPage() {
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">{referral.leadName}</h1>
-              <p className="text-sm text-muted-foreground">{referral.leadEmail}</p>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {referral.leadName}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {referral.leadEmail}
+              </p>
             </div>
           </div>
           <Badge variant={cfg.variant} className="ml-2">
@@ -234,25 +267,29 @@ export default function CustomerDetailPage() {
           <AlertDialogTrigger asChild>
             <Button variant="destructive" size="sm">
               <Trash2 className="mr-2 h-4 w-4" />
-              Delete
+              {__tr("Delete")}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete this referral lead?</AlertDialogTitle>
+              <AlertDialogTitle>
+                {__tr("Delete this referral lead?")}
+              </AlertDialogTitle>
               <AlertDialogDescription>
-                This will permanently delete <strong>{referral.leadName}</strong> and all associated
-                conversions and commissions. This action cannot be undone.
+                {__rich(
+                  "This will permanently delete {0} and all associated conversions and commissions. This action cannot be undone.",
+                  [<strong>{referral.leadName}</strong>],
+                )}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{__tr("Cancel")}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 disabled={deleting}
               >
-                {deleting ? 'Deleting...' : 'Delete'}
+                {deleting ? "Deleting..." : __tr("Delete")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -269,20 +306,22 @@ export default function CustomerDetailPage() {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <User className="h-5 w-5" />
-                    Lead Details
+                    {__tr("Lead Details")}
                   </CardTitle>
-                  <CardDescription>View and edit customer information</CardDescription>
+                  <CardDescription>
+                    {__tr("View and edit customer information")}
+                  </CardDescription>
                 </div>
                 <Button onClick={handleSave} disabled={saving} size="sm">
                   {saved ? (
                     <>
                       <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
-                      Saved
+                      {__tr("Saved")}
                     </>
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      {saving ? 'Saving...' : 'Save'}
+                      {saving ? __tr("Saving...") : __tr("Save")}
                     </>
                   )}
                 </Button>
@@ -291,7 +330,7 @@ export default function CustomerDetailPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="grid gap-2">
-                  <Label htmlFor="leadName">Full Name</Label>
+                  <Label htmlFor="leadName">{__tr("Full Name")}</Label>
                   <Input
                     id="leadName"
                     value={editName}
@@ -299,7 +338,7 @@ export default function CustomerDetailPage() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="leadEmail">Email Address</Label>
+                  <Label htmlFor="leadEmail">{__tr("Email Address")}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -314,45 +353,63 @@ export default function CustomerDetailPage() {
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="grid gap-2">
-                  <Label>Phone</Label>
+                  <Label>{__tr("Phone")}</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input className="pl-9" value={referral.leadPhone || '—'} readOnly disabled />
+                    <Input
+                      className="pl-9"
+                      value={referral.leadPhone || "—"}
+                      readOnly
+                      disabled
+                    />
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label>Company</Label>
+                  <Label>{__tr("Company")}</Label>
                   <div className="relative">
                     <Building2 className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input className="pl-9" value={referral.company || '—'} readOnly disabled />
+                    <Input
+                      className="pl-9"
+                      value={referral.company || "—"}
+                      readOnly
+                      disabled
+                    />
                   </div>
                 </div>
               </div>
               {referral.notes && (
                 <div className="grid gap-2">
-                  <Label>Notes</Label>
-                  <div className="rounded-md border bg-muted/50 p-3 text-sm">{referral.notes}</div>
+                  <Label>{__tr("Notes")}</Label>
+                  <div className="rounded-md border bg-muted/50 p-3 text-sm">
+                    {referral.notes}
+                  </div>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Review Actions Card - only for PENDING */}
-          {referral.status === 'PENDING' && (
+          {referral.status === "PENDING" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Shield className="h-5 w-5" />
-                  Review Lead
+                  {__tr("Review Lead")}
                 </CardTitle>
-                <CardDescription>Approve or reject this referral lead</CardDescription>
+                <CardDescription>
+                  {__tr("Approve or reject this referral lead")}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="reviewNotes">Review Notes (optional)</Label>
+                  <Label htmlFor="reviewNotes">
+                    {__tr("Review Notes (optional)")}
+                  </Label>
                   <Textarea
                     id="reviewNotes"
-                    placeholder="Add notes about this review decision..."
+                    placeholder={__tr(
+                      "Add notes about this review decision...",
+                    )}
                     value={reviewNotes}
                     onChange={(e) => setReviewNotes(e.target.value)}
                     rows={3}
@@ -360,7 +417,7 @@ export default function CustomerDetailPage() {
                 </div>
                 <div className="flex gap-3">
                   <Button
-                    onClick={() => handleAction('approve')}
+                    onClick={() => handleAction("approve")}
                     disabled={actionLoading}
                   >
                     {actionLoading ? (
@@ -368,11 +425,11 @@ export default function CustomerDetailPage() {
                     ) : (
                       <CheckCircle2 className="mr-2 h-4 w-4" />
                     )}
-                    Approve Lead
+                    {__tr("Approve Lead")}
                   </Button>
                   <Button
                     variant="destructive"
-                    onClick={() => handleAction('reject')}
+                    onClick={() => handleAction("reject")}
                     disabled={actionLoading}
                   >
                     {actionLoading ? (
@@ -380,7 +437,7 @@ export default function CustomerDetailPage() {
                     ) : (
                       <XCircle className="mr-2 h-4 w-4" />
                     )}
-                    Reject Lead
+                    {__tr("Reject Lead")}
                   </Button>
                 </div>
               </CardContent>
@@ -393,26 +450,40 @@ export default function CustomerDetailPage() {
           {/* Value Card */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Financial Summary</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                {__tr("Financial Summary")}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Estimated Value</span>
+                <span className="text-sm text-muted-foreground">
+                  {__tr("Estimated Value")}
+                </span>
                 <span className="flex items-center gap-1 font-semibold">
                   <IndianRupee className="h-3.5 w-3.5" />
-                  {referral.estimatedValue.toLocaleString('en-IN')}
+                  {referral.estimatedValue.toLocaleString(__locale())}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Commission Rate</span>
-                <span className="font-semibold">{(referral.affiliate.commissionRate * 100).toFixed(0)}%</span>
+                <span className="text-sm text-muted-foreground">
+                  {__tr("Commission Rate")}
+                </span>
+                <span className="font-semibold">
+                  {(referral.affiliate.commissionRate * 100).toLocaleString(
+                    __locale(),
+                    { minimumFractionDigits: 0, maximumFractionDigits: 0 },
+                  )}
+                  %
+                </span>
               </div>
               <Separator />
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Est. Commission</span>
+                <span className="text-sm font-medium">
+                  {__tr("Est. Commission")}
+                </span>
                 <span className="flex items-center gap-1 text-lg font-bold text-primary">
                   <IndianRupee className="h-4 w-4" />
-                  {estimatedCommission.toLocaleString('en-IN')}
+                  {estimatedCommission.toLocaleString(__locale())}
                 </span>
               </div>
             </CardContent>
@@ -423,7 +494,7 @@ export default function CustomerDetailPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Link2 className="h-4 w-4" />
-                Referring Partner
+                {__tr("Referring Partner")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -434,21 +505,31 @@ export default function CustomerDetailPage() {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-sm font-medium">{referral.affiliate.name}</p>
-                  <p className="text-xs text-muted-foreground">{referral.affiliate.email}</p>
+                  <p className="text-sm font-medium">
+                    {referral.affiliate.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {referral.affiliate.email}
+                  </p>
                 </div>
               </div>
               <Separator />
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Referral Code</span>
+                  <span className="text-muted-foreground">
+                    {__tr("Referral Code")}
+                  </span>
                   <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
                     {referral.affiliate.referralCode}
                   </code>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Partner Group</span>
-                  <Badge variant="outline" className="text-xs">{referral.affiliate.partnerGroup}</Badge>
+                  <span className="text-muted-foreground">
+                    {__tr("Partner Group")}
+                  </span>
+                  <Badge variant="outline" className="text-xs">
+                    {referral.affiliate.partnerGroup}
+                  </Badge>
                 </div>
               </div>
             </CardContent>
@@ -459,7 +540,7 @@ export default function CustomerDetailPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Timeline
+                {__tr("Timeline")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -469,49 +550,61 @@ export default function CustomerDetailPage() {
                     <FileText className="h-3 w-3 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">Lead Submitted</p>
+                    <p className="text-sm font-medium">
+                      {__tr("Lead Submitted")}
+                    </p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(referral.createdAt).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })}
-                      {' at '}
-                      {new Date(referral.createdAt).toLocaleTimeString('en-IN', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      {new Date(referral.createdAt).toLocaleDateString(
+                        __locale(),
+                        {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        },
+                      )}{" "}
+                      {__tr("at")}{" "}
+                      {new Date(referral.createdAt).toLocaleTimeString(
+                        __locale(),
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        },
+                      )}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className={`mt-0.5 rounded-full p-1 ${
-                    referral.status === 'APPROVED'
-                      ? 'bg-green-100'
-                      : referral.status === 'REJECTED'
-                        ? 'bg-red-100'
-                        : 'bg-yellow-100'
-                  }`}>
-                    <StatusIcon className={`h-3 w-3 ${
-                      referral.status === 'APPROVED'
-                        ? 'text-green-600'
-                        : referral.status === 'REJECTED'
-                          ? 'text-red-600'
-                          : 'text-yellow-600'
-                    }`} />
+                  <div
+                    className={`mt-0.5 rounded-full p-1 ${
+                      referral.status === "APPROVED"
+                        ? "bg-green-100"
+                        : referral.status === "REJECTED"
+                          ? "bg-red-100"
+                          : "bg-yellow-100"
+                    }`}
+                  >
+                    <StatusIcon
+                      className={`h-3 w-3 ${
+                        referral.status === "APPROVED"
+                          ? "text-green-600"
+                          : referral.status === "REJECTED"
+                            ? "text-red-600"
+                            : "text-yellow-600"
+                      }`}
+                    />
                   </div>
                   <div>
                     <p className="text-sm font-medium">
-                      {referral.status === 'APPROVED'
-                        ? 'Approved'
-                        : referral.status === 'REJECTED'
-                          ? 'Rejected'
-                          : 'Awaiting Review'}
+                      {referral.status === "APPROVED"
+                        ? __tr("Approved")
+                        : referral.status === "REJECTED"
+                          ? __tr("Rejected")
+                          : __tr("Awaiting Review")}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {referral.status === 'PENDING'
-                        ? 'Needs admin review'
-                        : 'Decision recorded'}
+                      {referral.status === "PENDING"
+                        ? __tr("Needs admin review")
+                        : __tr("Decision recorded")}
                     </p>
                   </div>
                 </div>

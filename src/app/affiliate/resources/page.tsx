@@ -1,18 +1,19 @@
-'use client';
+"use client";
+import { useI18n } from "@/i18n/provider";
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Download,
   FileText,
@@ -22,7 +23,7 @@ import {
   ExternalLink,
   Layers,
   FolderOpen,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface Resource {
   id: string;
@@ -48,21 +49,28 @@ const typeIcons: Record<string, React.ElementType> = {
 };
 
 const typeColors: Record<string, string> = {
-  BANNER: 'bg-blue-100 text-blue-700',
-  LOGO: 'bg-purple-100 text-purple-700',
-  SOCIAL_POST: 'bg-pink-100 text-pink-700',
-  EMAIL_TEMPLATE: 'bg-amber-100 text-amber-700',
-  DOCUMENT: 'bg-slate-100 text-slate-700',
-  VIDEO: 'bg-red-100 text-red-700',
-  OTHER: 'bg-gray-100 text-gray-700',
+  BANNER: "bg-blue-100 text-blue-700",
+  LOGO: "bg-purple-100 text-purple-700",
+  SOCIAL_POST: "bg-pink-100 text-pink-700",
+  EMAIL_TEMPLATE: "bg-amber-100 text-amber-700",
+  DOCUMENT: "bg-slate-100 text-slate-700",
+  VIDEO: "bg-red-100 text-red-700",
+  OTHER: "bg-gray-100 text-gray-700",
 };
 
 export default function ResourcesPage() {
+  const {
+    t: __tr,
+    getIntlLocale: __locale,
+    label: __label,
+    plural: __plural,
+  } = useI18n();
+
   const { loading: authLoading } = useAuth();
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
 
   useEffect(() => {
     if (!authLoading) fetchResources();
@@ -71,11 +79,11 @@ export default function ResourcesPage() {
   const fetchResources = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/affiliate/resources');
+      const res = await fetch("/api/affiliate/resources");
       const data = await res.json();
       if (data.success) setResources(data.resources || []);
     } catch (error) {
-      console.error('Failed to fetch resources:', error);
+      console.error("Failed to fetch resources:", error);
     } finally {
       setLoading(false);
     }
@@ -84,31 +92,56 @@ export default function ResourcesPage() {
   const handleDownload = async (resource: Resource) => {
     // Track download
     try {
-      await fetch(`/api/affiliate/resources?id=${resource.id}`, { method: 'POST' });
-    } catch (_e) { /* ignore tracking errors */ }
+      await fetch(`/api/affiliate/resources?id=${resource.id}`, {
+        method: "POST",
+      });
+    } catch (_e) {
+      /* ignore tracking errors */
+    }
 
     // Open/download file
-    window.open(resource.fileUrl, '_blank');
+    window.open(resource.fileUrl, "_blank");
     setResources((prev) =>
-      prev.map((r) => (r.id === resource.id ? { ...r, downloads: r.downloads + 1 } : r))
+      prev.map((r) =>
+        r.id === resource.id ? { ...r, downloads: r.downloads + 1 } : r,
+      ),
     );
   };
 
   const formatFileSize = (bytes?: number) => {
-    if (!bytes) return '';
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / 1048576).toFixed(1)} MB`;
+    if (!bytes) return "";
+    if (bytes < 1024) return __tr("{0} B", [bytes]);
+    if (bytes < 1048576)
+      return __tr("{0} KB", [
+        (bytes / 1024).toLocaleString(__locale(), {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        }),
+      ]);
+    return __tr("{0} MB", [
+      (bytes / 1048576).toLocaleString(__locale(), {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      }),
+    ]);
   };
 
-  const categories: string[] = ['ALL', ...Array.from(new Set(resources.map((r) => r.category).filter((c): c is string => Boolean(c))))];
+  const categories: string[] = [
+    "ALL",
+    ...Array.from(
+      new Set(
+        resources.map((r) => r.category).filter((c): c is string => Boolean(c)),
+      ),
+    ),
+  ];
 
   const filteredResources = resources.filter((r) => {
     const matchesSearch =
       !searchQuery ||
       r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (r.description || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === 'ALL' || r.category === categoryFilter;
+      (r.description || "").toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      categoryFilter === "ALL" || r.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
@@ -117,7 +150,9 @@ export default function ResourcesPage() {
       <div className="space-y-6">
         <Skeleton className="h-8 w-48" />
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-48" />)}
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-48" />
+          ))}
         </div>
       </div>
     );
@@ -126,9 +161,13 @@ export default function ResourcesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Resources</h1>
+        <h1 className="text-2xl font-bold tracking-tight">
+          {__tr("Resources")}
+        </h1>
         <p className="text-muted-foreground">
-          Download marketing materials, banners, and promotional assets
+          {__tr(
+            "Download marketing materials, banners, and promotional assets",
+          )}
         </p>
       </div>
 
@@ -141,7 +180,9 @@ export default function ResourcesPage() {
             </div>
             <div>
               <p className="text-2xl font-bold">{resources.length}</p>
-              <p className="text-xs text-muted-foreground">Total Resources</p>
+              <p className="text-xs text-muted-foreground">
+                {__tr("Total Resources")}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -151,8 +192,16 @@ export default function ResourcesPage() {
               <Image className="h-4 w-4 text-emerald-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{resources.filter((r) => ['BANNER', 'LOGO', 'SOCIAL_POST'].includes(r.type)).length}</p>
-              <p className="text-xs text-muted-foreground">Visual Assets</p>
+              <p className="text-2xl font-bold">
+                {
+                  resources.filter((r) =>
+                    ["BANNER", "LOGO", "SOCIAL_POST"].includes(r.type),
+                  ).length
+                }
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {__tr("Visual Assets")}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -162,8 +211,12 @@ export default function ResourcesPage() {
               <Download className="h-4 w-4 text-amber-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{resources.reduce((sum, r) => sum + r.downloads, 0)}</p>
-              <p className="text-xs text-muted-foreground">Total Downloads</p>
+              <p className="text-2xl font-bold">
+                {resources.reduce((sum, r) => sum + r.downloads, 0)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {__tr("Total Downloads")}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -174,7 +227,7 @@ export default function ResourcesPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search resources..."
+            placeholder={__tr("Search resources...")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -184,11 +237,11 @@ export default function ResourcesPage() {
           {categories.map((cat) => (
             <Button
               key={cat}
-              variant={categoryFilter === cat ? 'default' : 'outline'}
+              variant={categoryFilter === cat ? "default" : "outline"}
               size="sm"
               onClick={() => setCategoryFilter(cat)}
             >
-              {cat === 'ALL' ? 'All' : cat}
+              {cat === "ALL" ? __tr("All") : __label(cat)}
             </Button>
           ))}
         </div>
@@ -199,11 +252,13 @@ export default function ResourcesPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <FolderOpen className="h-12 w-12 text-muted-foreground/40 mb-3" />
-            <p className="font-medium">No resources found</p>
+            <p className="font-medium">{__tr("No resources found")}</p>
             <p className="mt-1 text-sm text-muted-foreground">
               {resources.length === 0
-                ? 'Marketing resources will appear here once uploaded by the admin team'
-                : 'Try adjusting your search or filter'}
+                ? __tr(
+                    "Marketing resources will appear here once uploaded by the admin team",
+                  )
+                : __tr("Try adjusting your search or filter")}
             </p>
           </CardContent>
         </Card>
@@ -211,21 +266,31 @@ export default function ResourcesPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredResources.map((resource) => {
             const Icon = typeIcons[resource.type] || Layers;
-            const colorClass = typeColors[resource.type] || 'bg-gray-100 text-gray-700';
+            const colorClass =
+              typeColors[resource.type] || "bg-gray-100 text-gray-700";
             return (
-              <Card key={resource.id} className="group hover:shadow-md transition-shadow">
+              <Card
+                key={resource.id}
+                className="group hover:shadow-md transition-shadow"
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${colorClass}`}>
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-lg ${colorClass}`}
+                    >
                       <Icon className="h-5 w-5" />
                     </div>
                     <Badge variant="outline" className="text-xs">
-                      {resource.type.replace('_', ' ')}
+                      {__label(resource.type)}
                     </Badge>
                   </div>
-                  <CardTitle className="text-base mt-3">{resource.title}</CardTitle>
+                  <CardTitle className="text-base mt-3">
+                    {resource.title}
+                  </CardTitle>
                   {resource.description && (
-                    <CardDescription className="line-clamp-2">{resource.description}</CardDescription>
+                    <CardDescription className="line-clamp-2">
+                      {resource.description}
+                    </CardDescription>
                   )}
                 </CardHeader>
                 <CardContent>
@@ -235,20 +300,23 @@ export default function ResourcesPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">
-                      {resource.downloads} download{resource.downloads !== 1 ? 's' : ''}
+                      {__plural(resource.downloads, "download")}
                     </span>
                     <div className="flex gap-1.5">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(resource.fileUrl, '_blank')}
+                        onClick={() => window.open(resource.fileUrl, "_blank")}
                       >
                         <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                        Preview
+                        {__tr("Preview")}
                       </Button>
-                      <Button size="sm" onClick={() => handleDownload(resource)}>
+                      <Button
+                        size="sm"
+                        onClick={() => handleDownload(resource)}
+                      >
                         <Download className="h-3.5 w-3.5 mr-1" />
-                        Download
+                        {__tr("Download")}
                       </Button>
                     </div>
                   </div>

@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import * as crypto from 'crypto';
@@ -5,7 +8,7 @@ import * as crypto from 'crypto';
 /**
  * POST /api/admin/integration/generate-key - Generate API keys for tracking
  */
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -16,14 +19,14 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'Access denied. Admin role required.' },
+        { success: false, error: __tr("Access denied. Admin role required.") },
         { status: 403 }
       );
     }
@@ -66,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'API keys generated successfully',
+      message: __tr("API keys generated successfully"),
       keys: {
         publicKey: integration.publicKey,
         apiKey: integration.apiKey,
@@ -77,8 +80,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Generate API key error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to generate API keys' },
+      { success: false, error: __tr("Failed to generate API keys") },
       { status: 500 }
     );
   }
 }
+
+export const POST = withSystemLocale(POSTHandler);

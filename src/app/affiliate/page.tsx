@@ -1,19 +1,20 @@
-'use client';
+"use client";
+import { useI18n } from "@/i18n/provider";
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Skeleton } from '@/components/ui/skeleton';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -21,7 +22,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -29,8 +30,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+} from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   IndianRupee,
   MousePointerClick,
@@ -48,8 +49,8 @@ import {
   TrendingUp,
   ArrowRight,
   Banknote,
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AffiliateStats {
   totalEarnings: number;
@@ -76,21 +77,26 @@ interface Referral {
 }
 
 export default function AffiliateDashboard() {
+  const { t: __tr, getIntlLocale: __locale, label: __label } = useI18n();
+
   const { user, loading: authLoading } = useAuth();
   const [stats, setStats] = useState<AffiliateStats | null>(null);
   const [referrals, setReferrals] = useState<Referral[]>([]);
-  const [currencySymbol, setCurrencySymbol] = useState('₹');
+  const [currencySymbol, setCurrencySymbol] = useState("₹");
   const [loading, setLoading] = useState(true);
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const [copied, setCopied] = useState<'link' | 'code' | null>(null);
+  const [notification, setNotification] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+  const [copied, setCopied] = useState<"link" | "code" | null>(null);
 
   // Referral form state
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitForm, setSubmitForm] = useState({
-    leadName: '',
-    leadEmail: '',
-    estimatedValue: '0',
+    leadName: "",
+    leadEmail: "",
+    estimatedValue: "0",
   });
 
   useEffect(() => {
@@ -102,7 +108,7 @@ export default function AffiliateDashboard() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/affiliate/profile');
+      const response = await fetch("/api/affiliate/profile");
       const data = await response.json();
 
       if (data.success) {
@@ -111,19 +117,21 @@ export default function AffiliateDashboard() {
           pendingEarnings: data.stats?.pendingEarnings || 0,
           totalClicks: data.stats?.totalClicks || 0,
           totalLeads: data.referrals?.length || 0,
-          totalReferredCustomers: data.referrals?.filter((r: any) => r.status === 'APPROVED').length || 0,
+          totalReferredCustomers:
+            data.referrals?.filter((r: any) => r.status === "APPROVED")
+              .length || 0,
           totalConversions: data.stats?.totalConversions || 0,
           conversionRate: data.stats?.conversionRate || 0,
           referralLink: `${window.location.origin}/r/${data.affiliate?.referralCode}`,
-          referralCode: data.affiliate?.referralCode || '',
-          currencySymbol: data.currencySymbol || '₹',
+          referralCode: data.affiliate?.referralCode || "",
+          currencySymbol: data.currencySymbol || "₹",
           nextMaturesAt: data.stats?.nextMaturesAt || null,
         });
         setReferrals(data.referrals || []);
-        setCurrencySymbol(data.currencySymbol || '₹');
+        setCurrencySymbol(data.currencySymbol || "₹");
       }
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
+      console.error("Failed to load dashboard data:", error);
     } finally {
       setLoading(false);
     }
@@ -134,9 +142,9 @@ export default function AffiliateDashboard() {
     setSubmitLoading(true);
 
     try {
-      const response = await fetch('/api/affiliate/referrals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/affiliate/referrals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           lead_name: submitForm.leadName,
           lead_email: submitForm.leadEmail,
@@ -147,15 +155,21 @@ export default function AffiliateDashboard() {
       const data = await response.json();
 
       if (data.success) {
-        showNotification('success', 'Lead submitted successfully! Waiting for admin approval.');
+        showNotification(
+          "success",
+          __tr("Lead submitted successfully! Waiting for admin approval."),
+        );
         setShowSubmitModal(false);
-        setSubmitForm({ leadName: '', leadEmail: '', estimatedValue: '0' });
+        setSubmitForm({ leadName: "", leadEmail: "", estimatedValue: "0" });
         loadDashboardData();
       } else {
-        showNotification('error', data.error || 'Failed to submit lead');
+        showNotification("error", data.error || __tr("Failed to submit lead"));
       }
     } catch (_e) {
-      showNotification('error', 'An error occurred while submitting lead');
+      showNotification(
+        "error",
+        __tr("An error occurred while submitting lead"),
+      );
     } finally {
       setSubmitLoading(false);
     }
@@ -163,50 +177,71 @@ export default function AffiliateDashboard() {
 
   const handleGenerateCode = async () => {
     try {
-      const response = await fetch('/api/affiliate/generate-code', { method: 'POST' });
+      const response = await fetch("/api/affiliate/generate-code", {
+        method: "POST",
+      });
       const data = await response.json();
       if (data.success) {
         window.location.reload();
       } else {
-        showNotification('error', 'Failed to generate code: ' + data.error);
+        showNotification(
+          "error",
+          __tr("Failed to generate code:") + data.error,
+        );
       }
     } catch (_e) {
-      showNotification('error', 'Failed to generate code. Please try again.');
+      showNotification(
+        "error",
+        __tr("Failed to generate code. Please try again."),
+      );
     }
   };
 
-  const showNotification = (type: 'success' | 'error', message: string) => {
+  const showNotification = (type: "success" | "error", message: string) => {
     setNotification({ type, message });
     setTimeout(() => setNotification(null), 5000);
   };
 
-  const copyToClipboard = (text: string, type: 'link' | 'code') => {
+  const copyToClipboard = (text: string, type: "link" | "code") => {
     navigator.clipboard.writeText(text);
     setCopied(type);
     setTimeout(() => setCopied(null), 2000);
   };
 
   const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+    new Date(date).toLocaleDateString(__locale(), {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
 
   const formatCurrency = (cents: number) =>
-    `${currencySymbol}${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    `${currencySymbol}${(cents / 100).toLocaleString(__locale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const getStatusBadge = (status: string) => {
-    const map: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType }> = {
-      APPROVED: { variant: 'default', icon: CheckCircle2 },
-      COMPLETED: { variant: 'default', icon: CheckCircle2 },
-      PAID: { variant: 'default', icon: CheckCircle2 },
-      PENDING: { variant: 'secondary', icon: Clock },
-      PROCESSING: { variant: 'secondary', icon: Loader2 },
-      REJECTED: { variant: 'destructive', icon: Ban },
-      FAILED: { variant: 'destructive', icon: AlertCircle },
+    const map: Record<
+      string,
+      {
+        variant: "default" | "secondary" | "destructive" | "outline";
+        icon: React.ElementType;
+      }
+    > = {
+      APPROVED: { variant: "default", icon: CheckCircle2 },
+      COMPLETED: { variant: "default", icon: CheckCircle2 },
+      PAID: { variant: "default", icon: CheckCircle2 },
+      PENDING: { variant: "secondary", icon: Clock },
+      PROCESSING: { variant: "secondary", icon: Loader2 },
+      REJECTED: { variant: "destructive", icon: Ban },
+      FAILED: { variant: "destructive", icon: AlertCircle },
     };
-    const { variant, icon: Icon } = map[status] || { variant: 'outline' as const, icon: Clock };
+    const { variant, icon: Icon } = map[status] || {
+      variant: "outline" as const,
+      icon: Clock,
+    };
     return (
       <Badge variant={variant} className="gap-1 text-xs">
         <Icon className="h-3 w-3" />
-        {status}
+        {__label(status)}
       </Badge>
     );
   };
@@ -219,8 +254,10 @@ export default function AffiliateDashboard() {
     <div className="space-y-6">
       {/* Notification */}
       {notification && (
-        <Alert variant={notification.type === 'error' ? 'destructive' : 'default'}>
-          {notification.type === 'success' ? (
+        <Alert
+          variant={notification.type === "error" ? "destructive" : "default"}
+        >
+          {notification.type === "success" ? (
             <CheckCircle2 className="h-4 w-4" />
           ) : (
             <AlertCircle className="h-4 w-4" />
@@ -243,13 +280,21 @@ export default function AffiliateDashboard() {
                 <span className="text-2xl font-bold">{currencySymbol}</span>
               </div>
               <div>
-                <p className="text-sm text-white/90 font-medium tracking-wide">Earn 20% commission on all paid customers</p>
-                <p className="text-xl font-bold mt-1 tracking-tight">Start referring today and grow your wealth!</p>
+                <p className="text-sm text-white/90 font-medium tracking-wide">
+                  {__tr("Earn 20% commission on all paid customers")}
+                </p>
+                <p className="text-xl font-bold mt-1 tracking-tight">
+                  {__tr("Start referring today and grow your wealth!")}
+                </p>
               </div>
             </div>
-            <Button variant="secondary" onClick={() => setShowSubmitModal(true)} className="gap-2 hidden sm:flex bg-white text-emerald-700 hover:bg-emerald-50 border-0 shadow-md transform transition hover:scale-105 active:scale-95">
+            <Button
+              variant="secondary"
+              onClick={() => setShowSubmitModal(true)}
+              className="gap-2 hidden sm:flex bg-white text-emerald-700 hover:bg-emerald-50 border-0 shadow-md transform transition hover:scale-105 active:scale-95"
+            >
               <Plus className="h-4 w-4" />
-              Submit Lead
+              {__tr("Submit Lead")}
             </Button>
           </CardContent>
         </Card>
@@ -259,26 +304,46 @@ export default function AffiliateDashboard() {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
         {[
           {
-            label: 'Available Balance',
+            label: __tr("Available Balance"),
             value: formatCurrency(stats?.totalEarnings || 0),
             icon: Banknote,
-            color: 'text-emerald-600',
-            bg: 'bg-emerald-500/10',
-            description: 'Ready for payout'
+            color: "text-emerald-600",
+            bg: "bg-emerald-500/10",
+            description: __tr("Ready for payout"),
           },
           {
-            label: 'Pending Balance',
+            label: __tr("Pending Balance"),
             value: formatCurrency(stats?.pendingEarnings || 0),
             icon: Clock,
-            color: 'text-amber-600',
-            bg: 'bg-amber-500/10',
+            color: "text-amber-600",
+            bg: "bg-amber-500/10",
             description: stats?.nextMaturesAt
-              ? `Next maturity: ${new Date(stats.nextMaturesAt).toLocaleDateString()}`
-              : 'Held for refund period'
+              ? __tr("Next maturity: {0}", [
+                  new Date(stats.nextMaturesAt).toLocaleDateString(__locale()),
+                ])
+              : __tr("Held for refund period"),
           },
-          { label: 'Total Clicks', value: stats?.totalClicks || 0, icon: MousePointerClick, color: 'text-blue-600', bg: 'bg-blue-500/10' },
-          { label: 'Total Leads', value: stats?.totalLeads || 0, icon: Target, color: 'text-rose-600', bg: 'bg-rose-500/10' },
-          { label: 'Conv. Rate', value: `${stats?.conversionRate?.toFixed(1) || '0.0'}%`, icon: TrendingUp, color: 'text-violet-600', bg: 'bg-violet-500/10' },
+          {
+            label: __tr("Total Clicks"),
+            value: stats?.totalClicks || 0,
+            icon: MousePointerClick,
+            color: "text-blue-600",
+            bg: "bg-blue-500/10",
+          },
+          {
+            label: __tr("Total Leads"),
+            value: stats?.totalLeads || 0,
+            icon: Target,
+            color: "text-rose-600",
+            bg: "bg-rose-500/10",
+          },
+          {
+            label: __tr("Conv. Rate"),
+            value: `${stats?.conversionRate?.toLocaleString(__locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }) || "0.0"}%`,
+            icon: TrendingUp,
+            color: "text-violet-600",
+            bg: "bg-violet-500/10",
+          },
         ].map((stat, i) => (
           <motion.div
             key={i}
@@ -290,9 +355,13 @@ export default function AffiliateDashboard() {
             <Card className="glass-card border-0">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${stat.bg} backdrop-blur-sm transition-transform group-hover:scale-110`}>
+                  <div
+                    className={`flex h-12 w-12 items-center justify-center rounded-2xl ${stat.bg} backdrop-blur-sm transition-transform group-hover:scale-110`}
+                  >
                     {stat.icon === Banknote ? (
-                      <span className={`text-lg font-bold ${stat.color}`}>{currencySymbol}</span>
+                      <span className={`text-lg font-bold ${stat.color}`}>
+                        {currencySymbol}
+                      </span>
                     ) : (
                       <stat.icon className={`h-5 w-5 ${stat.color}`} />
                     )}
@@ -301,9 +370,13 @@ export default function AffiliateDashboard() {
                     <p className={`text-2xl font-bold ${stat.color}`}>
                       {stat.value}
                     </p>
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                      {stat.label}
+                    </p>
                     {stat.description && (
-                      <p className="text-[10px] text-muted-foreground/70 mt-0.5 italic">{stat.description}</p>
+                      <p className="text-[10px] text-muted-foreground/70 mt-0.5 italic">
+                        {stat.description}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -318,7 +391,7 @@ export default function AffiliateDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Link className="h-4 w-4" />
-            Your Referral Links
+            {__tr("Your Referral Links")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -327,39 +400,61 @@ export default function AffiliateDashboard() {
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted mb-4">
                 <Link className="h-6 w-6 text-muted-foreground" />
               </div>
-              <p className="font-medium">No referral code found</p>
+              <p className="font-medium">{__tr("No referral code found")}</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Generate your referral code to start earning commissions
+                {__tr(
+                  "Generate your referral code to start earning commissions",
+                )}
               </p>
               <Button className="mt-4" onClick={handleGenerateCode}>
-                Generate Referral Code
+                {__tr("Generate Referral Code")}
               </Button>
             </div>
           ) : (
             <>
               <div className="space-y-2">
-                <Label>Referral Link</Label>
+                <Label>{__tr("Referral Link")}</Label>
                 <div className="flex gap-2">
-                  <Input readOnly value={stats?.referralLink || ''} className="font-mono text-sm" />
+                  <Input
+                    readOnly
+                    value={stats?.referralLink || ""}
+                    className="font-mono text-sm"
+                  />
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => copyToClipboard(stats?.referralLink || '', 'link')}
+                    onClick={() =>
+                      copyToClipboard(stats?.referralLink || "", "link")
+                    }
                   >
-                    {copied === 'link' ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                    {copied === "link" ? (
+                      <Check className="h-4 w-4 text-emerald-600" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Referral Code</Label>
+                <Label>{__tr("Referral Code")}</Label>
                 <div className="flex gap-2">
-                  <Input readOnly value={stats?.referralCode || ''} className="font-mono text-sm" />
+                  <Input
+                    readOnly
+                    value={stats?.referralCode || ""}
+                    className="font-mono text-sm"
+                  />
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => copyToClipboard(stats?.referralCode || '', 'code')}
+                    onClick={() =>
+                      copyToClipboard(stats?.referralCode || "", "code")
+                    }
                   >
-                    {copied === 'code' ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                    {copied === "code" ? (
+                      <Check className="h-4 w-4 text-emerald-600" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
@@ -372,40 +467,48 @@ export default function AffiliateDashboard() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-base">Recent Referrals</CardTitle>
-            <CardDescription>Latest 5 referrals</CardDescription>
+            <CardTitle className="text-base">
+              {__tr("Recent Referrals")}
+            </CardTitle>
+            <CardDescription>{__tr("Latest 5 referrals")}</CardDescription>
           </div>
           {referrals.length > 5 && (
             <Button variant="ghost" size="sm" asChild>
               <a href="/affiliate/referrals" className="gap-1">
-                View All <ArrowRight className="h-3.5 w-3.5" />
+                {__tr("View All")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </Button>
           )}
         </CardHeader>
         <CardContent className="p-0">
           {referrals.length === 0 ? (
-            <EmptyState icon={Users} message="No referrals yet" />
+            <EmptyState icon={Users} message={__tr("No referrals yet")} />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Value</TableHead>
+                  <TableHead>{__tr("Full Name")}</TableHead>
+                  <TableHead>{__tr("Email")}</TableHead>
+                  <TableHead>{__tr("Status")}</TableHead>
+                  <TableHead>{__tr("Date")}</TableHead>
+                  <TableHead className="text-right">{__tr("Value")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {referrals.slice(0, 5).map((ref) => (
                   <TableRow key={ref.id}>
-                    <TableCell className="font-medium">{ref.leadName}</TableCell>
-                    <TableCell className="text-muted-foreground">{ref.leadEmail}</TableCell>
+                    <TableCell className="font-medium">
+                      {ref.leadName}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {ref.leadEmail}
+                    </TableCell>
                     <TableCell>{getStatusBadge(ref.status)}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{formatDate(ref.createdAt)}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {formatDate(ref.createdAt)}
+                    </TableCell>
                     <TableCell className="text-right font-semibold">
-                      {`${currencySymbol}${(Number(ref.estimatedValue) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                      {`${currencySymbol}${(Number(ref.estimatedValue) || 0).toLocaleString(__locale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -417,32 +520,47 @@ export default function AffiliateDashboard() {
 
       {/* Quick Actions */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = '/affiliate/referrals'}>
+        <Card
+          className="hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => (window.location.href = "/affiliate/referrals")}
+        >
           <CardContent className="p-5 flex items-center gap-3">
             <Users className="h-5 w-5 text-blue-600" />
             <div>
-              <p className="font-medium">Manage Referrals</p>
-              <p className="text-xs text-muted-foreground">View all your submissions</p>
+              <p className="font-medium">{__tr("Manage Referrals")}</p>
+              <p className="text-xs text-muted-foreground">
+                {__tr("View all your submissions")}
+              </p>
             </div>
             <ArrowRight className="h-4 w-4 ml-auto text-muted-foreground" />
           </CardContent>
         </Card>
-        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = '/affiliate/reports'}>
+        <Card
+          className="hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => (window.location.href = "/affiliate/reports")}
+        >
           <CardContent className="p-5 flex items-center gap-3">
             <TrendingUp className="h-5 w-5 text-emerald-600" />
             <div>
-              <p className="font-medium">View Reports</p>
-              <p className="text-xs text-muted-foreground">Analyze your performance</p>
+              <p className="font-medium">{__tr("View Reports")}</p>
+              <p className="text-xs text-muted-foreground">
+                {__tr("Analyze your performance")}
+              </p>
             </div>
             <ArrowRight className="h-4 w-4 ml-auto text-muted-foreground" />
           </CardContent>
         </Card>
-        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = '/affiliate/resources'}>
+        <Card
+          className="hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => (window.location.href = "/affiliate/resources")}
+        >
           <CardContent className="p-5 flex items-center gap-3">
             <Target className="h-5 w-5 text-violet-600" />
             <div>
-              <p className="font-medium">Resources</p>
-              <p className="text-xs text-muted-foreground">Marketing materials</p>
+              <p className="font-medium">{__tr("Resources")}</p>
+              <p className="text-xs text-muted-foreground">
+                {__tr("Marketing materials")}
+              </p>
             </div>
             <ArrowRight className="h-4 w-4 ml-auto text-muted-foreground" />
           </CardContent>
@@ -453,51 +571,73 @@ export default function AffiliateDashboard() {
       <Dialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Submit Lead</DialogTitle>
+            <DialogTitle>{__tr("Submit Lead")}</DialogTitle>
             <DialogDescription>
-              Enter the details below to submit a lead. Ensure all information is accurate for proper tracking.
+              {__tr(
+                "Enter the details below to submit a lead. Ensure all information is accurate for proper tracking.",
+              )}
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmitLead} className="space-y-4">
             <div className="space-y-2">
-              <Label>Lead&apos;s Name *</Label>
+              <Label>{__tr("Lead&apos;s Name *")}</Label>
               <Input
                 required
                 value={submitForm.leadName}
-                onChange={(e) => setSubmitForm({ ...submitForm, leadName: e.target.value })}
-                placeholder="Full name"
+                onChange={(e) =>
+                  setSubmitForm({ ...submitForm, leadName: e.target.value })
+                }
+                placeholder={__tr("Full name")}
               />
             </div>
             <div className="space-y-2">
-              <Label>Contact Email *</Label>
+              <Label>{__tr("Contact Email *")}</Label>
               <Input
                 type="email"
                 required
                 value={submitForm.leadEmail}
-                onChange={(e) => setSubmitForm({ ...submitForm, leadEmail: e.target.value })}
+                onChange={(e) =>
+                  setSubmitForm({ ...submitForm, leadEmail: e.target.value })
+                }
                 placeholder="email@example.com"
               />
             </div>
             <div className="space-y-2">
-              <Label>Estimated Deal Size ({currencySymbol}) *</Label>
+              <Label>
+                {__tr("Estimated Deal Size (")}
+                {currencySymbol}) *
+              </Label>
               <Input
                 type="number"
                 required
                 value={submitForm.estimatedValue}
-                onChange={(e) => setSubmitForm({ ...submitForm, estimatedValue: e.target.value })}
+                onChange={(e) =>
+                  setSubmitForm({
+                    ...submitForm,
+                    estimatedValue: e.target.value,
+                  })
+                }
                 placeholder="0"
               />
-              <p className="text-xs text-muted-foreground">Type 0 if unsure</p>
+              <p className="text-xs text-muted-foreground">
+                {__tr("Type 0 if unsure")}
+              </p>
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowSubmitModal(false)}>
-                Cancel
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowSubmitModal(false)}
+              >
+                {__tr("Cancel")}
               </Button>
               <Button type="submit" disabled={submitLoading}>
-                {submitLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Submit Lead
+                {submitLoading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                {__tr("Submit Lead")}
               </Button>
             </DialogFooter>
           </form>
@@ -507,7 +647,13 @@ export default function AffiliateDashboard() {
   );
 }
 
-function EmptyState({ icon: Icon, message }: { icon: React.ElementType; message: string }) {
+function EmptyState({
+  icon: Icon,
+  message,
+}: {
+  icon: React.ElementType;
+  message: string;
+}) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <Icon className="h-10 w-10 text-muted-foreground/40 mb-3" />

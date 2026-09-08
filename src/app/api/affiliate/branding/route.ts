@@ -1,7 +1,8 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const settings = await prisma.programSettings.findFirst({
       select: {
@@ -25,3 +26,5 @@ export async function GET(request: NextRequest) {
     });
   }
 }
+
+export const GET = withSystemLocale(GETHandler);

@@ -1,21 +1,22 @@
-'use client';
+"use client";
+import { useI18n } from "@/i18n/provider";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -23,8 +24,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -32,22 +33,22 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Search,
   Plus,
@@ -63,7 +64,7 @@ import {
   Trash2,
   UserPlus,
   ArrowUpDown,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface Partner {
   id: string;
@@ -82,36 +83,38 @@ interface Partner {
 }
 
 export default function PartnersPage() {
+  const { t: __tr, getIntlLocale: __locale, label: __label } = useI18n();
+
   const router = useRouter();
   const [partners, setPartners] = useState<Partner[]>([]);
   const [filteredPartners, setFilteredPartners] = useState<Partner[]>([]);
-  const [activeTab, setActiveTab] = useState('active');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState("active");
+  const [searchQuery, setSearchQuery] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedPartners, setSelectedPartners] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currencySymbol, setCurrencySymbol] = useState('₹');
-  const [sortField, setSortField] = useState<keyof Partner>('createdAt');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [currencySymbol, setCurrencySymbol] = useState("₹");
+  const [sortField, setSortField] = useState<keyof Partner>("createdAt");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const [newPartner, setNewPartner] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    company: '',
-    partnerGroup: 'Default',
-    country: 'N/A',
-    payoutMethod: 'PayPal',
-    paypalEmail: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    company: "",
+    partnerGroup: __tr("Default"),
+    country: "N/A",
+    payoutMethod: __tr("PayPal"),
+    paypalEmail: "",
     sendWelcomeEmail: true,
-    trackingParameter: 'ref',
+    trackingParameter: "ref",
   });
 
   const [invitePartner, setInvitePartner] = useState({
-    email: '',
-    partnerGroup: 'Default',
-    inviteType: 'single',
+    email: "",
+    partnerGroup: __tr("Default"),
+    inviteType: "single",
   });
 
   useEffect(() => {
@@ -125,7 +128,7 @@ export default function PartnersPage() {
   const fetchPartners = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/affiliates');
+      const response = await fetch("/api/admin/affiliates");
       const data = await response.json();
 
       if (data.success) {
@@ -142,13 +145,13 @@ export default function PartnersPage() {
           customers: aff._count?.referrals || 0,
           revenue: 0,
           earnings: aff.balanceCents || 0,
-          groupName: '',
+          groupName: "",
         }));
         setPartners(formattedPartners);
-        setCurrencySymbol(data.currencySymbol || '₹');
+        setCurrencySymbol(data.currencySymbol || "₹");
       }
     } catch (error) {
-      console.error('Failed to fetch partners:', error);
+      console.error("Failed to fetch partners:", error);
     } finally {
       setLoading(false);
     }
@@ -157,14 +160,16 @@ export default function PartnersPage() {
   const filterPartners = () => {
     let filtered = partners;
 
-    if (activeTab === 'active') {
-      filtered = filtered.filter((p: Partner) => p.status === 'ACTIVE');
-    } else if (activeTab === 'pending') {
-      filtered = filtered.filter((p: Partner) => p.status === 'PENDING');
-    } else if (activeTab === 'invited') {
-      filtered = filtered.filter((p: Partner) => p.status === 'INVITED');
+    if (activeTab === "active") {
+      filtered = filtered.filter((p: Partner) => p.status === "ACTIVE");
+    } else if (activeTab === "pending") {
+      filtered = filtered.filter((p: Partner) => p.status === "PENDING");
+    } else if (activeTab === "invited") {
+      filtered = filtered.filter((p: Partner) => p.status === "INVITED");
     } else {
-      filtered = filtered.filter((p: Partner) => !['ACTIVE', 'PENDING', 'INVITED'].includes(p.status));
+      filtered = filtered.filter(
+        (p: Partner) => !["ACTIVE", "PENDING", "INVITED"].includes(p.status),
+      );
     }
 
     if (searchQuery) {
@@ -172,18 +177,20 @@ export default function PartnersPage() {
         (p: Partner) =>
           p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.referralCode.toLowerCase().includes(searchQuery.toLowerCase())
+          p.referralCode.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
     filtered.sort((a: Partner, b: Partner) => {
       const aValue = (a as any)[sortField];
       const bValue = (b as any)[sortField];
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return sortDirection === "asc"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
       }
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
       }
       return 0;
     });
@@ -193,19 +200,19 @@ export default function PartnersPage() {
 
   const handleSort = (field: keyof Partner) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
 
   const handleCreatePartner = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/admin/affiliates', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/admin/affiliates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: `${newPartner.firstName} ${newPartner.lastName}`.trim(),
           email: newPartner.email,
@@ -219,27 +226,44 @@ export default function PartnersPage() {
 
       if (data.success) {
         alert(
-          `Partner created successfully!\n\nName: ${data.affiliate.name}\nEmail: ${data.affiliate.email}\nReferral Code: ${data.affiliate.referralCode}\nPassword: ${data.password}\n\nPlease save and share this with the partner.`
+          __tr(
+            "Partner created successfully! Name: {0} Email: {1} Referral Code: {2} Password: {3} Please save and share this with the partner.",
+            [
+              data.affiliate.name,
+              data.affiliate.email,
+              data.affiliate.referralCode,
+              data.password,
+            ],
+          ),
         );
         setShowCreateModal(false);
         setNewPartner({
-          firstName: '', lastName: '', email: '', company: '',
-          partnerGroup: 'Default', country: 'N/A', payoutMethod: 'PayPal',
-          paypalEmail: '', sendWelcomeEmail: true, trackingParameter: 'ref',
+          firstName: "",
+          lastName: "",
+          email: "",
+          company: "",
+          partnerGroup: __tr("Default"),
+          country: "N/A",
+          payoutMethod: __tr("PayPal"),
+          paypalEmail: "",
+          sendWelcomeEmail: true,
+          trackingParameter: "ref",
         });
         fetchPartners();
       } else {
-        alert(data.message || 'Failed to create partner');
+        alert(data.message || __tr("Failed to create partner"));
       }
     } catch (error) {
-      console.error('Failed to create partner:', error);
-      alert('Failed to create partner');
+      console.error("Failed to create partner:", error);
+      alert(__tr("Failed to create partner"));
     }
   };
 
   const handleSelectPartner = (partnerId: string) => {
     setSelectedPartners((prev: string[]) =>
-      prev.includes(partnerId) ? prev.filter((id: string) => id !== partnerId) : [...prev, partnerId]
+      prev.includes(partnerId)
+        ? prev.filter((id: string) => id !== partnerId)
+        : [...prev, partnerId],
     );
   };
 
@@ -251,55 +275,96 @@ export default function PartnersPage() {
     }
   };
 
-  const handleExportPartners = (exportType: 'all' | 'selected' = 'all') => {
+  const handleExportPartners = (exportType: "all" | "selected" = "all") => {
     const partnersToExport =
-      exportType === 'all'
+      exportType === "all"
         ? filteredPartners
-        : filteredPartners.filter((p: Partner) => selectedPartners.includes(p.id));
+        : filteredPartners.filter((p: Partner) =>
+            selectedPartners.includes(p.id),
+          );
 
     if (partnersToExport.length === 0) {
-      alert('No partners to export');
+      alert(__tr("No partners to export"));
       return;
     }
 
     const csv = [
-      ['Name', 'Email', 'Referral Code', 'Status', 'Signed Up', 'Clicks', 'Leads', 'Customers', 'Revenue', 'Earnings'].join(','),
+      [
+        __tr("Full Name"),
+        __tr("Email"),
+        __tr("Referral Code"),
+        __tr("Status"),
+        __tr("Signed Up"),
+        __tr("Clicks"),
+        __tr("Leads"),
+        __tr("Customers"),
+        __tr("Revenue"),
+        __tr("Earnings"),
+      ].join(","),
       ...partnersToExport.map((p: Partner) =>
         [
-          `"${p.name}"`, p.email, p.referralCode, p.status,
-          new Date(p.createdAt).toLocaleDateString(), p.clicks, p.leads,
-          p.customers, (p.revenue / 100).toFixed(2), (p.earnings / 100).toFixed(2),
-        ].join(',')
+          `"${p.name}"`,
+          p.email,
+          p.referralCode,
+          p.status,
+          new Date(p.createdAt).toLocaleDateString(__locale()),
+          p.clicks,
+          p.leads,
+          p.customers,
+          (p.revenue / 100).toLocaleString(__locale(), {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }),
+          (p.earnings / 100).toLocaleString(__locale(), {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }),
+        ].join(","),
       ),
-    ].join('\n');
+    ].join("\n");
 
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob([csv], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `partners-${exportType}-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `partners-${exportType}-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
   };
 
   const handleBulkAction = async (action: string, status?: string) => {
     if (selectedPartners.length === 0) {
-      alert(`Please select partners first`);
+      alert(__tr("Please select partners first"));
       return;
     }
 
-    if (action === 'delete') {
-      if (!confirm(`Delete ${selectedPartners.length} partner(s)? This cannot be undone.`)) return;
+    if (action === "delete") {
+      if (
+        !confirm(
+          __tr("Delete {0} partner(s)? This cannot be undone.", [
+            selectedPartners.length,
+          ]),
+        )
+      )
+        return;
     } else {
-      if (!confirm(`${action} ${selectedPartners.length} partner(s)?`)) return;
+      if (
+        !confirm(
+          __tr("{0} {1} partner(s)?", [
+            __label(action),
+            selectedPartners.length,
+          ]),
+        )
+      )
+        return;
     }
 
     try {
-      const response = await fetch('/api/admin/affiliates/batch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/admin/affiliates/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           affiliateIds: selectedPartners,
-          action: action === 'delete' ? 'delete' : 'changeStatus',
+          action: action === "delete" ? "delete" : "changeStatus",
           status: status,
         }),
       });
@@ -307,28 +372,31 @@ export default function PartnersPage() {
       const data = await response.json();
 
       if (data.success) {
-        alert(`Action completed successfully`);
+        alert(__tr("Action completed successfully"));
         setSelectedPartners([]);
         fetchPartners();
       } else {
-        alert(data.error || 'Action failed');
+        alert(data.error || __tr("Action failed"));
       }
     } catch (error) {
-      console.error('Bulk action failed:', error);
-      alert('Action failed');
+      console.error("Bulk action failed:", error);
+      alert(__tr("Action failed"));
     }
   };
 
   const tabCounts = {
-    active: partners.filter((p: Partner) => p.status === 'ACTIVE').length,
-    pending: partners.filter((p: Partner) => p.status === 'PENDING').length,
-    invited: partners.filter((p: Partner) => p.status === 'INVITED').length,
-    other: partners.filter((p: Partner) => !['ACTIVE', 'PENDING', 'INVITED'].includes(p.status)).length,
+    active: partners.filter((p: Partner) => p.status === "ACTIVE").length,
+    pending: partners.filter((p: Partner) => p.status === "PENDING").length,
+    invited: partners.filter((p: Partner) => p.status === "INVITED").length,
+    other: partners.filter(
+      (p: Partner) => !["ACTIVE", "PENDING", "INVITED"].includes(p.status),
+    ).length,
   };
 
   const SortIcon = ({ field }: { field: keyof Partner }) => {
-    if (sortField !== field) return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />;
-    return sortDirection === 'asc' ? (
+    if (sortField !== field)
+      return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />;
+    return sortDirection === "asc" ? (
       <ChevronUp className="ml-1 h-3 w-3" />
     ) : (
       <ChevronDown className="ml-1 h-3 w-3" />
@@ -370,17 +438,21 @@ export default function PartnersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Partners</h2>
-          <p className="text-muted-foreground">Manage your affiliate partners</p>
+          <h2 className="text-2xl font-bold tracking-tight">
+            {__tr("Partners")}
+          </h2>
+          <p className="text-muted-foreground">
+            {__tr("Manage your affiliate partners")}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setShowInviteModal(true)}>
             <Mail className="mr-2 h-4 w-4" />
-            Invite
+            {__tr("Invite")}
           </Button>
           <Button onClick={() => setShowCreateModal(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Create Partner
+            {__tr("Create Partner")}
           </Button>
         </div>
       </div>
@@ -389,18 +461,32 @@ export default function PartnersPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex items-center justify-between gap-4">
           <TabsList>
-            <TabsTrigger value="active">Active ({tabCounts.active})</TabsTrigger>
-            <TabsTrigger value="pending">Pending ({tabCounts.pending})</TabsTrigger>
-            <TabsTrigger value="invited">Invited ({tabCounts.invited})</TabsTrigger>
-            <TabsTrigger value="other">Other ({tabCounts.other})</TabsTrigger>
+            <TabsTrigger value="active">
+              {__tr("Active (")}
+              {tabCounts.active})
+            </TabsTrigger>
+            <TabsTrigger value="pending">
+              {__tr("Pending (")}
+              {tabCounts.pending})
+            </TabsTrigger>
+            <TabsTrigger value="invited">
+              {__tr("Invited (")}
+              {tabCounts.invited})
+            </TabsTrigger>
+            <TabsTrigger value="other">
+              {__tr("Other (")}
+              {tabCounts.other})
+            </TabsTrigger>
           </TabsList>
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search partners..."
+                placeholder={__tr("Search partners...")}
                 value={searchQuery}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSearchQuery(e.target.value)
+                }
                 className="pl-9 w-64"
               />
             </div>
@@ -408,22 +494,30 @@ export default function PartnersPage() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
-                    Actions ({selectedPartners.length})
+                    {__tr("Actions (")}
+                    {selectedPartners.length})
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleBulkAction('approve', 'ACTIVE')}>
+                  <DropdownMenuItem
+                    onClick={() => handleBulkAction("approve", "ACTIVE")}
+                  >
                     <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-600" />
-                    Approve Selected
+                    {__tr("Approve Selected")}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleBulkAction('reject', 'INACTIVE')}>
+                  <DropdownMenuItem
+                    onClick={() => handleBulkAction("reject", "INACTIVE")}
+                  >
                     <XCircle className="mr-2 h-4 w-4 text-amber-600" />
-                    Reject Selected
+                    {__tr("Reject Selected")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleBulkAction('delete')} className="text-destructive">
+                  <DropdownMenuItem
+                    onClick={() => handleBulkAction("delete")}
+                    className="text-destructive"
+                  >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Selected
+                    {__tr("Delete Selected")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -435,20 +529,22 @@ export default function PartnersPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleExportPartners('all')}>
+                <DropdownMenuItem onClick={() => handleExportPartners("all")}>
                   <Download className="mr-2 h-4 w-4" />
-                  Export All (CSV)
+                  {__tr("Export All (CSV)")}
                 </DropdownMenuItem>
                 {selectedPartners.length > 0 && (
-                  <DropdownMenuItem onClick={() => handleExportPartners('selected')}>
+                  <DropdownMenuItem
+                    onClick={() => handleExportPartners("selected")}
+                  >
                     <Download className="mr-2 h-4 w-4" />
-                    Export Selected (CSV)
+                    {__tr("Export Selected (CSV)")}
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Upload className="mr-2 h-4 w-4" />
-                  Import Partners (CSV)
+                  {__tr("Import Partners (CSV)")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -463,39 +559,60 @@ export default function PartnersPage() {
                 <TableRow>
                   <TableHead className="w-12">
                     <Checkbox
-                      checked={selectedPartners.length === filteredPartners.length && filteredPartners.length > 0}
+                      checked={
+                        selectedPartners.length === filteredPartners.length &&
+                        filteredPartners.length > 0
+                      }
                       onCheckedChange={handleSelectAll}
                     />
                   </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort('name')}>
+                  <TableHead
+                    className="cursor-pointer"
+                    onClick={() => handleSort("name")}
+                  >
                     <div className="flex items-center">
-                      Partner <SortIcon field="name" />
+                      {__tr("Partner")} <SortIcon field="name" />
                     </div>
                   </TableHead>
-                  <TableHead>Referral Code</TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort('leads')}>
+                  <TableHead>{__tr("Referral Code")}</TableHead>
+                  <TableHead
+                    className="cursor-pointer"
+                    onClick={() => handleSort("leads")}
+                  >
                     <div className="flex items-center">
-                      Leads <SortIcon field="leads" />
+                      {__tr("Leads")} <SortIcon field="leads" />
                     </div>
                   </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort('customers')}>
+                  <TableHead
+                    className="cursor-pointer"
+                    onClick={() => handleSort("customers")}
+                  >
                     <div className="flex items-center">
-                      Customers <SortIcon field="customers" />
+                      {__tr("Customers")} <SortIcon field="customers" />
                     </div>
                   </TableHead>
-                  <TableHead className="cursor-pointer text-right" onClick={() => handleSort('revenue')}>
+                  <TableHead
+                    className="cursor-pointer text-right"
+                    onClick={() => handleSort("revenue")}
+                  >
                     <div className="flex items-center justify-end">
-                      Revenue <SortIcon field="revenue" />
+                      {__tr("Revenue")} <SortIcon field="revenue" />
                     </div>
                   </TableHead>
-                  <TableHead className="cursor-pointer text-right" onClick={() => handleSort('earnings')}>
+                  <TableHead
+                    className="cursor-pointer text-right"
+                    onClick={() => handleSort("earnings")}
+                  >
                     <div className="flex items-center justify-end">
-                      Earnings <SortIcon field="earnings" />
+                      {__tr("Earnings")} <SortIcon field="earnings" />
                     </div>
                   </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort('createdAt')}>
+                  <TableHead
+                    className="cursor-pointer"
+                    onClick={() => handleSort("createdAt")}
+                  >
                     <div className="flex items-center">
-                      Signed Up <SortIcon field="createdAt" />
+                      {__tr("Signed Up")} <SortIcon field="createdAt" />
                     </div>
                   </TableHead>
                 </TableRow>
@@ -506,12 +623,18 @@ export default function PartnersPage() {
                     <TableRow
                       key={partner.id}
                       className="cursor-pointer"
-                      onClick={() => router.push(`/admin/partners/${partner.id}`)}
+                      onClick={() =>
+                        router.push(`/admin/partners/${partner.id}`)
+                      }
                     >
-                      <TableCell onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                      <TableCell
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                      >
                         <Checkbox
                           checked={selectedPartners.includes(partner.id)}
-                          onCheckedChange={() => handleSelectPartner(partner.id)}
+                          onCheckedChange={() =>
+                            handleSelectPartner(partner.id)
+                          }
                         />
                       </TableCell>
                       <TableCell>
@@ -522,28 +645,45 @@ export default function PartnersPage() {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="text-sm font-medium">{partner.name}</p>
-                            <p className="text-xs text-muted-foreground">{partner.email}</p>
+                            <p className="text-sm font-medium">
+                              {partner.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {partner.email}
+                            </p>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{partner.referralCode}</code>
+                        <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                          {partner.referralCode}
+                        </code>
                       </TableCell>
                       <TableCell>{partner.leads}</TableCell>
                       <TableCell>{partner.customers}</TableCell>
                       <TableCell className="text-right font-medium">
-                        {currencySymbol}{(partner.revenue / 100).toFixed(2)}
+                        {currencySymbol}
+                        {(partner.revenue / 100).toLocaleString(__locale(), {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {currencySymbol}{(partner.earnings / 100).toFixed(2)}
+                        {currencySymbol}
+                        {(partner.earnings / 100).toLocaleString(__locale(), {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {new Date(partner.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
+                        {new Date(partner.createdAt).toLocaleDateString(
+                          __locale(),
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
@@ -552,9 +692,13 @@ export default function PartnersPage() {
                     <TableCell colSpan={8}>
                       <div className="flex flex-col items-center justify-center py-12 text-center">
                         <Users className="h-10 w-10 text-muted-foreground/50 mb-3" />
-                        <p className="text-sm font-medium text-muted-foreground">No partners found</p>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          {__tr("No partners found")}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {searchQuery ? 'Try a different search term' : 'Create or invite partners to get started'}
+                          {searchQuery
+                            ? __tr("Try a different search term")
+                            : __tr("Create or invite partners to get started")}
                         </p>
                       </div>
                     </TableCell>
@@ -570,108 +714,142 @@ export default function PartnersPage() {
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Create Partner</DialogTitle>
-            <DialogDescription>Add a new affiliate partner manually</DialogDescription>
+            <DialogTitle>{__tr("Create Partner")}</DialogTitle>
+            <DialogDescription>
+              {__tr("Add a new affiliate partner manually")}
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreatePartner}>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="firstName">{__tr("First Name")}</Label>
                   <Input
                     id="firstName"
                     value={newPartner.firstName}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPartner({ ...newPartner, firstName: e.target.value })}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setNewPartner({
+                        ...newPartner,
+                        firstName: e.target.value,
+                      })
+                    }
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
+                  <Label htmlFor="lastName">{__tr("Last Name")}</Label>
                   <Input
                     id="lastName"
                     value={newPartner.lastName}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPartner({ ...newPartner, lastName: e.target.value })}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setNewPartner({ ...newPartner, lastName: e.target.value })
+                    }
                     required
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{__tr("Email")}</Label>
                 <Input
                   id="email"
                   type="email"
                   value={newPartner.email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPartner({ ...newPartner, email: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewPartner({ ...newPartner, email: e.target.value })
+                  }
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="company">Company (Optional)</Label>
+                <Label htmlFor="company">{__tr("Company (Optional)")}</Label>
                 <Input
                   id="company"
                   value={newPartner.company}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPartner({ ...newPartner, company: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewPartner({ ...newPartner, company: e.target.value })
+                  }
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Partner Group</Label>
+                  <Label>{__tr("Partner Group")}</Label>
                   <Select
                     value={newPartner.partnerGroup}
-                    onValueChange={(value: string) => setNewPartner({ ...newPartner, partnerGroup: value })}
+                    onValueChange={(value: string) =>
+                      setNewPartner({ ...newPartner, partnerGroup: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Default">Default</SelectItem>
+                      <SelectItem value="Default">{__tr("Default")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Payout Method</Label>
+                  <Label>{__tr("Payout Method")}</Label>
                   <Select
                     value={newPartner.payoutMethod}
-                    onValueChange={(value: string) => setNewPartner({ ...newPartner, payoutMethod: value })}
+                    onValueChange={(value: string) =>
+                      setNewPartner({ ...newPartner, payoutMethod: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="PayPal">PayPal</SelectItem>
-                      <SelectItem value="Wise">Wise</SelectItem>
-                      <SelectItem value="Bank">Bank Transfer</SelectItem>
-                      <SelectItem value="Crypto">Crypto</SelectItem>
+                      <SelectItem value="PayPal">{__tr("PayPal")}</SelectItem>
+                      <SelectItem value="Wise">{__tr("Wise")}</SelectItem>
+                      <SelectItem value="Bank">
+                        {__tr("Bank Transfer")}
+                      </SelectItem>
+                      <SelectItem value="Crypto">{__tr("Crypto")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="paypalEmail">PayPal Email (Optional)</Label>
+                <Label htmlFor="paypalEmail">
+                  {__tr("PayPal Email (Optional)")}
+                </Label>
                 <Input
                   id="paypalEmail"
                   type="email"
                   value={newPartner.paypalEmail}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPartner({ ...newPartner, paypalEmail: e.target.value })}
-                  placeholder="defaults to partner email"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewPartner({
+                      ...newPartner,
+                      paypalEmail: e.target.value,
+                    })
+                  }
+                  placeholder={__tr("defaults to partner email")}
                 />
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
                   id="sendWelcomeEmail"
                   checked={newPartner.sendWelcomeEmail}
-                  onCheckedChange={(checked: boolean) => setNewPartner({ ...newPartner, sendWelcomeEmail: checked })}
+                  onCheckedChange={(checked: boolean) =>
+                    setNewPartner({ ...newPartner, sendWelcomeEmail: checked })
+                  }
                 />
-                <Label htmlFor="sendWelcomeEmail">Send welcome email</Label>
+                <Label htmlFor="sendWelcomeEmail">
+                  {__tr("Send welcome email")}
+                </Label>
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>
-                Cancel
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCreateModal(false)}
+              >
+                {__tr("Cancel")}
               </Button>
               <Button type="submit">
                 <UserPlus className="mr-2 h-4 w-4" />
-                Create Partner
+                {__tr("Create Partner")}
               </Button>
             </DialogFooter>
           </form>
@@ -682,48 +860,62 @@ export default function PartnersPage() {
       <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Invite Partner</DialogTitle>
-            <DialogDescription>Send an email invitation to a new affiliate partner</DialogDescription>
+            <DialogTitle>{__tr("Invite Partner")}</DialogTitle>
+            <DialogDescription>
+              {__tr("Send an email invitation to a new affiliate partner")}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="inviteEmail">Email Address</Label>
+              <Label htmlFor="inviteEmail">{__tr("Email Address")}</Label>
               <Input
                 id="inviteEmail"
                 type="email"
                 value={invitePartner.email}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInvitePartner({ ...invitePartner, email: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setInvitePartner({ ...invitePartner, email: e.target.value })
+                }
                 placeholder="partner@example.com"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label>Partner Group</Label>
+              <Label>{__tr("Partner Group")}</Label>
               <Select
                 value={invitePartner.partnerGroup}
-                onValueChange={(value: string) => setInvitePartner({ ...invitePartner, partnerGroup: value })}
+                onValueChange={(value: string) =>
+                  setInvitePartner({ ...invitePartner, partnerGroup: value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Default">Default</SelectItem>
+                  <SelectItem value="Default">{__tr("Default")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setShowInviteModal(false)}>
-              Cancel
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowInviteModal(false)}
+            >
+              {__tr("Cancel")}
             </Button>
             <Button
               onClick={() => {
-                alert('Invite feature will send an email invitation to the partner.');
+                alert(
+                  __tr(
+                    "Invite feature will send an email invitation to the partner.",
+                  ),
+                );
                 setShowInviteModal(false);
               }}
             >
               <Mail className="mr-2 h-4 w-4" />
-              Send Invite
+              {__tr("Send Invite")}
             </Button>
           </DialogFooter>
         </DialogContent>

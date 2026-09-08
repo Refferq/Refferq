@@ -1,3 +1,5 @@
+
+import { t as __tr } from "@/i18n";
 import { prisma } from './prisma';
 
 export interface FraudCheckResult {
@@ -39,7 +41,7 @@ export async function checkFraud({
 
     // 1. Bot/automated user agent check
     if (isBotUserAgent(userAgent)) {
-        reasons.push('Suspicious user agent (possible bot)');
+        reasons.push(__tr("Suspicious user agent (possible bot)"));
         riskScore += 60;
     }
 
@@ -53,7 +55,7 @@ export async function checkFraud({
     });
 
     if (recentClicksFromIP >= MAX_CLICKS_PER_IP_PER_HOUR) {
-        reasons.push(`High click frequency: ${recentClicksFromIP} clicks from same IP in last hour`);
+        reasons.push(__tr("High click frequency: {0} clicks from same IP in last hour", [recentClicksFromIP]));
         riskScore += 30;
     }
 
@@ -70,14 +72,14 @@ export async function checkFraud({
     });
 
     if (clicksForAffiliateFromIP >= MAX_CLICKS_PER_AFFILIATE_PER_IP_DAY) {
-        reasons.push(`Duplicate IP: ${clicksForAffiliateFromIP} clicks for same affiliate from same IP today`);
+        reasons.push(__tr("Duplicate IP: {0} clicks for same affiliate from same IP today", [clicksForAffiliateFromIP]));
         riskScore += 40;
     }
 
     // 4. Private/loopback IP ranges (could indicate self-referral or test)
     const isPrivateIP = /^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/.test(ipAddress);
     if (isPrivateIP) {
-        reasons.push('Private/internal IP address');
+        reasons.push(__tr("Private/internal IP address"));
         riskScore += 10;
     }
 

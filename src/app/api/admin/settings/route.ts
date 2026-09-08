@@ -1,10 +1,13 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { logAuditAction } from '@/lib/audit';
 
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
 
@@ -14,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -28,12 +31,12 @@ export async function GET(request: NextRequest) {
         data: {
           programId: `prg_${Date.now()}`,
           productName: 'BsBot',
-          programName: "BsBot's Affiliate Program",
+          programName: __tr("BsBot's Affiliate Program"),
           websiteUrl: 'https://kyns.com',
           currency: 'INR',
           portalSubdomain: 'bsbot.tolt.io',
           minimumPayoutThreshold: 0,
-          payoutTerm: 'NET-15',
+          payoutTerm: __tr("NET-15"),
           commissionHoldDays: 30
         }
       });
@@ -66,13 +69,13 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Settings API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch settings' },
+      { error: __tr("Failed to fetch settings") },
       { status: 500 }
     );
   }
 }
 
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
 
@@ -82,7 +85,7 @@ export async function PUT(request: NextRequest) {
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -97,7 +100,7 @@ export async function PUT(request: NextRequest) {
         data: {
           programId: `prg_${Date.now()}`,
           productName: 'BsBot',
-          programName: "BsBot's Affiliate Program",
+          programName: __tr("BsBot's Affiliate Program"),
           websiteUrl: 'https://kyns.com',
           currency: 'INR',
           portalSubdomain: 'bsbot.tolt.io'
@@ -139,20 +142,20 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Settings updated successfully',
+      message: __tr("Settings updated successfully"),
       settings: updatedSettings
     });
 
   } catch (error) {
     console.error('Settings update API error:', error);
     return NextResponse.json(
-      { error: 'Failed to update settings' },
+      { error: __tr("Failed to update settings") },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
 
@@ -162,7 +165,7 @@ export async function POST(request: NextRequest) {
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -176,7 +179,7 @@ export async function POST(request: NextRequest) {
 
       if (!name || !type || value === undefined) {
         return NextResponse.json(
-          { error: 'Name, type, and value are required' },
+          { error: __tr("Name, type, and value are required") },
           { status: 400 }
         );
       }
@@ -214,7 +217,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: 'Commission rule created successfully',
+        message: __tr("Commission rule created successfully"),
         rule: newRule
       });
     }
@@ -225,7 +228,7 @@ export async function POST(request: NextRequest) {
 
       if (!id) {
         return NextResponse.json(
-          { error: 'Rule ID is required for update' },
+          { error: __tr("Rule ID is required for update") },
           { status: 400 }
         );
       }
@@ -251,7 +254,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: 'Commission rule updated successfully',
+        message: __tr("Commission rule updated successfully"),
         rule: updatedRule
       });
     }
@@ -262,7 +265,7 @@ export async function POST(request: NextRequest) {
 
       if (!id) {
         return NextResponse.json(
-          { error: 'Rule ID is required for deletion' },
+          { error: __tr("Rule ID is required for deletion") },
           { status: 400 }
         );
       }
@@ -276,20 +279,23 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: 'Commission rule deleted successfully'
+        message: __tr("Commission rule deleted successfully")
       });
     }
 
     return NextResponse.json(
-      { error: 'Invalid action' },
+      { error: __tr("Invalid action") },
       { status: 400 }
     );
 
   } catch (error) {
     console.error('Settings API error:', error);
     return NextResponse.json(
-      { error: 'Failed to update settings' },
+      { error: __tr("Failed to update settings") },
       { status: 500 }
     );
   }
 }
+export const GET = withSystemLocale(GETHandler);
+export const PUT = withSystemLocale(PUTHandler);
+export const POST = withSystemLocale(POSTHandler);

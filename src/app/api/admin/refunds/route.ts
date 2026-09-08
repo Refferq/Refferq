@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -14,17 +17,17 @@ async function verifyAdmin(request: NextRequest) {
 
 // POST - Process a refund for a transaction
 // Automatically reverses associated commissions
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   const admin = await verifyAdmin(request);
   if (!admin) {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+    return NextResponse.json({ success: false, error: __tr("Unauthorized") }, { status: 403 });
   }
 
   try {
     const { transactionId, reason } = await request.json();
 
     if (!transactionId) {
-      return NextResponse.json({ success: false, error: 'Transaction ID is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: __tr("Transaction ID is required") }, { status: 400 });
     }
 
     // Get transaction
@@ -34,11 +37,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (!transaction) {
-      return NextResponse.json({ success: false, error: 'Transaction not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: __tr("Transaction not found") }, { status: 404 });
     }
 
     if (transaction.status === 'REFUNDED') {
-      return NextResponse.json({ success: false, error: 'Transaction already refunded' }, { status: 400 });
+      return NextResponse.json({ success: false, error: __tr("Transaction already refunded") }, { status: 400 });
     }
 
     // Find associated commissions for this affiliate that are pending/approved
@@ -63,7 +66,7 @@ export async function POST(request: NextRequest) {
       where: { id: transactionId },
       data: {
         status: 'REFUNDED',
-        description: `${transaction.description || ''} [REFUNDED: ${reason || 'No reason provided'}]`.trim(),
+        description: __tr("{0} [REFUNDED: {1}]", [transaction.description || '', reason || __tr("No reason provided")]).trim(),
       },
     });
     results.transactionRefunded = true;
@@ -104,7 +107,7 @@ export async function POST(request: NextRequest) {
         objectType: 'transaction',
         objectId: transactionId,
         payload: {
-          reason: reason || 'No reason provided',
+          reason: reason || __tr("No reason provided"),
           transactionAmountCents: transaction.amountCents,
           commissionReversed: results.commissionReversed,
           reversedAmountCents: results.reversedAmountCents,
@@ -115,20 +118,20 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Refund processed successfully',
+      message: __tr("Refund processed successfully"),
       results,
     });
   } catch (error) {
     console.error('Refund processing error:', error);
-    return NextResponse.json({ success: false, error: 'Failed to process refund' }, { status: 500 });
+    return NextResponse.json({ success: false, error: __tr("Failed to process refund") }, { status: 500 });
   }
 }
 
 // GET - List refunded transactions
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   const admin = await verifyAdmin(request);
   if (!admin) {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+    return NextResponse.json({ success: false, error: __tr("Unauthorized") }, { status: 403 });
   }
 
   try {
@@ -146,6 +149,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Failed to fetch refunded transactions:', error);
-    return NextResponse.json({ success: false, error: 'Failed to fetch refunds' }, { status: 500 });
+    return NextResponse.json({ success: false, error: __tr("Failed to fetch refunds") }, { status: 500 });
   }
 }
+
+export const POST = withSystemLocale(POSTHandler);
+export const GET = withSystemLocale(GETHandler);

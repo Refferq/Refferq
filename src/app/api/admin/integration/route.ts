@@ -1,10 +1,13 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 /**
  * GET /api/admin/integration - Get integration settings
  */
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -15,14 +18,14 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'Access denied. Admin role required.' },
+        { success: false, error: __tr("Access denied. Admin role required.") },
         { status: 403 }
       );
     }
@@ -36,7 +39,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         integration: null,
-        message: 'No integration configured. Generate API keys to get started.',
+        message: __tr("No integration configured. Generate API keys to get started."),
       });
     }
 
@@ -48,7 +51,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('GET integration settings error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch integration settings' },
+      { success: false, error: __tr("Failed to fetch integration settings") },
       { status: 500 }
     );
   }
@@ -57,7 +60,7 @@ export async function GET(request: NextRequest) {
 /**
  * PUT /api/admin/integration - Update integration settings
  */
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -68,14 +71,14 @@ export async function PUT(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'Access denied. Admin role required.' },
+        { success: false, error: __tr("Access denied. Admin role required.") },
         { status: 403 }
       );
     }
@@ -96,15 +99,18 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Integration settings updated successfully',
+      message: __tr("Integration settings updated successfully"),
       integration,
     });
 
   } catch (error) {
     console.error('PUT integration settings error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update integration settings' },
+      { success: false, error: __tr("Failed to update integration settings") },
       { status: 500 }
     );
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const PUT = withSystemLocale(PUTHandler);

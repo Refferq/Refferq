@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { db, prisma } from '@/lib/prisma';
 import crypto from 'crypto';
@@ -27,7 +30,7 @@ async function verifyApiKey(request: NextRequest): Promise<boolean> {
   return !!key;
 }
 
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     // ─── Authentication: Require API key OR webhook signature ───
     const rawBody = await request.text();
@@ -49,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     if (!authenticated) {
       return NextResponse.json(
-        { success: false, message: 'Unauthorized: Valid API key or webhook signature required' },
+        { success: false, message: __tr("Unauthorized: Valid API key or webhook signature required") },
         { status: 401 }
       );
     }
@@ -68,7 +71,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!event_type || !customer_email) {
       return NextResponse.json(
-        { success: false, message: 'Event type and customer email are required' },
+        { success: false, message: __tr("Event type and customer email are required") },
         { status: 400 }
       );
     }
@@ -102,7 +105,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: 'Conversion logged (no attribution)',
+        message: __tr("Conversion logged (no attribution)"),
         attributed: false,
       });
     }
@@ -176,7 +179,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Conversion tracked successfully',
+      message: __tr("Conversion tracked successfully"),
       attributed: true,
       conversion,
       commission,
@@ -185,8 +188,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Conversion webhook error:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to process conversion' },
+      { success: false, message: __tr("Failed to process conversion") },
       { status: 500 }
     );
   }
 }
+export const POST = withSystemLocale(POSTHandler);

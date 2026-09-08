@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -13,9 +16,9 @@ async function verifyAdmin(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const url = new URL(request.url);
@@ -144,7 +147,7 @@ export async function GET(request: NextRequest) {
         })),
         keyUsage: keyUsage.map((k) => ({
           apiKeyId: k.apiKeyId,
-          name: keyMap.get(k.apiKeyId)?.name || 'Unknown',
+          name: keyMap.get(k.apiKeyId)?.name || __tr("Unknown"),
           prefix: keyMap.get(k.apiKeyId)?.prefix || '',
           requests: k._count,
           avgResponseMs: Math.round(k._avg.responseMs || 0),
@@ -164,6 +167,8 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('API usage analytics error:', error);
-    return NextResponse.json({ error: 'Failed to fetch API usage analytics' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to fetch API usage analytics") }, { status: 500 });
   }
 }
+
+export const GET = withSystemLocale(GETHandler);

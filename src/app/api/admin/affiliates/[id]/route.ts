@@ -1,10 +1,14 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { label as __label } from "@/i18n";
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { UserStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
 
 // Update affiliate status
-export async function PATCH(
+ async function PATCHHandler(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
@@ -18,7 +22,7 @@ export async function PATCH(
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -28,7 +32,7 @@ export async function PATCH(
 
     if (!status) {
       return NextResponse.json(
-        { error: 'Status is required' },
+        { error: __tr("Status is required") },
         { status: 400 }
       );
     }
@@ -37,7 +41,7 @@ export async function PATCH(
     const validStatuses = ['PENDING', 'ACTIVE', 'INACTIVE', 'SUSPENDED'];
     if (!validStatuses.includes(status)) {
       return NextResponse.json(
-        { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
+        { error: __tr("Invalid status. Must be one of: {0}", [validStatuses.join(', ')]) },
         { status: 400 }
       );
     }
@@ -50,7 +54,7 @@ export async function PATCH(
 
     if (!affiliate) {
       return NextResponse.json(
-        { error: 'Affiliate not found' },
+        { error: __tr("Affiliate not found") },
         { status: 404 }
       );
     }
@@ -81,7 +85,7 @@ export async function PATCH(
 
     return NextResponse.json({
       success: true,
-      message: `Affiliate status updated to ${status}`,
+      message: __tr("Affiliate status updated to {0}", [__label(status)]),
       affiliate: {
         id: affiliate.id,
         userId: updatedUser.id,
@@ -92,14 +96,14 @@ export async function PATCH(
   } catch (error) {
     console.error('Update affiliate status error:', error);
     return NextResponse.json(
-      { error: 'Failed to update affiliate status' },
+      { error: __tr("Failed to update affiliate status") },
       { status: 500 }
     );
   }
 }
 
 // Delete affiliate
-export async function DELETE(
+ async function DELETEHandler(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
@@ -113,7 +117,7 @@ export async function DELETE(
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -126,7 +130,7 @@ export async function DELETE(
 
     if (!affiliate) {
       return NextResponse.json(
-        { error: 'Affiliate not found' },
+        { error: __tr("Affiliate not found") },
         { status: 404 }
       );
     }
@@ -153,14 +157,17 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Affiliate deleted successfully'
+      message: __tr("Affiliate deleted successfully")
     });
 
   } catch (error) {
     console.error('Delete affiliate error:', error);
     return NextResponse.json(
-      { error: 'Failed to delete affiliate' },
+      { error: __tr("Failed to delete affiliate") },
       { status: 500 }
     );
   }
 }
+
+export const PATCH = withSystemLocale(PATCHHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

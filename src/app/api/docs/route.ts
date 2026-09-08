@@ -1,162 +1,165 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 
 // Auto-generated OpenAPI spec from Zod schemas
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
     const spec = {
         openapi: '3.0.3',
         info: {
-            title: 'Refferq API',
+            title: __tr("Refferq API"),
             version: '1.1.0',
-            description: 'Open-source affiliate marketing platform API. Manage affiliates, referrals, conversions, commissions, and payouts.',
+            description: __tr("Open-source affiliate marketing platform API. Manage affiliates, referrals, conversions, commissions, and payouts."),
             contact: { email: 'hello@refferq.com' },
             license: { name: 'MIT', url: 'https://opensource.org/licenses/MIT' },
         },
         servers: [
-            { url: process.env.NEXT_PUBLIC_APP_URL || 'https://app.refferq.com', description: 'Production' },
+            { url: process.env.NEXT_PUBLIC_APP_URL || 'https://app.refferq.com', description: __tr("Production") },
         ],
         tags: [
-            { name: 'Auth', description: 'Authentication endpoints' },
-            { name: 'Affiliate', description: 'Affiliate-facing endpoints' },
-            { name: 'Admin', description: 'Admin management endpoints' },
-            { name: 'Tracking', description: 'Click and conversion tracking' },
-            { name: 'Webhooks', description: 'External webhook receivers' },
+            { name: 'Auth', description: __tr("Authentication endpoints") },
+            { name: 'Affiliate', description: __tr("Affiliate-facing endpoints") },
+            { name: 'Admin', description: __tr("Admin management endpoints") },
+            { name: 'Tracking', description: __tr("Click and conversion tracking") },
+            { name: 'Webhooks', description: __tr("External webhook receivers") },
         ],
         paths: {
             // ─── Auth ──────────────────────────────────────────────
             '/api/auth/login': {
                 post: {
                     tags: ['Auth'],
-                    summary: 'Login',
+                    summary: __tr("Login"),
                     requestBody: {
                         required: true,
                         content: { 'application/json': { schema: { $ref: '#/components/schemas/LoginRequest' } } },
                     },
                     responses: {
-                        '200': { description: 'JWT token returned', content: { 'application/json': { schema: { $ref: '#/components/schemas/LoginResponse' } } } },
-                        '401': { description: 'Invalid credentials' },
+                        '200': { description: __tr("JWT token returned"), content: { 'application/json': { schema: { $ref: '#/components/schemas/LoginResponse' } } } },
+                        '401': { description: __tr("Invalid credentials") },
                     },
                 },
             },
             '/api/auth/me': {
                 get: {
                     tags: ['Auth'],
-                    summary: 'Get current user',
+                    summary: __tr("Get current user"),
                     security: [{ BearerAuth: [] }],
-                    responses: { '200': { description: 'Current user info' } },
+                    responses: { '200': { description: __tr("Current user info") } },
                 },
             },
 
             // ─── Affiliate ─────────────────────────────────────────
             '/api/affiliate/profile': {
                 get: {
-                    tags: ['Affiliate'],
-                    summary: 'Get affiliate profile & stats',
+                    tags: [__tr("Affiliate")],
+                    summary: __tr("Get affiliate profile & stats"),
                     security: [{ BearerAuth: [] }],
-                    responses: { '200': { description: 'Affiliate data, referrals, stats, currencySymbol' } },
+                    responses: { '200': { description: __tr("Affiliate data, referrals, stats, currencySymbol") } },
                 },
                 put: {
-                    tags: ['Affiliate'],
-                    summary: 'Update affiliate profile',
+                    tags: [__tr("Affiliate")],
+                    summary: __tr("Update affiliate profile"),
                     security: [{ BearerAuth: [] }],
                     requestBody: {
                         required: true,
                         content: { 'application/json': { schema: { $ref: '#/components/schemas/UpdateProfileRequest' } } },
                     },
-                    responses: { '200': { description: 'Profile updated' } },
+                    responses: { '200': { description: __tr("Profile updated") } },
                 },
             },
             '/api/affiliate/referrals': {
                 post: {
-                    tags: ['Affiliate'],
-                    summary: 'Submit a new referral lead',
+                    tags: [__tr("Affiliate")],
+                    summary: __tr("Submit a new referral lead"),
                     security: [{ BearerAuth: [] }],
                     requestBody: {
                         required: true,
                         content: { 'application/json': { schema: { $ref: '#/components/schemas/ReferralRequest' } } },
                     },
                     responses: {
-                        '201': { description: 'Referral created' },
-                        '400': { description: 'Validation error' },
+                        '201': { description: __tr("Referral created") },
+                        '400': { description: __tr("Validation error") },
                     },
                 },
             },
             '/api/affiliate/payouts': {
                 get: {
-                    tags: ['Affiliate'],
-                    summary: 'Get affiliate payout history',
+                    tags: [__tr("Affiliate")],
+                    summary: __tr("Get affiliate payout history"),
                     security: [{ BearerAuth: [] }],
-                    responses: { '200': { description: 'List of payouts' } },
+                    responses: { '200': { description: __tr("List of payouts") } },
                 },
             },
 
             // ─── Admin ─────────────────────────────────────────────
             '/api/admin/affiliates': {
                 get: {
-                    tags: ['Admin'],
-                    summary: 'List all affiliates',
+                    tags: [__tr("Admin")],
+                    summary: __tr("List all affiliates"),
                     security: [{ BearerAuth: [] }],
-                    responses: { '200': { description: 'Array of affiliates with stats and currencySymbol' } },
+                    responses: { '200': { description: __tr("Array of affiliates with stats and currencySymbol") } },
                 },
                 post: {
-                    tags: ['Admin'],
-                    summary: 'Create a new affiliate',
+                    tags: [__tr("Admin")],
+                    summary: __tr("Create a new affiliate"),
                     security: [{ BearerAuth: [] }],
                     requestBody: {
                         required: true,
                         content: { 'application/json': { schema: { $ref: '#/components/schemas/AffiliateCreateRequest' } } },
                     },
                     responses: {
-                        '200': { description: 'Affiliate created, temporaryPassword included' },
-                        '400': { description: 'Validation error or email exists' },
+                        '200': { description: __tr("Affiliate created, temporaryPassword included") },
+                        '400': { description: __tr("Validation error or email exists") },
                     },
                 },
             },
             '/api/admin/payouts': {
                 get: {
-                    tags: ['Admin'],
-                    summary: 'List all payouts',
+                    tags: [__tr("Admin")],
+                    summary: __tr("List all payouts"),
                     security: [{ BearerAuth: [] }],
                     parameters: [
-                        { name: 'affiliateId', in: 'query', schema: { type: 'string' }, description: 'Filter by affiliate' },
-                        { name: 'format', in: 'query', schema: { type: 'string', enum: ['csv'] }, description: 'Export as CSV' },
+                        { name: 'affiliateId', in: 'query', schema: { type: 'string' }, description: __tr("Filter by affiliate") },
+                        { name: 'format', in: 'query', schema: { type: 'string', enum: ['csv'] }, description: __tr("Export as CSV") },
                     ],
-                    responses: { '200': { description: 'Array of payouts' } },
+                    responses: { '200': { description: __tr("Array of payouts") } },
                 },
                 post: {
-                    tags: ['Admin'],
-                    summary: 'Create a payout',
+                    tags: [__tr("Admin")],
+                    summary: __tr("Create a payout"),
                     security: [{ BearerAuth: [] }],
                     requestBody: {
                         required: true,
                         content: { 'application/json': { schema: { $ref: '#/components/schemas/PayoutRequest' } } },
                     },
-                    responses: { '200': { description: 'Payout created' } },
+                    responses: { '200': { description: __tr("Payout created") } },
                 },
                 put: {
-                    tags: ['Admin'],
-                    summary: 'Update payout status',
+                    tags: [__tr("Admin")],
+                    summary: __tr("Update payout status"),
                     security: [{ BearerAuth: [] }],
                     requestBody: {
                         required: true,
                         content: { 'application/json': { schema: { $ref: '#/components/schemas/PayoutUpdateRequest' } } },
                     },
-                    responses: { '200': { description: 'Payout updated' } },
+                    responses: { '200': { description: __tr("Payout updated") } },
                 },
             },
             '/api/admin/analytics': {
                 get: {
-                    tags: ['Admin'],
-                    summary: 'Get platform analytics',
+                    tags: [__tr("Admin")],
+                    summary: __tr("Get platform analytics"),
                     security: [{ BearerAuth: [] }],
-                    responses: { '200': { description: 'Analytics data' } },
+                    responses: { '200': { description: __tr("Analytics data") } },
                 },
             },
             '/api/admin/reports': {
                 get: {
-                    tags: ['Admin'],
-                    summary: 'Get platform reports',
+                    tags: [__tr("Admin")],
+                    summary: __tr("Get platform reports"),
                     security: [{ BearerAuth: [] }],
-                    responses: { '200': { description: 'Report data' } },
+                    responses: { '200': { description: __tr("Report data") } },
                 },
             },
 
@@ -164,13 +167,13 @@ export async function GET(request: NextRequest) {
             '/r/{code}': {
                 get: {
                     tags: ['Tracking'],
-                    summary: 'Referral redirect (deep linking supported)',
+                    summary: __tr("Referral redirect (deep linking supported)"),
                     parameters: [
-                        { name: 'code', in: 'path', required: true, schema: { type: 'string' }, description: 'Referral code' },
-                        { name: 'dest', in: 'query', schema: { type: 'string', format: 'uri' }, description: 'Deep link destination URL' },
+                        { name: 'code', in: 'path', required: true, schema: { type: 'string' }, description: __tr("Referral code") },
+                        { name: 'dest', in: 'query', schema: { type: 'string', format: 'uri' }, description: __tr("Deep link destination URL") },
                     ],
                     responses: {
-                        '302': { description: 'Redirects to target URL with ref and attr params, sets attribution cookie' },
+                        '302': { description: __tr("Redirects to target URL with ref and attr params, sets attribution cookie") },
                     },
                 },
             },
@@ -179,12 +182,12 @@ export async function GET(request: NextRequest) {
             '/api/webhook/conversion': {
                 post: {
                     tags: ['Webhooks'],
-                    summary: 'Receive conversion events from external services',
+                    summary: __tr("Receive conversion events from external services"),
                     requestBody: {
                         required: true,
                         content: { 'application/json': { schema: { $ref: '#/components/schemas/ConversionWebhook' } } },
                     },
-                    responses: { '200': { description: 'Conversion processed' } },
+                    responses: { '200': { description: __tr("Conversion processed") } },
                 },
             },
         },
@@ -239,7 +242,7 @@ export async function GET(request: NextRequest) {
                     properties: {
                         name: { type: 'string', minLength: 2 },
                         email: { type: 'string', format: 'email' },
-                        password: { type: 'string', minLength: 8, description: 'Optional — auto-generated if omitted' },
+                        password: { type: 'string', minLength: 8, description: __tr("Optional — auto-generated if omitted") },
                     },
                 },
                 PayoutRequest: {
@@ -306,3 +309,5 @@ export async function GET(request: NextRequest) {
         },
     });
 }
+
+export const GET = withSystemLocale(GETHandler);

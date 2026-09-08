@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -14,9 +17,9 @@ async function verifyAdmin(request: NextRequest) {
 }
 
 // GET: List all invoices
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const { searchParams } = new URL(request.url);
@@ -31,21 +34,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, invoices });
   } catch (error) {
     console.error('Admin invoices GET error:', error);
-    return NextResponse.json({ error: 'Failed to fetch invoices' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to fetch invoices") }, { status: 500 });
   }
 }
 
 // POST: Create invoice
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { affiliateId, payoutId, amountCents, taxCents, lineItems, billingInfo, notes, dueAt } = body;
 
     if (!affiliateId || !amountCents) {
-      return NextResponse.json({ error: 'Affiliate ID and amount are required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Affiliate ID and amount are required") }, { status: 400 });
     }
 
     // Generate invoice number
@@ -64,7 +67,7 @@ export async function POST(request: NextRequest) {
         amountCents,
         taxCents: tax,
         totalCents: total,
-        lineItems: lineItems || [{ description: 'Affiliate commission payout', qty: 1, unitPrice: amountCents, total: amountCents }],
+        lineItems: lineItems || [{ description: __tr("Affiliate commission payout"), qty: 1, unitPrice: amountCents, total: amountCents }],
         billingInfo: billingInfo || {},
         notes: notes || null,
         status: 'ISSUED',
@@ -76,21 +79,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, invoice });
   } catch (error) {
     console.error('Admin invoices POST error:', error);
-    return NextResponse.json({ error: 'Failed to create invoice' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to create invoice") }, { status: 500 });
   }
 }
 
 // PUT: Update invoice status
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { id, status, paidAt, ...updates } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'Invoice ID required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Invoice ID required") }, { status: 400 });
     }
 
     const data: any = { ...updates };
@@ -105,36 +108,41 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true, invoice });
   } catch (error) {
     console.error('Admin invoices PUT error:', error);
-    return NextResponse.json({ error: 'Failed to update invoice' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to update invoice") }, { status: 500 });
   }
 }
 
 // DELETE: Delete invoice (only DRAFT status)
-export async function DELETE(request: NextRequest) {
+ async function DELETEHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: 'Invoice ID required' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Invoice ID required") }, { status: 400 });
     }
 
     const invoice = await prisma.invoice.findUnique({ where: { id } });
     if (!invoice) {
-      return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
+      return NextResponse.json({ error: __tr("Invoice not found") }, { status: 404 });
     }
 
     if (invoice.status === 'PAID') {
-      return NextResponse.json({ error: 'Cannot delete a paid invoice' }, { status: 400 });
+      return NextResponse.json({ error: __tr("Cannot delete a paid invoice") }, { status: 400 });
     }
 
     await prisma.invoice.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Admin invoices DELETE error:', error);
-    return NextResponse.json({ error: 'Failed to delete invoice' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to delete invoice") }, { status: 500 });
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);
+export const PUT = withSystemLocale(PUTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

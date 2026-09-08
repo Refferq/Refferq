@@ -1,3 +1,5 @@
+
+import { t as __tr } from "@/i18n";
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 
@@ -84,7 +86,7 @@ export async function triggerWebhook(eventType: WebhookEventType, eventData: any
       // SSRF protection: skip webhooks with unsafe URLs
       if (!isUrlSafe(webhook.url)) {
         console.warn(`Webhook ${webhook.id} skipped: URL targets a private/internal address`);
-        results.push({ webhookId: webhook.id, success: false, error: 'URL targets a blocked address' });
+        results.push({ webhookId: webhook.id, success: false, error: __tr("URL targets a blocked address") });
         continue;
       }
 
@@ -192,7 +194,7 @@ export async function triggerWebhook(eventType: WebhookEventType, eventData: any
             where: { id: log.id },
             data: {
               status: 'FAILED',
-              error: error.message || 'Network error',
+              error: error.message || __tr("Network error"),
               completedAt: new Date()
             }
           })

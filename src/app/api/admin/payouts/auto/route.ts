@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -13,10 +16,10 @@ async function verifyAdmin(request: NextRequest) {
 }
 
 // POST - Process auto-payouts for all eligible affiliates
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   const admin = await verifyAdmin(request);
   if (!admin) {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+    return NextResponse.json({ success: false, error: __tr("Unauthorized") }, { status: 403 });
   }
 
   try {
@@ -41,7 +44,7 @@ export async function POST(request: NextRequest) {
     if (eligibleAffiliates.length === 0) {
       return NextResponse.json({
         success: true,
-        message: 'No affiliates eligible for auto-payout',
+        message: __tr("No affiliates eligible for auto-payout"),
         processed: 0,
         totalAmountCents: 0,
       });
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
             amountCents: payoutAmountCents,
             status: 'PENDING',
             method: 'AUTO',
-            notes: 'Auto-payout processed',
+            notes: __tr("Auto-payout processed"),
             createdBy: admin.id,
           },
         });
@@ -104,7 +107,7 @@ export async function POST(request: NextRequest) {
           data: {
             action: 'AUTO_PAYOUT_CREATED',
             actorId: admin.id,
-            objectType: 'payout',
+            objectType: __tr("payout"),
             objectId: payout.id,
             payload: {
               affiliateId: affiliate.id,
@@ -135,22 +138,22 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Auto-payout processed for ${totalProcessed} affiliates`,
+      message: __tr("Auto-payout processed for {0} affiliates", [totalProcessed]),
       processed: totalProcessed,
       totalAmountCents,
       results,
     });
   } catch (error) {
     console.error('Auto-payout error:', error);
-    return NextResponse.json({ success: false, error: 'Failed to process auto-payouts' }, { status: 500 });
+    return NextResponse.json({ success: false, error: __tr("Failed to process auto-payouts") }, { status: 500 });
   }
 }
 
 // GET - Get auto-payout configuration and status
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   const admin = await verifyAdmin(request);
   if (!admin) {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+    return NextResponse.json({ success: false, error: __tr("Unauthorized") }, { status: 403 });
   }
 
   try {
@@ -200,6 +203,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Auto-payout config error:', error);
-    return NextResponse.json({ success: false, error: 'Failed to fetch config' }, { status: 500 });
+    return NextResponse.json({ success: false, error: __tr("Failed to fetch config") }, { status: 500 });
   }
 }
+
+export const POST = withSystemLocale(POSTHandler);
+export const GET = withSystemLocale(GETHandler);

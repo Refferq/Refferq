@@ -1,8 +1,11 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -13,14 +16,14 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -62,13 +65,13 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Partner groups API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch partner groups' },
+      { error: __tr("Failed to fetch partner groups") },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -79,14 +82,14 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -97,14 +100,14 @@ export async function POST(request: NextRequest) {
     // Validation
     if (!name || typeof name !== 'string') {
       return NextResponse.json(
-        { error: 'Partner group name is required' },
+        { error: __tr("Partner group name is required") },
         { status: 400 }
       );
     }
 
     if (!commissionRate || typeof commissionRate !== 'number' || commissionRate <= 0 || commissionRate > 1) {
       return NextResponse.json(
-        { error: 'Commission rate must be a number between 0 and 1 (e.g., 0.20 for 20%)' },
+        { error: __tr("Commission rate must be a number between 0 and 1 (e.g., 0.20 for 20%)") },
         { status: 400 }
       );
     }
@@ -130,20 +133,20 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Partner group created successfully',
+      message: __tr("Partner group created successfully"),
       partnerGroup
     });
 
   } catch (error) {
     console.error('Create partner group error:', error);
     return NextResponse.json(
-      { error: 'Failed to create partner group' },
+      { error: __tr("Failed to create partner group") },
       { status: 500 }
     );
   }
 }
 
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -154,14 +157,14 @@ export async function PUT(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -171,7 +174,7 @@ export async function PUT(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Partner group ID is required' },
+        { error: __tr("Partner group ID is required") },
         { status: 400 }
       );
     }
@@ -179,7 +182,7 @@ export async function PUT(request: NextRequest) {
     // Validation
     if (commissionRate && (typeof commissionRate !== 'number' || commissionRate <= 0 || commissionRate > 1)) {
       return NextResponse.json(
-        { error: 'Commission rate must be a number between 0 and 1' },
+        { error: __tr("Commission rate must be a number between 0 and 1") },
         { status: 400 }
       );
     }
@@ -209,20 +212,20 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Partner group updated successfully',
+      message: __tr("Partner group updated successfully"),
       partnerGroup
     });
 
   } catch (error) {
     console.error('Update partner group error:', error);
     return NextResponse.json(
-      { error: 'Failed to update partner group' },
+      { error: __tr("Failed to update partner group") },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(request: NextRequest) {
+ async function DELETEHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -233,14 +236,14 @@ export async function DELETE(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -250,7 +253,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Partner group ID is required' },
+        { error: __tr("Partner group ID is required") },
         { status: 400 }
       );
     }
@@ -262,7 +265,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!group) {
       return NextResponse.json(
-        { error: 'Partner group not found' },
+        { error: __tr("Partner group not found") },
         { status: 404 }
       );
     }
@@ -274,7 +277,7 @@ export async function DELETE(request: NextRequest) {
 
     if (memberCount > 0) {
       return NextResponse.json(
-        { error: `Cannot delete partner group with ${memberCount} active member(s)` },
+        { error: __tr("Cannot delete partner group with {0} active member(s)", [memberCount]) },
         { status: 400 }
       );
     }
@@ -286,14 +289,19 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Partner group deleted successfully'
+      message: __tr("Partner group deleted successfully")
     });
 
   } catch (error) {
     console.error('Delete partner group error:', error);
     return NextResponse.json(
-      { error: 'Failed to delete partner group' },
+      { error: __tr("Failed to delete partner group") },
       { status: 500 }
     );
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);
+export const PUT = withSystemLocale(PUTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

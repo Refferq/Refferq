@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import * as bcrypt from 'bcryptjs';
@@ -8,7 +11,7 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET!
 );
 
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     // Rate limit: 5 login attempts per minute per IP
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
@@ -17,7 +20,7 @@ export async function POST(request: NextRequest) {
     const rateLimit = await checkRateLimit(ip, 'auth/login', 5, 60 * 1000);
     if (!rateLimit.allowed) {
       return NextResponse.json(
-        { success: false, message: 'Too many login attempts. Please try again later.' },
+        { success: false, message: __tr("Too many login attempts. Please try again later.") },
         {
           status: 429,
           headers: {
@@ -35,7 +38,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!email || !password) {
       return NextResponse.json(
-        { success: false, message: 'Email and password are required' },
+        { success: false, message: __tr("Email and password are required") },
         { status: 400 }
       );
     }
@@ -47,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, message: 'Invalid email or password' },
+        { success: false, message: __tr("Invalid email or password") },
         { status: 401 }
       );
     }
@@ -55,7 +58,7 @@ export async function POST(request: NextRequest) {
     // Check user status - use generic message to prevent account status enumeration
     if (user.status !== 'ACTIVE') {
       return NextResponse.json(
-        { success: false, message: 'Unable to log in. Please contact support if you need assistance.' },
+        { success: false, message: __tr("Unable to log in. Please contact support if you need assistance.") },
         { status: 403 }
       );
     }
@@ -64,7 +67,7 @@ export async function POST(request: NextRequest) {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json(
-        { success: false, message: 'Invalid email or password' },
+        { success: false, message: __tr("Invalid email or password") },
         { status: 401 }
       );
     }
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     const response = NextResponse.json({
       success: true,
-      message: 'Login successful',
+      message: __tr("Login successful"),
       user: userData,
     });
 
@@ -103,23 +106,25 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Login API error:', error);
     return NextResponse.json(
-      { success: false, message: 'Login failed' },
+      { success: false, message: __tr("Login failed") },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE() {
+ async function DELETEHandler() {
   try {
     return NextResponse.json({
       success: true,
-      message: 'Logged out successfully',
+      message: __tr("Logged out successfully"),
     });
   } catch (error) {
     console.error('Logout API error:', error);
     return NextResponse.json(
-      { success: false, message: 'Logout failed' },
+      { success: false, message: __tr("Logout failed") },
       { status: 500 }
     );
   }
 }
+export const POST = withSystemLocale(POSTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

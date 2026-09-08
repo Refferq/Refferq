@@ -1,10 +1,13 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { UserStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
 
 // Batch update affiliates
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -14,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -24,14 +27,14 @@ export async function POST(request: NextRequest) {
 
     if (!affiliateIds || !Array.isArray(affiliateIds) || affiliateIds.length === 0) {
       return NextResponse.json(
-        { error: 'affiliateIds array is required' },
+        { error: __tr("affiliateIds array is required") },
         { status: 400 }
       );
     }
 
     if (!action) {
       return NextResponse.json(
-        { error: 'action is required (changeStatus, changeGroup, delete)' },
+        { error: __tr("action is required (changeStatus, changeGroup, delete)") },
         { status: 400 }
       );
     }
@@ -42,7 +45,7 @@ export async function POST(request: NextRequest) {
       case 'changeStatus':
         if (!status) {
           return NextResponse.json(
-            { error: 'status is required for changeStatus action' },
+            { error: __tr("status is required for changeStatus action") },
             { status: 400 }
           );
         }
@@ -51,7 +54,7 @@ export async function POST(request: NextRequest) {
         const validStatuses = ['PENDING', 'ACTIVE', 'INACTIVE', 'SUSPENDED'];
         if (!validStatuses.includes(status)) {
           return NextResponse.json(
-            { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
+            { error: __tr("Invalid status. Must be one of: {0}", [validStatuses.join(', ')]) },
             { status: 400 }
           );
         }
@@ -88,14 +91,14 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          message: `Updated ${updatedCount} affiliate(s) status to ${status}`,
+          message: __tr("Updated {0} affiliate(s) status to {1}", [updatedCount, status]),
           count: updatedCount
         });
 
       case 'changeGroup':
         if (!group) {
           return NextResponse.json(
-            { error: 'group is required for changeGroup action' },
+            { error: __tr("group is required for changeGroup action") },
             { status: 400 }
           );
         }
@@ -134,7 +137,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          message: `Updated ${updatedCount} affiliate(s) group to ${group}`,
+          message: __tr("Updated {0} affiliate(s) group to {1}", [updatedCount, group]),
           count: updatedCount
         });
 
@@ -170,13 +173,13 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          message: `Deleted ${updatedCount} affiliate(s)`,
+          message: __tr("Deleted {0} affiliate(s)", [updatedCount]),
           count: updatedCount
         });
 
       default:
         return NextResponse.json(
-          { error: 'Invalid action. Must be: changeStatus, changeGroup, or delete' },
+          { error: __tr("Invalid action. Must be: changeStatus, changeGroup, or delete") },
           { status: 400 }
         );
     }
@@ -184,8 +187,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Batch update affiliates error:', error);
     return NextResponse.json(
-      { error: 'Failed to process batch update' },
+      { error: __tr("Failed to process batch update") },
       { status: 500 }
     );
   }
 }
+
+export const POST = withSystemLocale(POSTHandler);

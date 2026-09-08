@@ -1,3 +1,8 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { getIntlLocale as __locale } from "@/i18n";
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -13,9 +18,9 @@ async function verifyAdmin(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const url = new URL(request.url);
@@ -66,11 +71,11 @@ export async function GET(request: NextRequest) {
         weekStart.setDate(weekStart.getDate() - weekStart.getDay());
         weekStart.setHours(0, 0, 0, 0);
         cohortKey = weekStart.toISOString().slice(0, 10);
-        cohortLabel = `Week of ${weekStart.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`;
+        cohortLabel = __tr("Week of {0}", [weekStart.toLocaleDateString(__locale(), { month: 'short', day: 'numeric' })]);
         cohortStart = weekStart;
       } else {
         cohortKey = `${joinDate.getFullYear()}-${String(joinDate.getMonth() + 1).padStart(2, '0')}`;
-        cohortLabel = joinDate.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+        cohortLabel = joinDate.toLocaleDateString(__locale(), { month: 'long', year: 'numeric' });
         cohortStart = new Date(joinDate.getFullYear(), joinDate.getMonth(), 1);
       }
 
@@ -152,6 +157,8 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Cohort analysis error:', error);
-    return NextResponse.json({ error: 'Failed to generate cohort analysis' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to generate cohort analysis") }, { status: 500 });
   }
 }
+
+export const GET = withSystemLocale(GETHandler);

@@ -1,3 +1,6 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
@@ -22,9 +25,9 @@ function generateApiKey(): { key: string; prefix: string; keyHash: string } {
 }
 
 // GET - List API keys (masked)
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const apiKeys = await prisma.apiKey.findMany({
@@ -56,20 +59,20 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('API keys GET error:', error);
-    return NextResponse.json({ error: 'Failed to fetch API keys' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to fetch API keys") }, { status: 500 });
   }
 }
 
 // POST - Create a new API key
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { name, scopes, rateLimit, expiresAt } = body;
 
-    if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    if (!name) return NextResponse.json({ error: __tr("Name is required") }, { status: 400 });
 
     const { key, prefix, keyHash } = generateApiKey();
 
@@ -102,20 +105,20 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('API keys POST error:', error);
-    return NextResponse.json({ error: 'Failed to create API key' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to create API key") }, { status: 500 });
   }
 }
 
 // PUT - Update an API key (toggle active, change rate limit, etc.)
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const body = await request.json();
     const { id, ...updates } = body;
 
-    if (!id) return NextResponse.json({ error: 'API key ID is required' }, { status: 400 });
+    if (!id) return NextResponse.json({ error: __tr("API key ID is required") }, { status: 400 });
 
     // Only allow updating certain fields
     const allowedUpdates: Record<string, unknown> = {};
@@ -142,23 +145,28 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error('API keys PUT error:', error);
-    return NextResponse.json({ error: 'Failed to update API key' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to update API key") }, { status: 500 });
   }
 }
 
 // DELETE - Revoke an API key
-export async function DELETE(request: NextRequest) {
+ async function DELETEHandler(request: NextRequest) {
   const user = await verifyAdmin(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: __tr("Unauthorized") }, { status: 401 });
 
   try {
     const { id } = await request.json();
-    if (!id) return NextResponse.json({ error: 'API key ID is required' }, { status: 400 });
+    if (!id) return NextResponse.json({ error: __tr("API key ID is required") }, { status: 400 });
 
     await prisma.apiKey.delete({ where: { id } });
-    return NextResponse.json({ success: true, message: 'API key revoked' });
+    return NextResponse.json({ success: true, message: __tr("API key revoked") });
   } catch (error) {
     console.error('API keys DELETE error:', error);
-    return NextResponse.json({ error: 'Failed to revoke API key' }, { status: 500 });
+    return NextResponse.json({ error: __tr("Failed to revoke API key") }, { status: 500 });
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);
+export const PUT = withSystemLocale(PUTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

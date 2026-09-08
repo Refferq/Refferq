@@ -1,8 +1,11 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -12,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -143,14 +146,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       analytics,
-      period: `Last ${days} days`
+      period: __tr("Last {0} days", [days])
     });
 
   } catch (error) {
     console.error('Analytics API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch analytics' },
+      { error: __tr("Failed to fetch analytics") },
       { status: 500 }
     );
   }
 }
+export const GET = withSystemLocale(GETHandler);

@@ -1,8 +1,14 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+import { reportCSV, reportValue } from "@/i18n";
+
+import { label as __label } from "@/i18n";
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -12,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -47,7 +53,7 @@ export async function GET(request: NextRequest) {
       });
 
       reportData = {
-        type: 'Affiliate Performance Report',
+        type: __tr("Affiliate Performance Report"),
         generatedAt: new Date().toISOString(),
         data: affiliates.map(affiliate => ({
           affiliateId: affiliate.id,
@@ -81,7 +87,7 @@ export async function GET(request: NextRequest) {
       });
 
       reportData = {
-        type: 'Referrals Report',
+        type: __tr("Referrals Report"),
         generatedAt: new Date().toISOString(),
         data: referrals.map(referral => ({
           referralId: referral.id,
@@ -116,7 +122,7 @@ export async function GET(request: NextRequest) {
       });
 
       reportData = {
-        type: 'Commissions Report',
+        type: __tr("Commissions Report"),
         generatedAt: new Date().toISOString(),
         data: commissions.map(commission => ({
           commissionId: commission.id,
@@ -153,7 +159,7 @@ export async function GET(request: NextRequest) {
       });
 
       reportData = {
-        type: 'Payouts Report',
+        type: __tr("Payouts Report"),
         generatedAt: new Date().toISOString(),
         data: payouts.map(payout => ({
           payoutId: payout.id,
@@ -185,9 +191,9 @@ export async function GET(request: NextRequest) {
       });
 
       reportData = {
-        type: 'Summary Report',
+        type: __tr("Summary Report"),
         generatedAt: new Date().toISOString(),
-        period: startDate && endDate ? `${startDate} to ${endDate}` : 'All time',
+        period: startDate && endDate ? __tr("{0} to {1}", [startDate, endDate]) : __tr("All time"),
         summary: {
           totalAffiliates,
           totalReferrals,
@@ -221,21 +227,14 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Reports API error:', error);
     return NextResponse.json(
-      { error: 'Failed to generate report' },
+      { error: __tr("Failed to generate report") },
       { status: 500 }
     );
   }
 }
 
-function convertToCSV(data: any[]): string {
-  if (!data || data.length === 0) return '';
-  
-  const headers = Object.keys(data[0]).join(',');
-  const rows = data.map(row => 
-    Object.values(row).map(val => 
-      typeof val === 'string' && val.includes(',') ? `"${val}"` : val
-    ).join(',')
-  );
-  
-  return [headers, ...rows].join('\n');
+function convertToCSV(data: Record<string, unknown>[]): string {
+  return reportCSV(data);
 }
+
+export const GET = withSystemLocale(GETHandler);

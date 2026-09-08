@@ -1,8 +1,12 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { label as __label } from "@/i18n";
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 
-export async function PUT(
+ async function PUTHandler(
   request: NextRequest, 
   context: { params: Promise<{ id: string }> }
 ) {
@@ -16,7 +20,7 @@ export async function PUT(
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -26,7 +30,7 @@ export async function PUT(
 
     if (!action || !['approve', 'reject'].includes(action)) {
       return NextResponse.json(
-        { error: 'Invalid action' },
+        { error: __tr("Invalid action") },
         { status: 400 }
       );
     }
@@ -42,7 +46,7 @@ export async function PUT(
 
     if (!referral) {
       return NextResponse.json(
-        { error: 'Referral not found' },
+        { error: __tr("Referral not found") },
         { status: 404 }
       );
     }
@@ -94,21 +98,21 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      message: `Referral ${action}d successfully`,
+      message: __tr(action === "approve" ? "Referral approved successfully" : "Referral rejected successfully"),
       referral: updatedReferral
     });
 
   } catch (error) {
     console.error('Referral approval error:', error);
     return NextResponse.json(
-      { error: 'Failed to process referral' },
+      { error: __tr("Failed to process referral") },
       { status: 500 }
     );
   }
 }
 
 // Add PATCH method for updating referral/customer details
-export async function PATCH(
+ async function PATCHHandler(
   request: NextRequest, 
   context: { params: Promise<{ id: string }> }
 ) {
@@ -122,7 +126,7 @@ export async function PATCH(
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -138,7 +142,7 @@ export async function PATCH(
 
     if (!referral) {
       return NextResponse.json(
-        { error: 'Referral not found' },
+        { error: __tr("Referral not found") },
         { status: 404 }
       );
     }
@@ -189,7 +193,7 @@ export async function PATCH(
 
       return NextResponse.json({
         success: true,
-        message: `Referral ${action}d successfully`,
+        message: __tr(action === "approve" ? "Referral approved successfully" : "Referral rejected successfully"),
         referral: updatedReferral
       });
     }
@@ -213,21 +217,21 @@ export async function PATCH(
 
     return NextResponse.json({
       success: true,
-      message: 'Customer updated successfully',
+      message: __tr("Customer updated successfully"),
       referral: updatedReferral
     });
 
   } catch (error) {
     console.error('Update referral error:', error);
     return NextResponse.json(
-      { error: 'Failed to update referral' },
+      { error: __tr("Failed to update referral") },
       { status: 500 }
     );
   }
 }
 
 // Add DELETE method to allow admins to delete referrals
-export async function DELETE(
+ async function DELETEHandler(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
@@ -241,7 +245,7 @@ export async function DELETE(
 
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -253,7 +257,7 @@ export async function DELETE(
 
     if (!referral) {
       return NextResponse.json(
-        { error: 'Referral not found' },
+        { error: __tr("Referral not found") },
         { status: 404 }
       );
     }
@@ -265,14 +269,17 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Referral deleted successfully'
+      message: __tr("Referral deleted successfully")
     });
 
   } catch (error) {
     console.error('Delete referral error:', error);
     return NextResponse.json(
-      { error: 'Failed to delete referral' },
+      { error: __tr("Failed to delete referral") },
       { status: 500 }
     );
   }
 }
+export const PUT = withSystemLocale(PUTHandler);
+export const PATCH = withSystemLocale(PATCHHandler);
+export const DELETE = withSystemLocale(DELETEHandler);

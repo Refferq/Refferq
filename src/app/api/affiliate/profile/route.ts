@@ -1,7 +1,10 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
 
@@ -15,14 +18,14 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'AFFILIATE') {
       return NextResponse.json(
-        { error: 'Access denied. Affiliate role required.' },
+        { error: __tr("Access denied. Affiliate role required.") },
         { status: 403 }
       );
     }
@@ -30,7 +33,7 @@ export async function GET(request: NextRequest) {
     const affiliate = user.affiliate as any;
     if (!affiliate) {
       return NextResponse.json(
-        { error: 'Affiliate profile not found' },
+        { error: __tr("Affiliate profile not found") },
         { status: 404 }
       );
     }
@@ -118,13 +121,13 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Affiliate profile API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch affiliate profile' },
+      { error: __tr("Failed to fetch affiliate profile") },
       { status: 500 }
     );
   }
 }
 
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
 
@@ -138,14 +141,14 @@ export async function PUT(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'AFFILIATE') {
       return NextResponse.json(
-        { error: 'Access denied. Affiliate role required.' },
+        { error: __tr("Access denied. Affiliate role required.") },
         { status: 403 }
       );
     }
@@ -165,7 +168,7 @@ export async function PUT(request: NextRequest) {
       });
       if (existingUser && existingUser.id !== user.id) {
         return NextResponse.json(
-          { error: 'Email already in use' },
+          { error: __tr("Email already in use") },
           { status: 400 }
         );
       }
@@ -198,13 +201,15 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Profile updated successfully',
+      message: __tr("Profile updated successfully"),
     });
   } catch (error) {
     console.error('Affiliate profile update API error:', error);
     return NextResponse.json(
-      { error: 'Failed to update profile' },
+      { error: __tr("Failed to update profile") },
       { status: 500 }
     );
   }
 }
+export const GET = withSystemLocale(GETHandler);
+export const PUT = withSystemLocale(PUTHandler);

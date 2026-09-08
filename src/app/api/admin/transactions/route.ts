@@ -1,26 +1,29 @@
+import { withSystemLocale } from '@/i18n/runtime.server';
+
+import { t as __tr } from "@/i18n";
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 
 // GET - Fetch all transactions (Admin only)
-export async function GET(request: NextRequest) {
+ async function GETHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
-    
+
     const user = await prisma.user.findUnique({
       where: { id: userId }
     });
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -80,9 +83,9 @@ export async function GET(request: NextRequest) {
             name: affiliate.user.name,
             email: affiliate.user.email,
             referralCode: affiliate.referralCode,
-            partnerGroup: affiliate.partnerGroupId ? 
-              (affiliate.partnerGroup?.name || 'Default') : 
-              'Default'
+            partnerGroup: affiliate.partnerGroupId ?
+              (affiliate.partnerGroup?.name || __tr("Default")) :
+              __tr("Default")
           }
         };
       })
@@ -91,31 +94,31 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Get transactions API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch transactions' },
+      { error: __tr("Failed to fetch transactions") },
       { status: 500 }
     );
   }
 }
 
 // POST - Create new transaction
-export async function POST(request: NextRequest) {
+ async function POSTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
-    
+
     const user = await prisma.user.findUnique({
       where: { id: userId }
     });
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -133,7 +136,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!referralId || !amount) {
       return NextResponse.json(
-        { error: 'Referral ID and amount are required' },
+        { error: __tr("Referral ID and amount are required") },
         { status: 400 }
       );
     }
@@ -148,7 +151,7 @@ export async function POST(request: NextRequest) {
 
     if (!referral) {
       return NextResponse.json(
-        { error: 'Referral not found' },
+        { error: __tr("Referral not found") },
         { status: 404 }
       );
     }
@@ -216,7 +219,7 @@ export async function POST(request: NextRequest) {
       if (affiliateUser?.email) {
         const { emailService } = await import('@/lib/email');
         await emailService.sendTransactionCreatedEmail(affiliateUser.email, {
-          affiliateName: affiliate.name || affiliateUser.name || 'Partner',
+          affiliateName: affiliate.name || affiliateUser.name || __tr("Partner"),
           customerName: referral.leadName,
           amountCents,
           commissionCents,
@@ -232,37 +235,37 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       transaction,
-      message: 'Transaction created successfully'
+      message: __tr("Transaction created successfully")
     });
 
   } catch (error) {
     console.error('Create transaction API error:', error);
     return NextResponse.json(
-      { error: 'Failed to create transaction' },
+      { error: __tr("Failed to create transaction") },
       { status: 500 }
     );
   }
 }
 
 // PUT - Update transaction
-export async function PUT(request: NextRequest) {
+ async function PUTHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
-    
+
     const user = await prisma.user.findUnique({
       where: { id: userId }
     });
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -279,7 +282,7 @@ export async function PUT(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Transaction ID is required' },
+        { error: __tr("Transaction ID is required") },
         { status: 400 }
       );
     }
@@ -298,37 +301,37 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       transaction,
-      message: 'Transaction updated successfully'
+      message: __tr("Transaction updated successfully")
     });
 
   } catch (error) {
     console.error('Update transaction API error:', error);
     return NextResponse.json(
-      { error: 'Failed to update transaction' },
+      { error: __tr("Failed to update transaction") },
       { status: 500 }
     );
   }
 }
 
 // DELETE - Delete transaction
-export async function DELETE(request: NextRequest) {
+ async function DELETEHandler(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')!;
-    
+
     const user = await prisma.user.findUnique({
       where: { id: userId }
     });
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: __tr("User not found") },
         { status: 401 }
       );
     }
 
     if (user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: __tr("Admin access required") },
         { status: 403 }
       );
     }
@@ -338,7 +341,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Transaction ID is required' },
+        { error: __tr("Transaction ID is required") },
         { status: 400 }
       );
     }
@@ -349,14 +352,19 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Transaction deleted successfully'
+      message: __tr("Transaction deleted successfully")
     });
 
   } catch (error) {
     console.error('Delete transaction API error:', error);
     return NextResponse.json(
-      { error: 'Failed to delete transaction' },
+      { error: __tr("Failed to delete transaction") },
       { status: 500 }
     );
   }
 }
+
+export const GET = withSystemLocale(GETHandler);
+export const POST = withSystemLocale(POSTHandler);
+export const PUT = withSystemLocale(PUTHandler);
+export const DELETE = withSystemLocale(DELETEHandler);
