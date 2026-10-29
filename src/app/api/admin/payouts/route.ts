@@ -75,9 +75,8 @@ export async function GET(request: NextRequest) {
         affiliate: {
           select: {
             id: true,
-            name: true,
-            email: true,
             referralCode: true,
+            user: { select: { name: true, email: true } },
           },
         },
       },
@@ -90,8 +89,8 @@ export async function GET(request: NextRequest) {
     const formattedPayouts = payouts.map((payout: any) => ({
       id: payout.id,
       affiliateId: payout.affiliateId,
-      affiliateName: payout.affiliate.name,
-      affiliateEmail: payout.affiliate.email,
+      affiliateName: payout.affiliate.user.name,
+      affiliateEmail: payout.affiliate.user.email,
       amountCents: payout.amountCents,
       commissionCount: payout.commissionCount || 0,
       status: payout.status,
@@ -255,7 +254,7 @@ export async function POST(request: NextRequest) {
       if (affiliateUser?.email) {
         const { emailService } = await import('@/lib/email');
         await emailService.sendPayoutCreatedEmail(affiliateUser.email, {
-          affiliateName: payout.affiliate.name || affiliateUser.name || 'Partner',
+          affiliateName: payout.affiliate.user.name || affiliateUser.name || 'Partner',
           amountCents: totalAmountCents,
           commissionCount: commissions.length,
           payoutId: payout.id,
@@ -272,8 +271,8 @@ export async function POST(request: NextRequest) {
       payout: {
         id: payout.id,
         affiliateId: payout.affiliateId,
-        affiliateName: payout.affiliate.name,
-        affiliateEmail: payout.affiliate.email,
+        affiliateName: payout.affiliate.user.name,
+        affiliateEmail: payout.affiliate.user.email,
         amountCents: payout.amountCents,
         commissionCount: payout.commissionCount,
         status: payout.status,
@@ -336,10 +335,7 @@ export async function PUT(request: NextRequest) {
       data: updateData,
       include: {
         affiliate: {
-          select: {
-            name: true,
-            email: true,
-          },
+          select: { user: { select: { name: true, email: true } } },
         },
       },
     });
@@ -365,7 +361,7 @@ export async function PUT(request: NextRequest) {
         if (affiliateUser?.email) {
           const { emailService } = await import('@/lib/email');
           await emailService.sendPayoutCompletedEmail(affiliateUser.email, {
-            affiliateName: payout.affiliate.name || affiliateUser.name || 'Partner',
+            affiliateName: payout.affiliate.user.name || affiliateUser.name || 'Partner',
             amountCents: payout.amountCents,
             commissionCount: payout.commissionCount,
             payoutId: payout.id,
@@ -384,8 +380,8 @@ export async function PUT(request: NextRequest) {
       payout: {
         id: payout.id,
         affiliateId: payout.affiliateId,
-        affiliateName: payout.affiliate.name,
-        affiliateEmail: payout.affiliate.email,
+        affiliateName: payout.affiliate.user.name,
+        affiliateEmail: payout.affiliate.user.email,
         amountCents: payout.amountCents,
         commissionCount: payout.commissionCount,
         status: payout.status,
