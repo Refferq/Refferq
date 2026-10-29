@@ -37,47 +37,19 @@ class AuthService {
    */
   async register(data: RegisterData): Promise<{ success: boolean; message: string; user?: User }> {
     try {
-      // Check if user already exists
-      const existingUser = await prisma.user.findUnique({
-        where: { email: data.email }
-      });
-
-      if (existingUser) {
-        return { success: false, message: 'User already exists with this email' };
-      }
-
-      // Hash password
+      const email = data.email.trim().toLowerCase();
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      if (existingUser) return { success: false, message: 'An account with this email already exists. Sign in or request another code.' };
       const hashedPassword = await bcrypt.hash(data.password, 12);
-
-      // Determine initial status based on role
-      const userRoleLower = data.role.toLowerCase();
-      const initialStatus = userRoleLower === 'admin' ? 'ACTIVE' : 'PENDING';
-
-      // Create user using prisma client directly or db service
-      // We'll use prisma client here since we've already hashed the password
-      const user = await prisma.user.create({
-        data: {
-          email: data.email,
-          name: data.name,
-          password: hashedPassword,
-          role: data.role.toUpperCase() as Role,
-          status: initialStatus as UserStatus
-        }
-      });
-
-      // If affiliate, create affiliate record
-      if (userRoleLower === 'affiliate') {
-        const referralCode = this.generateReferralCode(data.name);
-
-        await prisma.affiliate.create({
-          data: {
-            userId: user.id,
-            referralCode,
-            payoutDetails: {},
-            balanceCents: 0
-          }
+      const user = await prisma.$transaction(async tx => {
+        const created = await tx.user.create({
+          data: { email, name: data.name.trim(), password: hashedPassword, role: 'AFFILIATE', status: 'PENDING' },
         });
-      }
+        await tx.affiliate.create({
+          data: { userId: created.id, referralCode: this.generateReferralCode(data.name), payoutDetails: {}, balanceCents: 0 },
+        });
+        return created;
+      });
 
       return {
         success: true,
