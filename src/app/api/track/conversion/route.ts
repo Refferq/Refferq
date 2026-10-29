@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
         referralId: referral?.id || null,
         eventType: 'PURCHASE',
         amountCents,
-        currency: currency || 'USD',
+        currency: currency || 'EGP',
         status: 'PENDING',
         eventMetadata: {
           orderId: orderId || null,
