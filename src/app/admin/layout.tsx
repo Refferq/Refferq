@@ -34,6 +34,7 @@ import {
   Users,
   UserCheck,
   Wallet,
+  Truck,
   Mail,
   Settings,
   Sliders,
@@ -55,6 +56,7 @@ const mainNavItems = [
   { title: 'Partners', url: '/admin/partners', icon: Users },
   { title: 'Customers', url: '/admin/customers', icon: UserCheck },
   { title: 'Payouts', url: '/admin/payouts', icon: Wallet },
+  { title: 'COD Reconciliation', url: '/admin/cod', icon: Truck },
   { title: 'Invoices', url: '/admin/invoices', icon: FileText },
   { title: 'Emails', url: '/admin/emails', icon: Mail },
 ];
