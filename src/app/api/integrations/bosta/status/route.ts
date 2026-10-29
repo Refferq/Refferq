@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
+import { randomUUID } from 'node:crypto';
 import { normalizeBostaStatus, verifyBostaKey } from '@/lib/hv-cod-connector';
 
 export async function POST(req: NextRequest) {
@@ -10,26 +12,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error:'Unauthorized'}, {status:401});
   try {
     const update = normalizeBostaStatus(await req.json());
-    const existing = await prisma.hvCodOrder.findUnique({where:{orderName:update.orderName}});
-    if (!existing || !existing.isCod) return NextResponse.json({error:'Unknown COD order'}, {status:409});
-    if (existing.bostaDeliveryId && existing.bostaDeliveryId !== update.deliveryId)
-      return NextResponse.json({error:'Different delivery ID'}, {status:409});
-    if (existing.bostaUpdatedAt && existing.bostaUpdatedAt >= update.eventAt)
-      return NextResponse.json({success:true,status:'duplicate-or-stale'});
-    const delivered = update.delivered && !update.returned;
-    const courierCollected = delivered && update.collectedPiasters >= existing.orderTotalPiasters;
-    await prisma.hvCodOrder.update({
-      where:{id:existing.id},
-      data:{
-        bostaDeliveryId:update.deliveryId,bostaTrackingNumber:update.trackingNumber,
-        bostaState:update.state,bostaUpdatedAt:update.eventAt,
-        delivered,courierCollected,
-        collectedPiasters:delivered ? update.collectedPiasters : 0,
-        merchantReconciled:delivered && courierCollected && existing.merchantReconciled
-      }
+    const outcome = await prisma.$transaction(async tx => {
+      const existing = await tx.hvCodOrder.findUnique({where:{orderName:update.orderName}});
+      if (!existing || !existing.isCod) return 'unknown-order';
+      if (existing.bostaDeliveryId && existing.bostaDeliveryId !== update.deliveryId) return 'different-delivery';
+      await tx.hvCodEvent.create({data:{
+        id:randomUUID(),
+        dedupeKey:['bosta',update.deliveryId,update.eventAt.getTime(),update.state].join(':'),
+        source:'BOSTA',
+        orderName:update.orderName,
+        state:String(update.state),
+        occurredAt:update.eventAt
+      }});
+      if (existing.bostaUpdatedAt && existing.bostaUpdatedAt >= update.eventAt) return 'stale';
+      const delivered = update.delivered && !update.returned;
+      const courierCollected = delivered && update.collectedPiasters >= existing.orderTotalPiasters;
+      const changed = await tx.hvCodOrder.updateMany({
+        where:{id:existing.id,OR:[{bostaUpdatedAt:null},{bostaUpdatedAt:{lt:update.eventAt}}]},
+        data:{
+          bostaDeliveryId:update.deliveryId,bostaTrackingNumber:update.trackingNumber,
+          bostaState:update.state,bostaUpdatedAt:update.eventAt,
+          delivered,courierCollected,
+          collectedPiasters:delivered ? update.collectedPiasters : 0,
+          merchantReconciled:delivered && courierCollected && existing.merchantReconciled
+        }
+      });
+      return changed.count === 1 ? 'recorded' : 'stale';
     });
-    return NextResponse.json({success:true,status:'recorded'});
-  } catch {
+    if (outcome === 'unknown-order' || outcome === 'different-delivery')
+      return NextResponse.json({error:outcome}, {status:409});
+    return NextResponse.json({success:true,status:outcome});
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002')
+      return NextResponse.json({success:true,status:'duplicate'});
     return NextResponse.json({error:'Invalid Bosta status event'}, {status:422});
   }
 }
