@@ -1,11 +1,13 @@
 {
   "version": 2,
-  "name": "refferq",
+  "name": "herbal-vitaly-affiliate",
   "framework": "nextjs",
-  "buildCommand": "npx prisma generate && npm run build",
+  "buildCommand": "node scripts/staging-build.mjs",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
-  "regions": ["iad1"],
+  "regions": [
+    "iad1"
+  ],
   "headers": [
     {
       "source": "/(.*)",
