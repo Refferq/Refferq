@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     const {
       event_type,
       amount_cents,
-      currency = 'USD',
+      currency = 'EGP',
       customer_email,
       attribution_key,
       referral_code,
@@ -124,12 +124,12 @@ export async function POST(request: NextRequest) {
 
     // Calculate commission
     const commissionRules = await db.getCommissionRules();
-    let applicableRule = commissionRules.find((rule: any) => rule.isDefault);
+    let applicableRule = commissionRules.find((rule: any) => rule.isDefault && rule.isActive);
 
-    const commissionRate = applicableRule?.value || 15;
+    const commissionRate = applicableRule?.value ?? 20;
     let commissionAmount = 0;
 
-    if (applicableRule?.type === 'PERCENTAGE' && amount_cents) {
+    if ((!applicableRule || applicableRule.type === 'PERCENTAGE') && amount_cents) {
       commissionAmount = Math.floor((amount_cents * commissionRate) / 100);
     } else if (applicableRule?.type === 'FIXED') {
       commissionAmount = commissionRate;
