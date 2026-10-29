@@ -1,3 +1,4 @@
+import { isCodFinanceWriteEnabled } from '@/lib/hv-egypt-finance';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -5,6 +6,10 @@ import { prisma } from '@/lib/prisma';
  * POST /api/track/conversion - Track conversions/sales
  */
 export async function POST(req: NextRequest) {
+  if (!isCodFinanceWriteEnabled()) {
+    return NextResponse.json({ success: false, code: 'COD_FINANCE_NOT_VERIFIED', error: 'Financial writes are disabled until authenticated Shopify COD delivery and collection reconciliation is implemented.' }, { status: 423 });
+  }
+
   try {
     const apiKey = req.headers.get('X-API-Key') || req.headers.get('x-api-key');
     
