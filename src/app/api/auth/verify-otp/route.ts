@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({
       success: true,
       pendingApproval: false,
-      user: { id: user.id, email: user.email, name: user.name, role: user.role, hasAffiliate: Boolean(user.affiliate) },
+      user: { id: user.id, email: user.email, name: user.name, role: user.role, hasAffiliate: user.role === 'AFFILIATE' },
     });
     response.cookies.set('auth-token', token, {
       httpOnly: true, secure: process.env.NODE_ENV === 'production',
