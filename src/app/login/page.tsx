@@ -80,7 +80,10 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      if (res.ok && data.success) {
+      if (res.ok && data.success && data.pendingApproval) {
+        setError('Your email is verified. Your application is waiting for administrator approval.');
+        setStep('email');
+      } else if (res.ok && data.success && data.user) {
         const user = data.user;
         if (user.role === 'ADMIN') {
           router.push('/admin');
