@@ -3,6 +3,9 @@ import { auth } from '@/lib/auth';
 import { otpService } from '@/lib/otp';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { randomBytes } from 'node:crypto';
+import * as bcrypt from 'bcryptjs';
+import { prisma } from '@/lib/prisma';
+import { canBootstrapFirstAdmin, normalizeAffiliateEmail } from '@/lib/affiliate-auth-policy';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,13 +24,45 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Enter a valid name and email address' }, { status: 400 });
     }
 
-    // Public sign-up is always affiliate-only. Never email or return a password.
-    const created = await auth.register({
-      name, email, role: 'AFFILIATE',
-      password: randomBytes(32).toString('base64url'),
-    });
-    if (!created.success) {
-      return NextResponse.json({ success: false, message: created.message }, { status: 400 });
+    const allowedAdminEmails = (process.env.ADMIN_EMAILS || '').split(',')
+      .map(normalizeAffiliateEmail).filter(Boolean);
+    const adminAddress = allowedAdminEmails.includes(email);
+    const existingAdminCount = adminAddress
+      ? await prisma.user.count({ where: { role: 'ADMIN' } })
+      : 0;
+
+    if (adminAddress) {
+      if (!canBootstrapFirstAdmin({
+        email,
+        allowlist: process.env.ADMIN_EMAILS || '',
+        environment: process.env.VERCEL_ENV,
+        enabled: process.env.ENABLE_INITIAL_ADMIN_BOOTSTRAP,
+        existingAdminCount,
+      })) {
+        return NextResponse.json({ success: false, message: 'Administrator setup is unavailable.' }, { status: 403 });
+      }
+      // Public input can never specify a role; a server-only allowlist decides.
+      // Admin remains PENDING until the owner proves inbox possession via OTP.
+      const password = await bcrypt.hash(randomBytes(32).toString('base64url'), 12);
+      try {
+        await prisma.user.create({
+          data: { name, email, password, role: 'ADMIN', status: 'PENDING' },
+        });
+      } catch {
+        return NextResponse.json({
+          success: false,
+          message: 'This administrator email is already registered. Use the sign-in page to request an OTP.',
+        }, { status: 409 });
+      }
+    } else {
+      // Ordinary public registration is always an affiliate, never an admin.
+      const created = await auth.register({
+        name, email, role: 'AFFILIATE',
+        password: randomBytes(32).toString('base64url'),
+      });
+      if (!created.success) {
+        return NextResponse.json({ success: false, message: created.message }, { status: 400 });
+      }
     }
     const delivered = await otpService.sendOTP(email);
     return NextResponse.json({
