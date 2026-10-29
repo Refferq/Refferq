@@ -34,7 +34,7 @@ test('one fictitious Shopify order can be matched to Bosta by order reference',(
  assert.equal(s.commissionPreviewPiasters,20000);
  assert.equal(b.collectedPiasters,105000);
  assert.equal(b.delivered,true);
- const state={...s,delivered:b.delivered,courierCollected:true,merchantReconciled:false,collectedPiasters:b.collectedPiasters};
+ const state={...s,delivered:b.delivered,courierCollected:true,merchantReconciled:false,collectedPiasters:b.collectedPiasters,affiliateApproved:true};
  assert.equal(previewCodCommission(state).eligibleForManualReview,false);
  const ready=previewCodCommission({...state,merchantReconciled:true});
  assert.equal(ready.eligibleForManualReview,true);
@@ -44,13 +44,14 @@ test('one fictitious Shopify order can be matched to Bosta by order reference',(
 });
 test('delivery without proof, insufficient collection, refund and wrong payment method block commission',()=>{
  const s=normalizeShopifyOrder(SHOPIFY),b=normalizeBostaStatus(BOSTA);
- const ready={...s,delivered:b.delivered,courierCollected:true,merchantReconciled:true,collectedPiasters:b.collectedPiasters};
+ const ready={...s,delivered:b.delivered,courierCollected:true,merchantReconciled:true,collectedPiasters:b.collectedPiasters,affiliateApproved:true};
  assert.equal(previewCodCommission({...ready,delivered:false}).eligibleForManualReview,false);
  assert.equal(previewCodCommission({...ready,collectedPiasters:104999}).eligibleForManualReview,false);
  assert.equal(previewCodCommission({...ready,refunded:true}).eligibleForManualReview,false);
  assert.equal(previewCodCommission({...ready,cancelled:true}).eligibleForManualReview,false);
  assert.equal(previewCodCommission({...ready,isCod:false}).eligibleForManualReview,false);
  assert.equal(previewCodCommission({...ready,referralCode:null}).eligibleForManualReview,false);
+ assert.equal(previewCodCommission({...ready,affiliateApproved:false}).eligibleForManualReview,false);
  assert.equal(normalizeBostaStatus({...BOSTA,isConfirmedDelivery:false}).delivered,false);
  assert.equal(normalizeBostaStatus({...BOSTA,state:46}).returned,true);
 });
