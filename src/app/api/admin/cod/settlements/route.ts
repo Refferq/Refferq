@@ -11,12 +11,16 @@ async function admin(req: NextRequest) {
 export async function GET(req: NextRequest) {
   if (!(await admin(req))) return NextResponse.json({error:'Forbidden'}, {status:403});
   const rows = await prisma.hvCodOrder.findMany({orderBy:{updatedAt:'desc'},take:50});
+  const affiliates = await prisma.affiliate.findMany({
+    where:{user:{status:'ACTIVE',emailVerifiedAt:{not:null}}},select:{referralCode:true}
+  });
+  const approvedCodes = new Set(affiliates.map(a=>a.referralCode));
   return NextResponse.json({success:true,orders:rows.map(o=>({
     orderName:o.orderName,currency:o.currency,subtotalPiasters:o.subtotalPiasters,
     orderTotalPiasters:o.orderTotalPiasters,referralCode:o.referralCode,
     bostaState:o.bostaState,delivered:o.delivered,courierCollected:o.courierCollected,
     merchantReconciled:o.merchantReconciled,settlementReference:o.merchantSettlementReference,
-    ...previewCodCommission(o)
+    ...previewCodCommission({...o,affiliateApproved:approvedCodes.has(o.referralCode || '')})
   }))});
 }
 export async function POST(req: NextRequest) {
