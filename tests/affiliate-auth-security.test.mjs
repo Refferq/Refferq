@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeAffiliateEmail, hashOtp, canApproveAffiliate } from '../src/lib/affiliate-auth-policy.ts';
+import { normalizeAffiliateEmail, hashOtp, canApproveAffiliate, canBootstrapFirstAdmin } from '../src/lib/affiliate-auth-policy.ts';
 
 test('email normalization removes surrounding whitespace and case differences', () => {
   assert.equal(normalizeAffiliateEmail('  Example@HerbalVitaly.COM '), 'example@herbalvitaly.com');
@@ -23,4 +23,16 @@ test('approval is only possible for verified affiliate emails', () => {
   assert.equal(canApproveAffiliate('AFFILIATE', null), false);
   assert.equal(canApproveAffiliate('ADMIN', now), false);
   assert.equal(canApproveAffiliate('AFFILIATE', 'not-a-date'), false);
+});
+
+test('admin bootstrap requires an explicitly enabled Preview with a single allowlisted email', () => {
+  const input = {
+    email: '  OWNER@EXAMPLE.COM ', allowlist: 'manager@example.com, owner@example.com ',
+    environment: 'preview', enabled: 'true', existingAdminCount: 0,
+  };
+  assert.equal(canBootstrapFirstAdmin(input), true);
+  assert.equal(canBootstrapFirstAdmin({ ...input, email: 'stranger@example.com' }), false);
+  assert.equal(canBootstrapFirstAdmin({ ...input, environment: 'production' }), false);
+  assert.equal(canBootstrapFirstAdmin({ ...input, enabled: 'false' }), false);
+  assert.equal(canBootstrapFirstAdmin({ ...input, existingAdminCount: 1 }), false);
 });
