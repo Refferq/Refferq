@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { calculateHvCommission } from './hv-egypt-finance';
+import { calculateHvCommission } from './hv-egypt-finance.ts';
 
 export function verifyShopifyHmac(rawBody: string, signature: string | null, secret: string): boolean {
   if (!signature || !secret) return false;
