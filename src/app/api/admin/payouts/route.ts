@@ -1,3 +1,4 @@
+import { isCodFinanceWriteEnabled } from '@/lib/hv-egypt-finance';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { logAuditAction } from '@/lib/audit';
@@ -130,6 +131,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!isCodFinanceWriteEnabled()) {
+    return NextResponse.json({ success: false, code: 'COD_FINANCE_NOT_VERIFIED', error: 'Financial writes are disabled until authenticated Shopify COD delivery and collection reconciliation is implemented.' }, { status: 423 });
+  }
+
   try {
     const auth = await verifyAdmin(request);
     if ('error' in auth) {
@@ -289,6 +294,10 @@ export async function POST(request: NextRequest) {
 
 // PUT - Update payout status
 export async function PUT(request: NextRequest) {
+  if (!isCodFinanceWriteEnabled()) {
+    return NextResponse.json({ success: false, code: 'COD_FINANCE_NOT_VERIFIED', error: 'Financial writes are disabled until authenticated Shopify COD delivery and collection reconciliation is implemented.' }, { status: 423 });
+  }
+
   try {
     const auth = await verifyAdmin(request);
     if ('error' in auth) {
@@ -397,6 +406,10 @@ export async function PUT(request: NextRequest) {
 
 // DELETE - Delete payout
 export async function DELETE(request: NextRequest) {
+  if (!isCodFinanceWriteEnabled()) {
+    return NextResponse.json({ success: false, code: 'COD_FINANCE_NOT_VERIFIED', error: 'Financial writes are disabled until authenticated Shopify COD delivery and collection reconciliation is implemented.' }, { status: 423 });
+  }
+
   try {
     const auth = await verifyAdmin(request);
     if ('error' in auth) {
