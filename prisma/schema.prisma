@@ -690,3 +690,46 @@ enum TeamMemberStatus {
   ACTIVE
   DEACTIVATED
 }
+
+
+model HvCodOrder {
+  id                          String   @id @default(cuid())
+  shopifyOrderId              String   @unique
+  orderName                   String   @unique
+  currency                    String   @default("EGP")
+  subtotalPiasters            Int
+  orderTotalPiasters          Int
+  commissionPreviewPiasters   Int
+  referralCode                String?
+  isCod                       Boolean  @default(false)
+  cancelled                   Boolean  @default(false)
+  refunded                    Boolean  @default(false)
+  shopifyUpdatedAt            DateTime
+  bostaDeliveryId             String?
+  bostaTrackingNumber         String?
+  bostaState                  Int?
+  bostaUpdatedAt              DateTime?
+  delivered                   Boolean  @default(false)
+  courierCollected            Boolean  @default(false)
+  collectedPiasters           Int      @default(0)
+  merchantReconciled          Boolean  @default(false)
+  merchantSettlementReference String?
+  merchantSettledAt           DateTime?
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  @@map("hv_cod_orders")
+}
+
+model HvCodEvent {
+  id          String   @id @default(cuid())
+  dedupeKey   String   @unique
+  source      String
+  orderName   String
+  state       String
+  occurredAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([orderName])
+  @@map("hv_cod_events")
+}
