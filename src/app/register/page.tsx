@@ -56,22 +56,13 @@ export default function RegisterPage() {
         return;
       }
 
-      // Step 2: Send OTP
-      const otpRes = await fetch('/api/auth/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      const otpData = await otpRes.json();
-
-      if (otpRes.ok) {
-        setStep('otp');
-        setMessage(registerData.message || 'Check your email for your verification code.');
+      // Registration API already sends the first OTP. A second request
+      // immediately afterwards would be rejected by the 60-second cooldown.
+      setStep('otp');
+      if (registerData.otpSent) {
+        setMessage('Verification code sent. Check your inbox.');
       } else {
-        // Registration succeeded but OTP failed - still move to OTP step
-        setStep('otp');
-        setError(registerData.message || 'Code could not be delivered. Try resending.');
+        setError('Your account was created, but email delivery failed. Use Resend code to retry.');
       }
     } catch (_e) {
       setError('Something went wrong. Please try again.');
