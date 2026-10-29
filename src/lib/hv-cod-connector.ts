@@ -69,13 +69,13 @@ export type CodSnapshot = {
   isCod: boolean; delivered: boolean; courierCollected: boolean;
   merchantReconciled: boolean; cancelled: boolean; refunded: boolean;
   orderTotalPiasters: number; collectedPiasters: number; subtotalPiasters: number;
-  referralCode?: string | null;
+  referralCode?: string | null; affiliateApproved?: boolean;
 };
 export function previewCodCommission(s: CodSnapshot) {
   const eligible = s.isCod && s.delivered && s.courierCollected &&
     s.merchantReconciled && !s.cancelled && !s.refunded &&
     s.orderTotalPiasters > 0 && s.subtotalPiasters > 0 &&
-    s.collectedPiasters >= s.orderTotalPiasters && Boolean(s.referralCode);
+    s.collectedPiasters >= s.orderTotalPiasters && Boolean(s.referralCode) && s.affiliateApproved === true;
   return {
     eligibleForManualReview: eligible,
     proposedCommissionPiasters: eligible ? calculateHvCommission(s.subtotalPiasters) : 0,
