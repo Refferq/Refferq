@@ -1,19 +1,11 @@
 import { prisma } from './prisma';
-import { createHmac, randomInt, timingSafeEqual } from 'node:crypto';
+import { randomInt, timingSafeEqual } from 'node:crypto';
+import { normalizeAffiliateEmail, hashOtp } from './affiliate-auth-policy';
 import { Resend } from 'resend';
 
 const CODE_LIFETIME_MS = 10 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
 const RESEND_INTERVAL_MS = 60 * 1000;
-
-export function normalizeAffiliateEmail(value: string): string {
-  return value.trim().toLowerCase();
-}
-
-// A keyed hash makes the database insufficient to recover a six-digit OTP.
-export function hashOtp(email: string, code: string, key: string): string {
-  return createHmac('sha256', key).update(normalizeAffiliateEmail(email) + ':' + code).digest('hex');
-}
 
 export class OTPService {
   async sendOTP(rawEmail: string): Promise<{ success: boolean; message: string }> {
