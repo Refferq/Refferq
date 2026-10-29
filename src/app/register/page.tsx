@@ -67,11 +67,11 @@ export default function RegisterPage() {
 
       if (otpRes.ok) {
         setStep('otp');
-        setMessage('Account created! A verification code has been sent to your email.');
+        setMessage(registerData.message || 'Check your email for your verification code.');
       } else {
         // Registration succeeded but OTP failed - still move to OTP step
         setStep('otp');
-        setError(otpData.error || 'Failed to send code. Try resending.');
+        setError(registerData.message || 'Code could not be delivered. Try resending.');
       }
     } catch (_e) {
       setError('Something went wrong. Please try again.');
@@ -99,17 +99,11 @@ export default function RegisterPage() {
 
       const data = await res.json();
 
-      if (res.ok && data.success) {
+      if (res.ok && data.success && data.pendingApproval) {
         setStep('success');
-        // Redirect after a short delay
-        setTimeout(() => {
-          const user = data.user;
-          if (user.role === 'ADMIN') {
-            router.push('/admin');
-          } else {
-            router.push('/affiliate');
-          }
-        }, 2000);
+        setMessage(data.message || 'Your email is verified. Await administrator approval.');
+      } else if (res.ok && data.success && data.user) {
+        router.push(data.user.role === 'ADMIN' ? '/admin' : '/affiliate');
       } else {
         setError(data.error || 'Invalid verification code');
       }
@@ -322,7 +316,7 @@ export default function RegisterPage() {
                 <div>
                   <h3 className="text-lg font-semibold">Welcome aboard, {name}!</h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Your account has been created. Redirecting to your dashboard...
+                    Your email is verified. Your application awaits administrator approval.
                   </p>
                 </div>
                 <div className="flex justify-center">
