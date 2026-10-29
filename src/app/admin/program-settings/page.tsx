@@ -52,7 +52,7 @@ import {
   Pencil,
   Trash2,
   Percent,
-  IndianRupee,
+  Coins,
   CheckCircle2,
   Globe,
   Code2,
@@ -322,6 +322,7 @@ export default function ProgramSettingsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="EGP">EGP (E£)</SelectItem>
                   <SelectItem value="INR">INR (₹)</SelectItem>
                   <SelectItem value="USD">USD ($)</SelectItem>
                   <SelectItem value="EUR">EUR (€)</SelectItem>
@@ -436,7 +437,7 @@ export default function ProgramSettingsPage() {
                         {ruleForm.type === 'PERCENTAGE' ? (
                           <Percent className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         ) : (
-                          <IndianRupee className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <Coins className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         )}
                         <Input
                           type="number"
@@ -493,7 +494,7 @@ export default function ProgramSettingsPage() {
                       <Badge variant="outline">{rule.type}</Badge>
                     </TableCell>
                     <TableCell>
-                      {rule.type === 'PERCENTAGE' ? `${rule.value}%` : `₹${rule.value}`}
+                      {rule.type === 'PERCENTAGE' ? `${rule.value}%` : `E£${rule.value}`}
                     </TableCell>
                     <TableCell>
                       {rule.isDefault && <Badge variant="default">Default</Badge>}
@@ -584,7 +585,7 @@ export default function ProgramSettingsPage() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <Label className="text-sm font-medium">Call this when a visitor completes a conversion event</Label>
-                  <Button variant="ghost" size="sm" onClick={() => handleCopySnippet('conversion', `// Track a conversion (e.g. after signup or purchase)\nRefferq.trackConversion({\n  email: customer.email,\n  name: customer.name,\n  amount: 4999,        // amount in smallest unit (e.g. paise / cents)\n  currency: '${settings.currency || 'INR'}',\n  orderId: 'ORD-12345' // optional\n});`)}>
+                  <Button variant="ghost" size="sm" onClick={() => handleCopySnippet('conversion', `// Track a conversion (e.g. after signup or purchase)\nRefferq.trackConversion({\n  email: customer.email,\n  name: customer.name,\n  amount: 4999,        // amount in smallest unit (e.g. paise / cents)\n  currency: '${settings.currency || 'EGP'}',\n  orderId: 'ORD-12345' // optional\n});`)}>
                     {copiedSnippet === 'conversion' ? <><CheckCircle2 className="mr-1 h-3.5 w-3.5 text-green-600" />Copied</> : <><Copy className="mr-1 h-3.5 w-3.5" />Copy</>}
                   </Button>
                 </div>
@@ -594,7 +595,7 @@ Refferq.trackConversion({
   email: customer.email,
   name: customer.name,
   amount: 4999,        // amount in smallest unit (e.g. paise / cents)
-  currency: '${settings.currency || 'INR'}',
+  currency: '${settings.currency || 'EGP'}',
   orderId: 'ORD-12345' // optional
 });`}
                 </div>
