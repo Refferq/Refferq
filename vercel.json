@@ -2,7 +2,7 @@
   "version": 2,
   "name": "herbal-vitaly-affiliate",
   "framework": "nextjs",
-  "buildCommand": "node --experimental-strip-types --test tests/affiliate-auth-security.test.mjs && npx prisma generate && npm run build",
+  "buildCommand": "node --experimental-strip-types --test tests/affiliate-auth-security.test.mjs tests/hv-egypt-finance.test.mjs && npx prisma generate && npm run build",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
   "regions": [
