@@ -93,8 +93,25 @@ export class OTPService {
       return { success: false, message: 'Account unavailable' };
     }
     if (user.status === 'PENDING') {
+      // One-time administrator onboarding: the address must be pre-provisioned
+      // in Neon as ADMIN and explicitly listed in the server-only allowlist.
+      if (user.role === 'ADMIN') {
+        const authorizedEmails = (process.env.ADMIN_EMAILS || '')
+          .split(',').map(v => normalizeAffiliateEmail(v)).filter(Boolean);
+        if (!authorizedEmails.includes(email)) {
+          return { success: false, message: 'Administrator onboarding is not authorized.' };
+        }
+        await prisma.user.updateMany({
+          where: { id: user.id, status: 'PENDING', role: 'ADMIN' },
+          data: { emailVerifiedAt: new Date(), status: 'ACTIVE' },
+        });
+        const approved = await prisma.user.findUnique({ where: { id: user.id }, include: { affiliate: true } });
+        if (!approved || approved.status !== 'ACTIVE')
+          return { success: false, message: 'Unable to activate administrator' };
+        return { success: true, message: 'Administrator email verified', user: approved };
+      }
       await prisma.user.updateMany({
-        where: { id: user.id, emailVerifiedAt: null, status: 'PENDING' },
+        where: { id: user.id, emailVerifiedAt: null, status: 'PENDING', role: 'AFFILIATE' },
         data: { emailVerifiedAt: new Date() },
       });
       return { success: true, message: 'Email verified. Your application awaits administrator approval.', pendingApproval: true };
