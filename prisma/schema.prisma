@@ -15,6 +15,7 @@ model User {
   role           Role         @default(AFFILIATE)
   status         UserStatus   @default(PENDING)
   lastLogin      DateTime?    @map("last_login")
+  emailVerifiedAt DateTime?   @map("email_verified_at")
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
   profilePicture String?      @map("profile_picture")
@@ -171,7 +172,7 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-model OTP {
+model Otp {
   id        String   @id @default(cuid())
   email     String
   code      String
