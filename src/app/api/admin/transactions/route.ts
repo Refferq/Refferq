@@ -1,3 +1,4 @@
+import { isCodFinanceWriteEnabled } from '@/lib/hv-egypt-finance';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -99,6 +100,10 @@ export async function GET(request: NextRequest) {
 
 // POST - Create new transaction
 export async function POST(request: NextRequest) {
+  if (!isCodFinanceWriteEnabled()) {
+    return NextResponse.json({ success: false, code: 'COD_FINANCE_NOT_VERIFIED', error: 'Financial records are locked until verified COD settlement and reconciliation are implemented.' }, { status: 423 });
+  }
+
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -246,6 +251,10 @@ export async function POST(request: NextRequest) {
 
 // PUT - Update transaction
 export async function PUT(request: NextRequest) {
+  if (!isCodFinanceWriteEnabled()) {
+    return NextResponse.json({ success: false, code: 'COD_FINANCE_NOT_VERIFIED', error: 'Financial records are locked until verified COD settlement and reconciliation are implemented.' }, { status: 423 });
+  }
+
   try {
     const userId = request.headers.get('x-user-id')!;
     
@@ -312,6 +321,10 @@ export async function PUT(request: NextRequest) {
 
 // DELETE - Delete transaction
 export async function DELETE(request: NextRequest) {
+  if (!isCodFinanceWriteEnabled()) {
+    return NextResponse.json({ success: false, code: 'COD_FINANCE_NOT_VERIFIED', error: 'Financial records are locked until verified COD settlement and reconciliation are implemented.' }, { status: 423 });
+  }
+
   try {
     const userId = request.headers.get('x-user-id')!;
     
