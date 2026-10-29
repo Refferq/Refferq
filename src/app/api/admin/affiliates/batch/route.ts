@@ -63,6 +63,15 @@ export async function POST(request: NextRequest) {
 
         const userIds = affiliates.map(aff => aff.userId);
 
+        if (status === 'ACTIVE') {
+          const unverified = await prisma.user.count({
+            where: { id: { in: userIds }, emailVerifiedAt: null },
+          });
+          if (unverified > 0) {
+            return NextResponse.json({ error: 'Some affiliates have not verified their email addresses' }, { status: 409 });
+          }
+        }
+
         // Update user statuses
         const result = await prisma.user.updateMany({
           where: { id: { in: userIds } },
