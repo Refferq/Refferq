@@ -1,3 +1,4 @@
+import { isCodFinanceWriteEnabled } from '@/lib/hv-egypt-finance';
 import { NextRequest, NextResponse } from 'next/server';
 import { db, prisma } from '@/lib/prisma';
 import crypto from 'crypto';
@@ -28,6 +29,10 @@ async function verifyApiKey(request: NextRequest): Promise<boolean> {
 }
 
 export async function POST(request: NextRequest) {
+  if (!isCodFinanceWriteEnabled()) {
+    return NextResponse.json({ success: false, code: 'COD_FINANCE_NOT_VERIFIED', error: 'Financial writes are disabled until authenticated Shopify COD delivery and collection reconciliation is implemented.' }, { status: 423 });
+  }
+
   try {
     // ─── Authentication: Require API key OR webhook signature ───
     const rawBody = await request.text();
