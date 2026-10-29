@@ -55,6 +55,11 @@ export async function PATCH(
       );
     }
 
+    // Admin approval is possible only after verified ownership of the email address.
+    if (status === 'ACTIVE' && !affiliate.user.emailVerifiedAt) {
+      return NextResponse.json({ error: 'Affiliate email must be verified before approval' }, { status: 409 });
+    }
+
     // Update user status
     const updatedUser = await prisma.user.update({
       where: { id: affiliate.userId },
