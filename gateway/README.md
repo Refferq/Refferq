@@ -65,3 +65,18 @@ Neither the Bosta nor Shopify URL should contain any Vercel automation bypass qu
 - This receiver stores a 20% **indicative** preview only, never a commission ledger entry.
 - The current integration accepts Shopify orders via legacy webhook header HMAC and Bosta via a shared header key. Bosta webhook body schema and retry policy should be checked against a controlled real payload before switching the live vendor endpoints.
 - Avoid posting secrets in tickets, chat or screenshots.
+
+
+## Shopify discount codes → Refferq coupons (NEW)
+
+- 20 existing Shopify codes were imported into the Refferq **staging** `coupons` table on 2026-10-30; source: `SHOPIFY`. No affiliate ID is assigned and no commission or payout is created.
+- Codes remain **read-only in Refferq**; edit the underlying discount in Shopify. Only Shopify-owned coupon rows can be updated by synchronization; Refferq-owned coupons are left unchanged.
+- Sync endpoint: `GET /api/discount-sync` (automated by Vercel Cron at `0 4 * * *` UTC, daily because account is Hobby).
+- The synchronization is deliberately disabled with `SHOPIFY_DISCOUNT_SYNC_ENABLED=false` until Shopify Admin credentials have been installed and verified. It does not affect `INGEST_ENABLED` (COD webhooks).
+- Create and install an app in Shopify **Dev Dashboard** with the minimal permission `read_discounts` for the store `kk20pd-es.myshopify.com`.
+- In this *staging gateway* Vercel project, add encrypted **Production** environment variables `SHOPIFY_CLIENT_ID` and `SHOPIFY_CLIENT_SECRET`. Client-credentials grant tokens expire after 24 hours; this cron obtains a new token on each run. Do not paste or store an expiring access token in the code.
+- Enable `SHOPIFY_DISCOUNT_SYNC_ENABLED=true` only after credentials and a manual authenticated dry run have been checked. Redeploy to apply.
+- `CRON_SECRET` is already set; the endpoint checks the bearer header using constant-time comparison.
+- The limited PostgreSQL role `hv_gateway_limited` has SELECT on `coupons` and column-limited INSERT/UPDATE of the Shopify mirror fields, with **no UPDATE on `affiliate_id`** and no access to commissions or payouts.
+- Sync scans the complete Shopify discount list before changing rows. Deleted/absent Shopify codes are deactivated rather than deleted. Missing code-pagination support is treated as a failed sync, not as an incomplete successful sync.
+- Discounts with product-specific, quantity, customer, or stacking restrictions are shown as a summary only; Refferq must **not** be treated as Shopify's discount validation authority.
