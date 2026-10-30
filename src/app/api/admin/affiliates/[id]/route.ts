@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { canApproveAffiliate } from '@/lib/affiliate-auth-policy';
 
 
 // Update affiliate status
@@ -53,6 +54,11 @@ export async function PATCH(
         { error: 'Affiliate not found' },
         { status: 404 }
       );
+    }
+
+    // Admin approval is possible only after verified ownership of the email address.
+    if (status === 'ACTIVE' && !canApproveAffiliate(affiliate.user.role, affiliate.user.emailVerifiedAt)) {
+      return NextResponse.json({ error: 'Affiliate email must be verified before approval' }, { status: 409 });
     }
 
     // Update user status

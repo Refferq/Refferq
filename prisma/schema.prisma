@@ -15,6 +15,7 @@ model User {
   role           Role         @default(AFFILIATE)
   status         UserStatus   @default(PENDING)
   lastLogin      DateTime?    @map("last_login")
+  emailVerifiedAt DateTime?   @map("email_verified_at")
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
   profilePicture String?      @map("profile_picture")
@@ -171,7 +172,7 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-model OTP {
+model Otp {
   id        String   @id @default(cuid())
   email     String
   code      String
@@ -191,7 +192,7 @@ model ProgramSettings {
   productName               String   @map("product_name")
   programName               String   @map("program_name")
   websiteUrl                String   @map("website_url")
-  currency                  String   @default("INR")
+  currency                  String   @default("EGP")
   blockedCountries          Json     @default("[]") @map("blocked_countries")
   portalSubdomain           String   @map("portal_subdomain")
   termsOfService            String?  @map("terms_of_service")
@@ -215,9 +216,9 @@ model ProgramSettings {
   requireBusinessEmail      Boolean  @default(false) @map("require_business_email")
   enablePostbacks           Boolean  @default(false) @map("enable_postbacks")
   autoApprovePayouts        Boolean  @default(false) @map("auto_approve_payouts")
-  payoutFrequency           String   @default("MONTHLY") @map("payout_frequency")
-  commissionHoldDays        Int      @default(30) @map("commission_hold_days")
-  minPayoutCents            Int      @default(100000) @map("min_payout_cents")
+  payoutFrequency           String   @default("WEEKLY") @map("payout_frequency")
+  commissionHoldDays        Int      @default(0) @map("commission_hold_days")
+  minPayoutCents            Int      @default(0) @map("min_payout_cents")
   companyName               String?  @map("company_name")
   createdAt                 DateTime @default(now()) @map("created_at")
   updatedAt                 DateTime @updatedAt @map("updated_at")
@@ -551,7 +552,7 @@ model Coupon {
   description     String?
   discountType    String       @default("PERCENTAGE") @map("discount_type") // PERCENTAGE | FIXED
   discountValue   Float        @map("discount_value") // e.g. 20 = 20% or 20 = $20
-  currency        String       @default("INR")
+  currency        String       @default("EGP")
   maxUses         Int?         @map("max_uses")
   usedCount       Int          @default(0) @map("used_count")
   affiliateId     String?      @map("affiliate_id") // null = program-wide
@@ -559,6 +560,11 @@ model Coupon {
   isActive        Boolean      @default(true) @map("is_active")
   startsAt        DateTime?    @map("starts_at")
   expiresAt       DateTime?    @map("expires_at")
+  source          String       @default("REFFERQ") // REFFERQ | SHOPIFY
+  shopifyDiscountId String?     @map("shopify_discount_id")
+  shopifySummary  String?       @map("shopify_summary")
+  shopifyStatus   String?       @map("shopify_status")
+  shopifySyncedAt DateTime?     @map("shopify_synced_at")
   createdBy       String       @map("created_by")
   createdAt       DateTime     @default(now()) @map("created_at")
   updatedAt       DateTime     @updatedAt @map("updated_at")
@@ -688,4 +694,47 @@ enum TeamMemberStatus {
   PENDING
   ACTIVE
   DEACTIVATED
+}
+
+
+model HvCodOrder {
+  id                          String   @id @default(cuid())
+  shopifyOrderId              String   @unique
+  orderName                   String   @unique
+  currency                    String   @default("EGP")
+  subtotalPiasters            Int
+  orderTotalPiasters          Int
+  commissionPreviewPiasters   Int
+  referralCode                String?
+  isCod                       Boolean  @default(false)
+  cancelled                   Boolean  @default(false)
+  refunded                    Boolean  @default(false)
+  shopifyUpdatedAt            DateTime
+  bostaDeliveryId             String?
+  bostaTrackingNumber         String?
+  bostaState                  Int?
+  bostaUpdatedAt              DateTime?
+  delivered                   Boolean  @default(false)
+  courierCollected            Boolean  @default(false)
+  collectedPiasters           Int      @default(0)
+  merchantReconciled          Boolean  @default(false)
+  merchantSettlementReference String?
+  merchantSettledAt           DateTime?
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  @@map("hv_cod_orders")
+}
+
+model HvCodEvent {
+  id          String   @id @default(cuid())
+  dedupeKey   String   @unique
+  source      String
+  orderName   String
+  state       String
+  occurredAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([orderName])
+  @@map("hv_cod_events")
 }

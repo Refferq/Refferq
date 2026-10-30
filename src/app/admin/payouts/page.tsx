@@ -32,7 +32,6 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
-  IndianRupee,
   ArrowUpRight,
   Ban,
   Download,
@@ -63,7 +62,7 @@ export default function PayoutsPage() {
   const [payouts, setPayouts] = useState<Payout[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [currencySymbol, setCurrencySymbol] = useState('₹');
+  const [currencySymbol, setCurrencySymbol] = useState('E£');
 
   useEffect(() => {
     fetchPayouts();
@@ -75,7 +74,7 @@ export default function PayoutsPage() {
       const data = await res.json();
       if (data.success) {
         setPayouts(data.payouts || []);
-        setCurrencySymbol(data.currencySymbol || '₹');
+        setCurrencySymbol(data.currencySymbol || 'E£');
       }
     } catch (error) {
       console.error('Failed to fetch payouts:', error);

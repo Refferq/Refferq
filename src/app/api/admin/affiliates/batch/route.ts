@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { canApproveAffiliate } from '@/lib/affiliate-auth-policy';
 
 
 // Batch update affiliates
@@ -62,6 +63,17 @@ export async function POST(request: NextRequest) {
         });
 
         const userIds = affiliates.map(aff => aff.userId);
+
+        if (status === 'ACTIVE') {
+          const candidates = await prisma.user.findMany({
+            where: { id: { in: userIds } },
+            select: { id: true, role: true, emailVerifiedAt: true },
+          });
+          if (candidates.length !== userIds.length ||
+              candidates.some(candidate => !canApproveAffiliate(candidate.role, candidate.emailVerifiedAt))) {
+            return NextResponse.json({ error: 'Some affiliates have not verified their email addresses' }, { status: 409 });
+          }
+        }
 
         // Update user statuses
         const result = await prisma.user.updateMany({

@@ -56,22 +56,13 @@ export default function RegisterPage() {
         return;
       }
 
-      // Step 2: Send OTP
-      const otpRes = await fetch('/api/auth/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      const otpData = await otpRes.json();
-
-      if (otpRes.ok) {
-        setStep('otp');
-        setMessage('Account created! A verification code has been sent to your email.');
+      // Registration API already sends the first OTP. A second request
+      // immediately afterwards would be rejected by the 60-second cooldown.
+      setStep('otp');
+      if (registerData.otpSent) {
+        setMessage('Verification code sent. Check your inbox.');
       } else {
-        // Registration succeeded but OTP failed - still move to OTP step
-        setStep('otp');
-        setError(otpData.error || 'Failed to send code. Try resending.');
+        setError('Your account was created, but email delivery failed. Use Resend code to retry.');
       }
     } catch (_e) {
       setError('Something went wrong. Please try again.');
@@ -99,17 +90,11 @@ export default function RegisterPage() {
 
       const data = await res.json();
 
-      if (res.ok && data.success) {
+      if (res.ok && data.success && data.pendingApproval) {
         setStep('success');
-        // Redirect after a short delay
-        setTimeout(() => {
-          const user = data.user;
-          if (user.role === 'ADMIN') {
-            router.push('/admin');
-          } else {
-            router.push('/affiliate');
-          }
-        }, 2000);
+        setMessage(data.message || 'Your email is verified. Await administrator approval.');
+      } else if (res.ok && data.success && data.user) {
+        router.push(data.user.role === 'ADMIN' ? '/admin' : '/affiliate');
       } else {
         setError(data.error || 'Invalid verification code');
       }
@@ -322,7 +307,7 @@ export default function RegisterPage() {
                 <div>
                   <h3 className="text-lg font-semibold">Welcome aboard, {name}!</h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Your account has been created. Redirecting to your dashboard...
+                    Your email is verified. Your application awaits administrator approval.
                   </p>
                 </div>
                 <div className="flex justify-center">

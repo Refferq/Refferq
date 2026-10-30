@@ -27,14 +27,19 @@ export async function GET(request: NextRequest) {
       programSettings = await prisma.programSettings.create({
         data: {
           programId: `prg_${Date.now()}`,
-          productName: 'BsBot',
-          programName: "BsBot's Affiliate Program",
-          websiteUrl: 'https://kyns.com',
-          currency: 'INR',
-          portalSubdomain: 'bsbot.tolt.io',
+          productName: 'Herbal Vitaly',
+          programName: 'Herbal Vitaly Affiliate Program',
+          websiteUrl: 'https://herbalvitaly.com',
+          currency: 'EGP',
+          portalSubdomain: 'herbal-vitaly-affiliate.vercel.app',
+          companyName: 'Herbal Vitaly',
+          payoutFrequency: 'WEEKLY',
+          payoutMethods: ['BANK_TRANSFER'],
+          autoApprovePayouts: false,
+          minPayoutCents: 0,
           minimumPayoutThreshold: 0,
-          payoutTerm: 'NET-15',
-          commissionHoldDays: 30
+          payoutTerm: 'WEEKLY_AFTER_COD_VALIDATION',
+          commissionHoldDays: 0
         }
       });
     }
@@ -96,11 +101,11 @@ export async function PUT(request: NextRequest) {
       programSettings = await prisma.programSettings.create({
         data: {
           programId: `prg_${Date.now()}`,
-          productName: 'BsBot',
-          programName: "BsBot's Affiliate Program",
-          websiteUrl: 'https://kyns.com',
-          currency: 'INR',
-          portalSubdomain: 'bsbot.tolt.io'
+          productName: 'Herbal Vitaly',
+          programName: 'Herbal Vitaly Affiliate Program',
+          websiteUrl: 'https://herbalvitaly.com',
+          currency: 'EGP',
+          portalSubdomain: 'herbal-vitaly-affiliate.vercel.app'
         }
       });
     }
@@ -118,6 +123,9 @@ export async function PUT(request: NextRequest) {
         sanitizedData[key] = body[key];
       }
     }
+
+    // Payment approval is always manual until the verified COD ledger is implemented.
+    sanitizedData.autoApprovePayouts = false;
 
     const updatedSettings = await prisma.programSettings.update({
       where: { id: programSettings.id },

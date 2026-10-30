@@ -4,6 +4,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
     'USD': '$',
     'EUR': '€',
     'INR': '₹',
+    'EGP': 'E£',
     'GBP': '£',
     'BGN': 'лв.',
     'CAD': 'CA$',
@@ -13,11 +14,11 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 export async function getCurrencySymbol(): Promise<string> {
     try {
         const settings = await prisma.programSettings.findFirst();
-        const currency = settings?.currency || 'USD';
+        const currency = settings?.currency || 'EGP';
         return CURRENCY_SYMBOLS[currency] || currency;
     } catch (error) {
         console.error('Failed to fetch currency symbol:', error);
-        return '$';
+        return 'E£';
     }
 }
 

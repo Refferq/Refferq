@@ -1,3 +1,4 @@
+import { isCodFinanceWriteEnabled } from '@/lib/hv-egypt-finance';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -15,6 +16,10 @@ async function verifyAdmin(request: NextRequest) {
 // POST - Process a refund for a transaction
 // Automatically reverses associated commissions
 export async function POST(request: NextRequest) {
+  if (!isCodFinanceWriteEnabled()) {
+    return NextResponse.json({ success: false, code: 'COD_FINANCE_NOT_VERIFIED', error: 'Financial records are locked until verified COD settlement and reconciliation are implemented.' }, { status: 423 });
+  }
+
   const admin = await verifyAdmin(request);
   if (!admin) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });

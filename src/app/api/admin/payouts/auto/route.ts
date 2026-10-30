@@ -1,3 +1,4 @@
+import { isCodFinanceWriteEnabled } from '@/lib/hv-egypt-finance';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -14,6 +15,10 @@ async function verifyAdmin(request: NextRequest) {
 
 // POST - Process auto-payouts for all eligible affiliates
 export async function POST(request: NextRequest) {
+  if (!isCodFinanceWriteEnabled()) {
+    return NextResponse.json({ success: false, code: 'COD_FINANCE_NOT_VERIFIED', error: 'Financial writes are disabled until authenticated Shopify COD delivery and collection reconciliation is implemented.' }, { status: 423 });
+  }
+
   const admin = await verifyAdmin(request);
   if (!admin) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });

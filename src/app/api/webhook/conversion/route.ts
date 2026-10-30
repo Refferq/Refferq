@@ -1,3 +1,4 @@
+import { isCodFinanceWriteEnabled } from '@/lib/hv-egypt-finance';
 import { NextRequest, NextResponse } from 'next/server';
 import { db, prisma } from '@/lib/prisma';
 import crypto from 'crypto';
@@ -28,6 +29,10 @@ async function verifyApiKey(request: NextRequest): Promise<boolean> {
 }
 
 export async function POST(request: NextRequest) {
+  if (!isCodFinanceWriteEnabled()) {
+    return NextResponse.json({ success: false, code: 'COD_FINANCE_NOT_VERIFIED', error: 'Financial writes are disabled until authenticated Shopify COD delivery and collection reconciliation is implemented.' }, { status: 423 });
+  }
+
   try {
     // ─── Authentication: Require API key OR webhook signature ───
     const rawBody = await request.text();
@@ -58,7 +63,7 @@ export async function POST(request: NextRequest) {
     const {
       event_type,
       amount_cents,
-      currency = 'USD',
+      currency = 'EGP',
       customer_email,
       attribution_key,
       referral_code,
@@ -124,12 +129,12 @@ export async function POST(request: NextRequest) {
 
     // Calculate commission
     const commissionRules = await db.getCommissionRules();
-    let applicableRule = commissionRules.find((rule: any) => rule.isDefault);
+    let applicableRule = commissionRules.find((rule: any) => rule.isDefault && rule.isActive);
 
-    const commissionRate = applicableRule?.value || 15;
+    const commissionRate = applicableRule?.value ?? 20;
     let commissionAmount = 0;
 
-    if (applicableRule?.type === 'PERCENTAGE' && amount_cents) {
+    if ((!applicableRule || applicableRule.type === 'PERCENTAGE') && amount_cents) {
       commissionAmount = Math.floor((amount_cents * commissionRate) / 100);
     } else if (applicableRule?.type === 'FIXED') {
       commissionAmount = commissionRate;
