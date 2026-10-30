@@ -33,6 +33,10 @@ interface Coupon {
   usedCount: number;
   affiliateId?: string;
   isActive: boolean;
+  source?: string;
+  shopifySummary?: string | null;
+  shopifyStatus?: string | null;
+  shopifySyncedAt?: string | null;
   startsAt?: string;
   expiresAt?: string;
   createdAt: string;
@@ -146,7 +150,7 @@ export default function CouponsPage() {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const formatDate = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  const formatDate = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
 
   if (loading) {
     return (
@@ -169,7 +173,7 @@ export default function CouponsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Coupons</h1>
-          <p className="text-muted-foreground">Manage discount codes and double-sided rewards</p>
+          <p className="text-muted-foreground">Codes Shopify synchronisés en lecture seule. Un code promotionnel ne devient pas automatiquement un code affilié.</p>
         </div>
         <Button onClick={() => { closeDialog(); setDialogOpen(true); }}>
           <Plus className="mr-2 h-4 w-4" />
@@ -177,7 +181,7 @@ export default function CouponsPage() {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Coupons</CardTitle>
@@ -199,6 +203,13 @@ export default function CouponsPage() {
           </CardHeader>
           <CardContent><div className="text-2xl font-bold">{stats.totalUses}</div></CardContent>
         </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Shopify synced</CardTitle>
+            <Ticket className="h-4 w-4 text-green-700" />
+          </CardHeader>
+          <CardContent><div className="text-2xl font-bold">{coupons.filter(c => c.source === 'SHOPIFY').length}</div></CardContent>
+        </Card>
       </div>
 
       <Card>
@@ -218,6 +229,7 @@ export default function CouponsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Code</TableHead>
+                  <TableHead>Source</TableHead>
                   <TableHead>Discount</TableHead>
                   <TableHead>Usage</TableHead>
                   <TableHead>Affiliate</TableHead>
@@ -238,20 +250,26 @@ export default function CouponsPage() {
                       </div>
                     </TableCell>
                     <TableCell>
+                      {c.source === 'SHOPIFY' ? <Badge variant="outline" className="border-green-700 text-green-800">Shopify</Badge> : <Badge variant="outline">Refferq</Badge>}
+                    </TableCell>
+                    <TableCell title={c.shopifySummary || c.description || ''}>
                       <Badge variant="outline">
-                        {c.discountType === 'PERCENTAGE' ? `${c.discountValue}%` : `E£${c.discountValue}`}
+                        {c.discountType === 'PERCENTAGE' ? `${c.discountValue}%` : c.discountType === 'FIXED' ? `EGP ${c.discountValue}` : 'Special offer'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm">{c.usedCount}{c.maxUses ? `/${c.maxUses}` : ''}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{c.affiliateId ? c.affiliateId.slice(0, 8) + '...' : 'Program-wide'}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{c.affiliateId ? c.affiliateId.slice(0, 8) + '...' : c.source === 'SHOPIFY' ? 'Unassigned — no commission' : 'Program-wide'}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{c.expiresAt ? formatDate(c.expiresAt) : 'Never'}</TableCell>
                     <TableCell>
-                      <Switch checked={c.isActive} onCheckedChange={() => handleToggle(c.id, c.isActive)} />
+                      {c.source === 'SHOPIFY' ? <Badge variant="outline">{c.shopifyStatus || (c.isActive ? 'ACTIVE' : 'INACTIVE')}</Badge> :
+                        <Switch checked={c.isActive} onCheckedChange={() => handleToggle(c.id, c.isActive)} />}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(c.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                        {c.source === 'SHOPIFY' ? <span className="text-xs text-muted-foreground" title="Manage this code in Shopify Discounts">Managed in Shopify</span> : <>
+                          <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(c.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                        </>}
                       </div>
                     </TableCell>
                   </TableRow>
