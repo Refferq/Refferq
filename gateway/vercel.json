@@ -5,9 +5,6 @@
   "functions": {
     "api/*.js": {
       "maxDuration": 15
-    },
-    "api/discount-sync.js": {
-      "maxDuration": 60
     }
   },
   "crons": [
