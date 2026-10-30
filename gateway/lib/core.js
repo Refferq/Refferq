@@ -51,7 +51,8 @@ function piasters(v) {
   return n;
 }
 function orderSnapshot(o) {
-  if(!o || !/^\d+$/.test(String(o.id)) || typeof o.name!=='string' || o.name.length>90 || !o.name.startsWith('#'))
+  if(!o || !/^\d+$/.test(String(o.id)) || typeof o.name!=='string' || o.name.length>90 ||
+      !/^(?:#)?[A-Za-z0-9][A-Za-z0-9._\/-]*$/.test(o.name))
     throw new Error('Unsupported Shopify order identity');
   if(o.currency!=='EGP') throw new Error('Only EGP accepted');
   const updated=new Date(o.updated_at);
