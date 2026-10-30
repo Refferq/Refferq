@@ -135,11 +135,6 @@ model Payout {
   status          PayoutStatus @default(PENDING)
   notes           String?
   processedAt     DateTime?    @map("processed_at")
-  source          String       @default("REFFERQ") // REFFERQ | SHOPIFY
-  shopifyDiscountId String?     @map("shopify_discount_id")
-  shopifySummary  String?       @map("shopify_summary")
-  shopifyStatus   String?       @map("shopify_status")
-  shopifySyncedAt DateTime?     @map("shopify_synced_at")
   createdBy       String       @map("created_by")
   createdAt       DateTime     @default(now()) @map("created_at")
   updatedAt       DateTime     @updatedAt @map("updated_at")
@@ -565,6 +560,11 @@ model Coupon {
   isActive        Boolean      @default(true) @map("is_active")
   startsAt        DateTime?    @map("starts_at")
   expiresAt       DateTime?    @map("expires_at")
+  source          String       @default("REFFERQ") // REFFERQ | SHOPIFY
+  shopifyDiscountId String?     @map("shopify_discount_id")
+  shopifySummary  String?       @map("shopify_summary")
+  shopifyStatus   String?       @map("shopify_status")
+  shopifySyncedAt DateTime?     @map("shopify_synced_at")
   createdBy       String       @map("created_by")
   createdAt       DateTime     @default(now()) @map("created_at")
   updatedAt       DateTime     @updatedAt @map("updated_at")
