@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         description: description || null,
         discountType: discountType || 'PERCENTAGE',
         discountValue,
-        currency: currency || 'INR',
+        currency: currency || 'EGP',
         maxUses: maxUses || null,
         affiliateId: affiliateId || null,
         startsAt: startsAt ? new Date(startsAt) : null,
@@ -83,6 +83,10 @@ export async function PUT(request: NextRequest) {
     if (!id) {
       return NextResponse.json({ error: 'Coupon ID required' }, { status: 400 });
     }
+
+    const existing = await prisma.coupon.findUnique({ where: { id }, select: { source: true } });
+    if (!existing) return NextResponse.json({ error: 'Coupon not found' }, { status: 404 });
+    if (existing.source === 'SHOPIFY') return NextResponse.json({ error: 'Shopify-synced discounts are read-only in Refferq' }, { status: 409 });
 
     // Only allow specific fields (prevent mass assignment)
     const allowedFields = ['code', 'description', 'discountType', 'discountValue', 'maxUses', 'isActive', 'expiresAt', 'startsAt', 'minimumAmount'];
@@ -117,6 +121,10 @@ export async function DELETE(request: NextRequest) {
     if (!id) {
       return NextResponse.json({ error: 'Coupon ID required' }, { status: 400 });
     }
+
+    const existing = await prisma.coupon.findUnique({ where: { id }, select: { source: true } });
+    if (!existing) return NextResponse.json({ error: 'Coupon not found' }, { status: 404 });
+    if (existing.source === 'SHOPIFY') return NextResponse.json({ error: 'Manage this discount in Shopify' }, { status: 409 });
 
     await prisma.coupon.delete({ where: { id } });
     return NextResponse.json({ success: true });
