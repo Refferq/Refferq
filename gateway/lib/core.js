@@ -102,4 +102,4 @@ async function withTx(work) {
     throw e;
   } finally { client.release(); }
 }
-module.exports={MAX_BODY_BYTES,reply,stringHeader,rawBody,eq,verifyShopify,piasters,orderSnapshot,bostaSnapshot,withTx};
+module.exports={database,MAX_BODY_BYTES,reply,stringHeader,rawBody,eq,verifyShopify,piasters,orderSnapshot,bostaSnapshot,withTx};
