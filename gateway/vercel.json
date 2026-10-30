@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "framework": null,
+  "buildCommand": "npm run build",
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 15
+    }
+  }
+}
