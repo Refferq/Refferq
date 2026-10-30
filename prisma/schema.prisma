@@ -557,7 +557,7 @@ model Coupon {
   description     String?
   discountType    String       @default("PERCENTAGE") @map("discount_type") // PERCENTAGE | FIXED
   discountValue   Float        @map("discount_value") // e.g. 20 = 20% or 20 = $20
-  currency        String       @default("INR")
+  currency        String       @default("EGP")
   maxUses         Int?         @map("max_uses")
   usedCount       Int          @default(0) @map("used_count")
   affiliateId     String?      @map("affiliate_id") // null = program-wide
