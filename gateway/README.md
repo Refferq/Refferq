@@ -11,17 +11,15 @@ The original Refferq Admin site remains Vercel Authentication protected. No auto
 
 The gateway is deployed with `INGEST_ENABLED=false`. Do not enable until the below are verified. All write attempts will return HTTP 503 while disabled.
 
-### 1. SQL-only Neon role (required)
-**Do not create this role via the Neon API, CLI or Console role creation**: as documented by Neon, those roles inherit `neon_superuser`. Create it in the **Neon SQL Editor** on the existing `affiliate_staging` database instead:
+### 1. SQL-only Neon role (already created, locked)
+The role `hv_gateway_limited` **already exists, is NOLOGIN**, has zero memberships, can write only `hv_cod_orders` and `hv_cod_events`, and has no access to users/payouts/commissions. This is intentional. Do not create it again.
+
+**Do not use a Neon API/Console-created role** (Neon grants those `neon_superuser`). When ready, activate this existing limited role **in the Neon SQL Editor** with a strong unique password managed privately:
 
 ```sql
-CREATE ROLE hv_gateway_limited LOGIN PASSWORD '<strong-random-secret>'
-  NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
-GRANT CONNECT ON DATABASE affiliate_staging TO hv_gateway_limited;
-GRANT USAGE ON SCHEMA public TO hv_gateway_limited;
-GRANT SELECT,INSERT,UPDATE ON public.hv_cod_orders TO hv_gateway_limited;
-GRANT SELECT,INSERT ON public.hv_cod_events TO hv_gateway_limited;
+ALTER ROLE hv_gateway_limited WITH LOGIN PASSWORD '<strong-random-secret>';
 ```
+
 
 Verify it has **zero** memberships and cannot access users/commissions/payouts:
 
